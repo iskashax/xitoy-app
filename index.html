@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xitoydan Buyumlar</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            padding: 20px;
+            margin: 0;
+        }
+        h2 { text-align: center; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--tg-theme-hint-color, #ccc);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 18px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>📦 Карго Калькулятори</h2>
+
+    <div class="input-group">
+        <label>Товарнинг Хитойдаги нархи (Юань - ¥):</label>
+        <input type="number" id="price" placeholder="Масалан: 50">
+    </div>
+
+    <div class="input-group">
+        <label>Оғирлиги қандай ўлчанади?</label>
+        <select id="weightType">
+            <option value="gram">Грамм (г)</option>
+            <option value="jin">Жин (斤 - 500г)</option>
+        </select>
+    </div>
+
+    <div class="input-group">
+        <label>Оғирлик миқдори:</label>
+        <input type="number" id="weight" placeholder="Масалан: 300">
+    </div>
+
+    <button class="btn" onclick="calculate()">Ҳисоблаш</button>
+
+    <div class="result" id="resultBox" style="display: none;">
+        Умумий нарх: <b id="totalSum">0</b> сўм
+    </div>
+
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand(); // Ойнани тўлиқ очиш
+
+        function calculate() {
+            let priceYuan = parseFloat(document.getElementById("price").value) || 0;
+            let weightType = document.getElementById("weightType").value;
+            let weightVal = parseFloat(document.getElementById("weight").value) || 0;
+
+            // Бу ерда курсни ва 1 кг карго нархини ўзгартирсангиз бўлади
+            let yuanToSum = 1800; // 1 Юань = 1800 сўм
+            let cargoPricePerKg = 70000; // 1 кг = 70,000 сўм
+
+            let weightInKg = 0;
+            if (weightType === "gram") {
+                weightInKg = weightVal / 1000;
+            } else if (weightType === "jin") {
+                weightInKg = weightVal * 0.5; // 1 жин = 500 грамм
+            }
+
+            let itemPriceSum = priceYuan * yuanToSum;
+            let cargoPriceSum = weightInKg * cargoPricePerKg;
+            let totalSum = itemPriceSum + cargoPriceSum;
+
+            document.getElementById("resultBox").style.display = "block";
+            document.getElementById("totalSum").innerText = totalSum.toLocaleString("uz-UZ");
+
+            // Пастда Телеграмнинг асосий тугмасини чиқариш
+            tg.MainButton.text = "БУЮРТМА БЕРИШ (" + totalSum.toLocaleString("uz-UZ") + " сўм)";
+            tg.MainButton.show();
+        }
+    </script>
+</body>
+</html>
