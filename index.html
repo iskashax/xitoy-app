@@ -1,306 +1,224 @@
 <!DOCTYPE html>
-<html lang="uz">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Xitoydan Buyumlar</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap');
-        :root { --bg: #0a0b10; --surface: rgba(25, 27, 38, 0.6); --border: rgba(255, 255, 255, 0.08); --primary: #e60000; --gold: #ffb700; --text: #ffffff; --muted: #8b92a5; }
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 90px; overflow-x: hidden; }
-        
-        .bg-glow { position: fixed; width: 300px; height: 300px; background: var(--primary); filter: blur(150px); opacity: 0.15; z-index: -1; border-radius: 50%; top: -50px; left: -50px; }
-        .bg-glow.gold { background: var(--gold); top: auto; bottom: 0; left: auto; right: -50px; }
-        
-        .page { display: none; padding: 20px; animation: slideFade 0.4s ease forwards; opacity: 0; transform: translateY(20px); }
-        .page.active { display: block; }
-        @keyframes slideFade { to { opacity: 1; transform: translateY(0); } }
-
-        .glass-card { background: var(--surface); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--border); border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); position: relative; }
-        
-        /* Баннер */
-        .promo-banner { display: flex; align-items: center; padding: 15px; margin-bottom: 20px; background: linear-gradient(135deg, rgba(230,0,0,0.1), rgba(255,183,0,0.1)); border: 1px solid rgba(255,183,0,0.3); }
-        .promo-logo { width: 60px; height: 60px; border-radius: 15px; object-fit: cover; border: 2px solid var(--gold); margin-right: 15px; }
-        .promo-text h3 { font-size: 16px; font-weight: 800; background: -webkit-linear-gradient(45deg, var(--gold), #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .promo-text p { font-size: 11px; color: var(--muted); margin-top: 4px; }
-        .btn-subscribe { margin-left: auto; background: var(--gold); color: #000; border: none; padding: 8px 15px; border-radius: 20px; font-weight: 800; font-size: 12px; cursor: pointer; transition: 0.2s; }
-        .btn-subscribe:active { transform: scale(0.9); }
-
-        /* Формалар */
-        .input-group { margin-bottom: 20px; position: relative; }
-        .input-group label { position: absolute; left: 15px; top: -8px; background: var(--bg); padding: 0 5px; font-size: 11px; color: var(--gold); font-weight: 600; z-index: 1; text-transform: uppercase; }
-        .input-group input, .input-group select { width: 100%; padding: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; color: var(--text); font-size: 15px; outline: none; transition: 0.3s; font-family: inherit; }
-        .input-group input:focus { border-color: var(--gold); }
-        
-        .btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--primary), #990000); color: #fff; border: none; border-radius: 14px; font-size: 16px; font-weight: 800; cursor: pointer; box-shadow: 0 10px 20px rgba(230,0,0,0.3); transition: 0.2s; margin-top: 10px; }
-        .btn:active { transform: translateY(3px); }
-        .btn-gold { background: linear-gradient(135deg, var(--gold), #cc9200); color: #000; box-shadow: 0 10px 20px rgba(255,183,0,0.3); }
-        
-        .alert-box { background: rgba(255,183,0,0.1); border-left: 4px solid var(--gold); padding: 15px; border-radius: 10px; font-size: 13px; line-height: 1.6; margin-top: 15px; display: none; }
-
-        /* Витрина */
-        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .product-card { padding: 12px; display: flex; flex-direction: column; }
-        .product-image-wrapper { position: relative; width: 100%; padding-top: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 12px; }
-        .product-image-wrapper img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
-        .tag-hot { position: absolute; top: 8px; right: 8px; background: var(--primary); color: #fff; font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 20px; z-index: 2; }
-        .product-card h4 { font-size: 13px; font-weight: 600; margin-bottom: 6px; height: 34px; overflow: hidden; }
-        .product-card .price { font-size: 17px; font-weight: 800; color: var(--gold); margin-bottom: 12px; }
-        .btn-buy { background: rgba(255,255,255,0.05); color: var(--gold); border: 1px solid var(--gold); padding: 10px; border-radius: 10px; font-weight: bold; width: 100%; }
-
-        /* Модал Ойна (Ранг ва Размер танлаш учун) */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: none; justify-content: center; align-items: flex-end; }
-        .modal-content { background: var(--bg); width: 100%; border-top-left-radius: 25px; border-top-right-radius: 25px; padding: 25px; border-top: 1px solid var(--gold); animation: slideUp 0.3s forwards; }
-        @keyframes slideUp { from{transform: translateY(100%);} to{transform: translateY(0);} }
-
-        /* Навигация */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(10,11,16,0.9); backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 15px 0 25px 0; z-index: 1000; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--muted); font-size: 11px; font-weight: 600; width: 25%; }
-        .nav-item.active { color: var(--gold); transform: translateY(-3px); }
-        .nav-item i { font-size: 22px; margin-bottom: 4px; }
-    </style>
-</head>
-<body>
-    <div class="bg-glow"></div><div class="bg-glow gold"></div>
-
-    <!-- РЎЙХАТДАН ЎТИШ -->
-    <div id="page-register" class="page">
-        <div style="text-align: center; margin-bottom: 30px; margin-top: 20px;">
-            <h1 style="color: var(--gold); font-weight: 800; font-size: 28px;">Xitoydan<br><span style="color: var(--text);">Buyumlar</span></h1>
-        </div>
-        <div class="input-group"><label>Исм ва Фамилия</label><input type="text" id="reg-name"></div>
-        <div class="input-group"><label>Телефон рақам</label><input type="tel" id="reg-phone"></div>
-        <div class="input-group">
-            <label>Вилоят</label>
-            <select id="reg-region" onchange="document.getElementById('bts-alert').style.display = this.value === 'Бошқа' ? 'block' : 'none';">
-                <option value="Фарғона">Фарғона</option><option value="Тошкент">Тошкент</option><option value="Бошқа">Бошқа вилоятлар</option>
-            </select>
-        </div>
-        <div class="input-group"><label>Аниқ манзил</label><input type="text" id="reg-address"></div>
-        <div id="bts-alert" class="alert-box"><i class="fas fa-truck-fast"></i> Буюртмалар BTS орқали <b>бепул</b> етказиб берилади. Фақат истисно ҳолатларда қўшимча харажат талаб этилиши мумкин.</div>
-        <button class="btn" onclick="submitRegister()">Тасдиқлаш</button>
-    </div>
-
-    <!-- АСОСИЙ (ВИТРИНА) -->
-    <div id="page-home" class="page">
-        <div class="glass-card promo-banner">
-            <img src="1000013568.jpg" alt="Logo" class="promo-logo">
-            <div class="promo-text"><h3>Xitoydan Buyumlar</h3><p>Энг арзон ва сифатли!</p></div>
-            <button class="btn-subscribe" onclick="haptic(); window.open('https://t.me/xitoydan_buyumlar', '_blank');">Уланиш</button>
-        </div>
-        
-        <div class="product-grid">
-            <div class="glass-card product-card">
-                <div class="product-image-wrapper"><span class="tag-hot">ХИТ</span><img src="https://telegra.ph/file/0c94622b7a95088ce8325.jpg"></div>
-                <h4>Кузги Кроссовка Nike</h4>
-                <div class="price" id="price-1">0 сўм</div>
-                <button class="btn-buy" onclick="openModal('Кузги Кроссовка Nike', 45, 'Қора, Оқ', '40, 41, 42')">Буюртма</button>
-            </div>
-            <div class="glass-card product-card">
-                <div class="product-image-wrapper"><img src="https://telegra.ph/file/1a2b3c4d5e6f7g8h9i0j.jpg" onerror="this.src='https://via.placeholder.com/150/1e2235/ffb700?text=Kiyim'"></div>
-                <h4>Эркаклар Курткаси</h4>
-                <div class="price" id="price-2">0 сўм</div>
-                <button class="btn-buy" onclick="openModal('Эркаклар Курткаси', 85, 'Қора, Кўк', 'M, L, XL')">Буюртма</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- БУЮРТМА МОДАЛ ОЙНАСИ (Ранг ва Ўлчам) -->
-    <div class="modal-overlay" id="order-modal">
-        <div class="modal-content">
-            <h3 id="modal-title" style="margin-bottom: 15px; color: var(--gold);">Товар Номи</h3>
-            <div class="input-group">
-                <label>Рангни танланг</label>
-                <select id="modal-color"></select>
-            </div>
-            <div class="input-group">
-                <label>Ўлчамни танланг</label>
-                <select id="modal-size"></select>
-            </div>
-            <div class="input-group">
-                <label>Карго тури (Пули кейин олинади)</label>
-                <select id="modal-cargo">
-                    <option value="Авто">Авто (~22 кун, $6/кг)</option>
-                    <option value="Авиа">Авиа (~13 кун, $10/кг)</option>
-                </select>
-            </div>
-            <button class="btn btn-gold" onclick="confirmOrder()">Харид қилиш</button>
-            <button class="btn" style="background: var(--surface); color: var(--muted); margin-top: 10px; box-shadow: none;" onclick="closeModal()">Бекор қилиш</button>
-        </div>
-    </div>
-
-    <!-- ТАРИХ -->
-    <div id="page-history" class="page"><h2 style="font-weight: 800;">📦 Трекинг</h2><p style="color: var(--muted); font-size: 13px; text-align: center; margin-top: 50px;">Буюртмалар тарихи бот орқали кузатилади.</p></div>
-
-    <!-- ПРОФИЛЬ -->
-    <div id="page-profile" class="page">
-        <div class="glass-card" style="padding: 25px; margin-bottom: 20px; text-align: center; border-top: 1px solid var(--primary);">
-            <div style="width: 80px; height: 80px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; margin: 0 auto 15px;" id="avatar-char">X</div>
-            <h2 id="display-name" style="margin-bottom: 5px;">Мижоз</h2>
-            <p style="color: var(--muted); font-size: 12px; margin-bottom: 10px;" id="display-code">ID: ----</p>
-            <p style="color: var(--gold); font-weight: 800; font-size: 22px;" id="display-balance">0 сўм</p>
-        </div>
-        <button class="btn btn-gold" onclick="haptic(); tg.showAlert('Карта рақами: 8600 0000 0000 0000\nҚабул қилувчи: ISROILJON J.\n\nТўлов чекини админга юборинг.')"><i class="fas fa-wallet"></i> Ҳисобни тўлдириш</button>
-    </div>
-
-    <!-- АДМИН ПАНЕЛЬ (ТЎЛИҚ ВЕРСИЯ) -->
-    <div id="page-admin" class="page">
-        <h2 style="color: var(--gold); margin-bottom: 20px; font-weight: 800;">⚙️ Бошқарув</h2>
-        
-        <!-- 1. Нархлар -->
-        <div class="glass-card" style="padding: 20px; margin-bottom: 20px;">
-            <h4 style="margin-bottom: 15px;"><i class="fas fa-chart-line" style="color: var(--primary);"></i> Нархлар ва Рассылка</h4>
-            <div class="input-group"><label>1 Юань (сўм)</label><input type="number" id="adm-kurs"></div>
-            <div class="input-group"><label>Хизмат ҳақи (сўм)</label><input type="number" id="adm-xizmat"></div>
-            <button class="btn btn-gold" onclick="actionAdmin('update_settings')">Сақлаш ва Рассылка</button>
-        </div>
-
-        <!-- 2. Баланс тўлдириш -->
-        <div class="glass-card" style="padding: 20px; margin-bottom: 20px;">
-            <h4 style="margin-bottom: 15px;"><i class="fas fa-wallet" style="color: var(--primary);"></i> Баланс Тўлдириш</h4>
-            <div class="input-group"><label>Мижоз ID Коди (Мас: XB-1234)</label><input type="text" id="adm-bal-id"></div>
-            <div class="input-group"><label>Сумма (сўм)</label><input type="number" id="adm-bal-sum"></div>
-            <button class="btn" onclick="actionAdmin('add_balance')">Пул Қўшиш</button>
-        </div>
-
-        <!-- 3. Статус ва Вазн -->
-        <div class="glass-card" style="padding: 20px; margin-bottom: 20px;">
-            <h4 style="margin-bottom: 15px;"><i class="fas fa-truck" style="color: var(--primary);"></i> Буюртма Ҳолати</h4>
-            <div class="input-group"><label>Трек Код (Мас: XB-1234-01)</label><input type="text" id="adm-stat-id"></div>
-            <div class="input-group">
-                <label>Янги Статус</label>
-                <select id="adm-stat-val">
-                    <option>🇨🇳 Хитой омборида</option><option>🚚 Йўлда</option><option>🇺🇿 Етиб келди</option>
-                </select>
-            </div>
-            <div class="input-group"><label>Вазни (Грамм - Етиб келганда)</label><input type="number" id="adm-stat-weight" placeholder="Масалан: 350"></div>
-            <button class="btn" onclick="actionAdmin('update_status')">Ҳолатни Ўзгартириш</button>
-        </div>
-
-        <!-- 4. Товар қўшиш -->
-        <div class="glass-card" style="padding: 20px;">
-            <h4 style="margin-bottom: 15px;"><i class="fas fa-box-open" style="color: var(--primary);"></i> Витринага Товар Қўшиш</h4>
-            <div class="input-group"><label>Номи</label><input type="text" id="adm-prod-name"></div>
-            <div class="input-group"><label>Расм Ссилкаси</label><input type="text" id="adm-prod-img"></div>
-            <div class="input-group"><label>Асл нархи (Юань)</label><input type="number" id="adm-prod-price"></div>
-            <div class="input-group"><label>Ранглар (вергул билан)</label><input type="text" id="adm-prod-colors"></div>
-            <div class="input-group"><label>Ўлчамлар (вергул билан)</label><input type="text" id="adm-prod-sizes"></div>
-            <button class="btn btn-gold" onclick="actionAdmin('add_product')">Қўшиш</button>
-        </div>
-    </div>
-
-    <!-- НАВИГАЦИЯ -->
-    <div class="bottom-nav" id="navigation" style="display: none;">
-        <div class="nav-item active" onclick="switchTab('home')"><i class="fas fa-home"></i><span>Асосий</span></div>
-        <div class="nav-item" onclick="switchTab('history')"><i class="fas fa-box"></i><span>Тарих</span></div>
-        <div class="nav-item" onclick="switchTab('profile')"><i class="fas fa-user"></i><span>Профиль</span></div>
-        <div class="nav-item" id="tab-admin" style="display: none;" onclick="switchTab('admin')"><i class="fas fa-shield-alt"></i><span>Бошқарув</span></div>
-    </div>
-
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand(); tg.setHeaderColor('#0a0b10'); tg.setBackgroundColor('#0a0b10');
-        function haptic() { if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); }
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const KURS = parseFloat(urlParams.get('k')) || 12000;
-        const XIZMAT = parseFloat(urlParams.get('x')) || 15000;
-        const ROLE = urlParams.get('role'); 
-        const IS_REGISTERED = urlParams.get('reg') === '1';
-        const CLIENT_CODE = urlParams.get('code') || "----";
-        const BALANCE = parseFloat(urlParams.get('bal')) || 0;
-
-        document.getElementById('price-1').innerText = ((45 * KURS) + XIZMAT).toLocaleString() + " сўм";
-        document.getElementById('price-2').innerText = ((85 * KURS) + XIZMAT).toLocaleString() + " сўм";
-
-        if (!IS_REGISTERED) { document.getElementById('page-register').classList.add('active'); } 
-        else { initApp(); }
-
-        function initApp() {
-            document.getElementById('page-home').classList.add('active');
-            document.getElementById('navigation').style.display = 'flex';
-            
-            document.getElementById('display-code').innerText = "ID: " + CLIENT_CODE;
-            document.getElementById('display-balance').innerText = BALANCE.toLocaleString() + " сўм";
-            if(tg.initDataUnsafe?.user) {
-                document.getElementById('display-name').innerText = tg.initDataUnsafe.user.first_name;
-                document.getElementById('avatar-char').innerText = tg.initDataUnsafe.user.first_name.charAt(0);
-            }
-            if (ROLE === 'owner') { 
-                document.getElementById('tab-admin').style.display = 'flex';
-                document.getElementById('adm-kurs').value = KURS;
-                document.getElementById('adm-xizmat').value = XIZMAT;
-            }
-        }
-
-        function submitRegister() {
-            haptic();
-            let name = document.getElementById('reg-name').value, phone = document.getElementById('reg-phone').value, reg = document.getElementById('reg-region').value, addr = document.getElementById('reg-address').value;
-            if(!name || !phone || !addr) { tg.showAlert('Тўлдиринг!'); return; }
-            tg.sendData(JSON.stringify({ action: "register", name, phone, region: reg, address: addr })); tg.close();
-        }
-
-        function switchTab(tabId) {
-            haptic();
-            document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            document.getElementById('page-' + tabId).classList.add('active');
-            event.currentTarget.classList.add('active');
-        }
-
-        // Модал ва Буюртма
-        let currentProd = {}, currentCalcUzs = 0;
-        function openModal(name, yuan, colorsStr, sizesStr) {
-            haptic();
-            currentCalcUzs = (yuan * KURS) + XIZMAT;
-            currentProd = { name: name, yuan: yuan };
-            document.getElementById('modal-title').innerText = name + ` (${currentCalcUzs.toLocaleString()} сўм)`;
-            
-            let colorSelect = document.getElementById('modal-color');
-            colorSelect.innerHTML = "";
-            colorsStr.split(',').forEach(c => colorSelect.innerHTML += `<option value="${c.trim()}">${c.trim()}</option>`);
-            
-            let sizeSelect = document.getElementById('modal-size');
-            sizeSelect.innerHTML = "";
-            sizesStr.split(',').forEach(s => sizeSelect.innerHTML += `<option value="${s.trim()}">${s.trim()}</option>`);
-            
-            document.getElementById('order-modal').style.display = 'flex';
-        }
-        function closeModal() { haptic(); document.getElementById('order-modal').style.display = 'none'; }
-        
-        function confirmOrder() {
-            haptic();
-            let color = document.getElementById('modal-color').value;
-            let size = document.getElementById('modal-size').value;
-            let cargo = document.getElementById('modal-cargo').value;
-            let cPrice = cargo === 'Авто' ? 6 : 10;
-            
-            tg.sendData(JSON.stringify({ action: "order", product: currentProd.name, color: color, size: size, cargoType: cargo, cargoPrice: cPrice, totalUzs: currentCalcUzs }));
-            tg.close();
-        }
-
-        // Админ Функциялари
-        function actionAdmin(type) {
-            haptic();
-            let data = { action: type };
-            if (type === 'update_settings') {
-                data.kurs = parseFloat(document.getElementById('adm-kurs').value);
-                data.xizmat = parseFloat(document.getElementById('adm-xizmat').value);
-            } else if (type === 'add_balance') {
-                              data.client_code = document.getElementById('adm-bal-id').value;
-                data.amount = parseFloat(document.getElementById('adm-bal-sum').value);
-            } else if (type === 'update_status') {
-                data.track_code = document.getElementById('adm-stat-id').value;
-                data.status = document.getElementById('adm-stat-val').value;
-                data.weight = parseFloat(document.getElementById('adm-stat-weight').value) || 0;
-            } else if (type === 'add_product') {
-                data.name = document.getElementById('adm-prod-name').value;
-            }
-            tg.sendData(JSON.stringify(data)); tg.close();
-        }
-    </script>
-</body>
-</html>
+<html lang="uz"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Xitoydan Buyumlar</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--bg:#120708;--cd:#1e0e10;--cd2:#2a1417;--tx:#fff4e6;--mu:#b99a94;--rd:#d12a22;--rd2:#8f1210;--gd:#f0c04f;--gd2:#b8862a;--ln:#ffffff14}
+body.light{--bg:#f7efe6;--cd:#fff;--cd2:#f3e4d6;--tx:#2a0f0d;--mu:#8a6a62;--ln:#00000014}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--tx);font:15px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;transition:background .3s}
+#app{min-height:100%;padding:calc(env(safe-area-inset-top,0px) + 14px) 14px 120px}
+h1{font-size:22px}h3{font-size:13px;color:var(--mu);letter-spacing:.06em;margin:18px 4px 8px}h4{font-size:14px}
+.card{background:var(--cd);border:1px solid var(--ln);border-radius:22px;padding:16px}
+.row{display:flex;align-items:center;gap:12px}.sp{justify-content:space-between}
+.mu{color:var(--mu);font-size:13px}.gd{color:var(--gd)}
+/* splash */
+#splash{position:fixed;inset:0;z-index:99;background:radial-gradient(circle at 50% 40%,#3a0c0c,#0c0405 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;transition:opacity .5s}
+#splash.off{opacity:0;pointer-events:none}
+.logo3d{width:210px;height:210px;border-radius:50%;object-fit:cover;border:3px solid var(--gd);animation:pulse 1.8s ease-in-out infinite;box-shadow:0 0 50px #f0c04f66,0 20px 40px #000}
+@keyframes pulse{0%,100%{transform:perspective(600px) rotateY(-12deg) scale(.96)}50%{transform:perspective(600px) rotateY(12deg) scale(1.05)}}
+.bar{width:230px;height:8px;border-radius:9px;background:#ffffff1c;overflow:hidden}.bar i{display:block;height:100%;width:0;border-radius:9px;background:linear-gradient(90deg,var(--rd),var(--gd));transition:width .3s}
+/* auth */
+.auth{min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center}
+.auth .logo3d{width:150px;height:150px;animation-duration:3s}
+.b3{width:100%;border:0;border-radius:18px;padding:16px;font:700 16px inherit;font-family:inherit;color:#fff;background:linear-gradient(var(--rd),var(--rd2));box-shadow:0 6px 0 #5a0907,0 12px 24px #0006;transition:.12s;cursor:pointer}
+.b3:active{transform:translateY(5px);box-shadow:0 1px 0 #5a0907}
+.b3.g{color:#3a1500;background:linear-gradient(var(--gd),var(--gd2));box-shadow:0 6px 0 #6e4d12,0 12px 24px #0006}
+.b3.g:active{box-shadow:0 1px 0 #6e4d12}
+.lite .b3{box-shadow:none}.lite .logo3d{animation:none;box-shadow:none}
+input,select{width:100%;background:var(--cd2);color:var(--tx);border:1px solid var(--ln);border-radius:14px;padding:14px;font:inherit;margin-bottom:10px;outline:0}
+input:focus,select:focus{border-color:var(--gd)}
+form{width:100%;text-align:left}
+/* home */
+.av{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--gd),var(--rd));display:grid;place-items:center;font-weight:800;color:#fff;font-size:19px;flex:none}
+.coin{margin-left:auto;background:var(--cd);border:1px solid var(--ln);border-radius:20px;padding:8px 14px;font-weight:700}
+.bal{margin-top:16px;border-radius:26px;padding:20px;background:linear-gradient(135deg,#c4221c,#6d0c0b);color:#fff;border:1px solid #f0c04f55;box-shadow:0 14px 30px #d12a2233}
+.bal b{font-size:38px}.bal .btns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+.bal .btns button{background:#ffffff1c;border:1px solid #ffffff33;color:#fff;border-radius:16px;padding:12px 4px;font:600 12px inherit;font-family:inherit;display:flex;flex-direction:column;gap:4px;align-items:center}
+.bal .btns span{font-size:20px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pc{background:var(--cd);border:1px solid var(--ln);border-radius:20px;padding:8px;cursor:pointer;transition:.15s}.pc:active{transform:scale(.97)}
+.pi{aspect-ratio:1;border-radius:14px;background:var(--cd2) center/cover;display:grid;place-items:center;font-size:40px;position:relative;margin-bottom:8px}
+.tag{position:absolute;top:6px;left:6px;background:linear-gradient(var(--gd),var(--gd2));color:#3a1500;font-size:10px;padding:2px 8px;border-radius:9px}
+.pc p{color:var(--gd);font-weight:700;margin:2px 0 4px}
+/* profile */
+.pf{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.pf div{background:var(--cd2);border-radius:16px;padding:12px}.pf b{font-size:24px}
+.idc{display:inline-flex;gap:8px;align-items:center;background:var(--cd2);border-radius:10px;padding:5px 10px;font-size:13px;margin-top:4px;cursor:pointer}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--cd);border:1px solid var(--ln);border-radius:20px;padding:4px}
+.seg button{border:0;background:0;color:var(--mu);padding:13px;border-radius:16px;font:700 15px inherit;font-family:inherit}
+.seg .on{background:linear-gradient(var(--rd),var(--rd2));color:#fff}
+.li{display:flex;gap:14px;align-items:center;padding:14px 4px;border-bottom:1px solid var(--ln);cursor:pointer}.li:last-child{border:0}
+.ic{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:21px;flex:none;background:var(--cd2)}
+.li div:nth-child(2){flex:1}.li small{display:block;color:var(--mu);font-size:12.5px;margin-top:2px}
+.tg{width:50px;height:30px;border-radius:20px;background:#6b5a58;position:relative;flex:none;transition:.2s}
+.tg:after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s}
+.tg.on{background:var(--rd)}.tg.on:after{left:23px}
+/* nav */
+nav{position:fixed;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);z-index:20;display:flex;gap:4px;padding:6px;border-radius:30px;background:#1e0e10cc;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid #f0c04f33;box-shadow:0 14px 34px #0009}
+body.light nav{background:#ffffffdd}
+.lite nav{backdrop-filter:none;background:var(--cd)}
+nav button{flex:1;border:0;background:0;color:var(--mu);padding:9px 2px;border-radius:24px;font:600 11px inherit;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:2px}
+nav button span{font-size:20px}nav .on{background:linear-gradient(var(--rd),var(--rd2));color:#fff}
+/* sheet */
+#sh{position:fixed;inset:0;z-index:50;display:none}#sh.on{display:block}
+.bk{position:absolute;inset:0;background:#000a}
+.sb{position:absolute;left:0;right:0;bottom:0;max-height:88%;overflow:auto;background:var(--bg);border-radius:28px 28px 0 0;padding:20px 16px calc(env(safe-area-inset-bottom,0px) + 20px);border-top:1px solid #f0c04f55;animation:up .25s}
+.lite .sb{animation:none}@keyframes up{from{transform:translateY(60px);opacity:0}}
+.chip{display:inline-block;padding:9px 14px;margin:0 6px 8px 0;border-radius:14px;background:var(--cd2);border:1px solid var(--ln);cursor:pointer}
+.chip.on{background:var(--rd);border-color:var(--gd);color:#fff}
+.st{display:inline-block;font-size:12px;padding:3px 10px;border-radius:10px;background:var(--cd2);color:var(--gd)}
+#toast{position:fixed;top:calc(env(safe-area-inset-top,0px) + 16px);left:50%;transform:translate(-50%,-90px);background:var(--gd);color:#3a1500;font-weight:700;padding:11px 20px;border-radius:20px;z-index:99;transition:.3s;max-width:90%;text-align:center}
+#toast.on{transform:translate(-50%,0)}
+.empty{text-align:center;padding:50px 20px;color:var(--mu)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style></head><body>
+<div id="splash"><img class="logo3d" src="1000013568.jpg" alt="Xitoydan Buyumlar"><div class="bar"><i id="pg"></i></div></div>
+<div id="app"></div><div id="sh"></div><div id="toast"></div>
+<script>
+/* ========== SOZLAMALAR (shu yerni o'zgartiring) ========== */
+const CFG={
+ API:'',                      // bot.py serveri manzili, masalan 'https://sizning-server.uz/api'. Bo'sh = demo rejim (telefon xotirasida)
+ BOT:'xitoydan_buyumlar_bot', // botingiz username (@siz)
+ ADMINS:[],                   // adminlar Telegram ID raqamlari, masalan [123456789]
+ SUPPORT:['iskashax','iskashax'], // ikki egasining Telegram username'lari
+ CARD:'8600 0000 0000 0000',  // to'lov kartasi
+ REF_BONUS:5, COIN:100, CASHBACK_PER:10000 // referal tanga, 1 tanga = 100 so'm, har 10 000 so'm xaridga 1 tanga
+};
+/* ========== TIL ========== */
+const L={uz:{new:"Yangi ro'yxatdan o'tish",login:"Login orqali kirish",name:"Ism va familiya",phone:"Telefon raqam",region:"Viloyat",addr:"Aniq manzil",pass:"Maxfiy parol",ok:"Tasdiqlash",free:"Buyurtmalar BTS orqali bepul yetkaziladi.",bal:"Balans",cash:"Keshbek",top:"Hisobni to'ldirish",bonus:"Bonus kodlar",supp:"Qo'llab-quvvatlash",hist:"Tarix",prof:"Profil",home:"Asosiy",adm:"Boshqaruv",buy:"Xarid qilish",color:"Rangni tanlang",size:"O'lchamni tanlang",cargo:"Kargo turi (puli keyin olinadi)",auto:"Avto (~22 kun, $6/kg)",avia:"Avia (~13 kun, $10/kg)",none:"Hozircha buyurtma yo'q",lang:"Til",svc:"Xizmatlar",inv:"Do'stlarni taklif qilish",invD:"Do'stingiz birinchi xarid qilsa, bonus tangalar olasiz",promo:"Chegirma kodlar",promoD:"Keshbek sarflab kod yarating yoki kodni faollashtiring",suppD:"Savollar bo'yicha egalar bilan bog'laning",lite:"Animatsiyalarni kamaytirish",liteD:"Eski telefonlarda tezroq ishlash uchun",night:"Tungi rejim",nightD:"Yorug' va qorong'i rejim",sec:"Xavfsizlik va ma'lumotlar",secD:"Parol, ism va manzilni tahrirlash",save:"Saqlash",copied:"Nusxa olindi",bad:"Login yoki parol xato",exists:"Bu raqam ro'yxatdan o'tgan",noMoney:"Balansda mablag' yetarli emas",bought:"Buyurtma qabul qilindi",code:"Kod",use:"Faollashtirish",create:"Kod yaratish",coins:"Tanga soni",newpass:"Yangi parol (ixtiyoriy)",done:"Bajarildi",send:"Taklif havolasini yuborish",topD:"Kartaga o'tkazing va chekni egalarga yuboring:",st1:"🇨🇳 Xitoy omborida",st2:"🚚 Yo'lda",st3:"🇺🇿 Yetib keldi",rate:"1 yuan (so'm)",fee:"Xizmat haqi (so'm)",addm:"Pul qo'shish",track:"Trek kod",weight:"Vazn (gramm)",pname:"Nomi",img:"Rasm havolasi",yuan:"Narx (yuan)",colors:"Ranglar (vergul bilan)",sizes:"O'lchamlar (vergul bilan)",add:"Qo'shish",resetp:"Parolni tiklash",pk:"ID yoki telefon",disc:"Chegirma",out:"Chiqish",sum:"Summa",dsc:"Chegirma summasi",welcome:"Xush kelibsiz",usd:"1 dollar (so'm)",locked:"Ko'p urinish. 10 daqiqadan so'ng urining",conflict:"Bu Telegramda allaqachon hisob bor",auth:"Ilovani Telegram ichidan oching",server:"Server xatosi",search:"Mahsulot qidirish",chat:"Suhbat",msg:"Xabar yozing...",nomsg:"Hozircha xabar yo'q",pay:"Kargo to'lash",all:"Hammasi",cat:"Kategoriya",admins:"Adminlar",tid:"Telegram ID",aname:"Ism",mine:"Mahsulotlar"},
+ru:{new:"Новая регистрация",login:"Войти по логину",name:"Имя и фамилия",phone:"Номер телефона",region:"Область",addr:"Точный адрес",pass:"Секретный пароль",ok:"Подтвердить",free:"Заказы доставляются через BTS бесплатно.",bal:"Баланс",cash:"Кэшбэк",top:"Пополнить счёт",bonus:"Бонус-коды",supp:"Поддержка",hist:"История",prof:"Профиль",home:"Главная",adm:"Управление",buy:"Купить",color:"Выберите цвет",size:"Выберите размер",cargo:"Тип карго (оплата потом)",auto:"Авто (~22 дня, $6/кг)",avia:"Авиа (~13 дней, $10/кг)",none:"Заказов пока нет",lang:"Язык",svc:"Сервисы",inv:"Пригласить друзей",invD:"Получите бонусные монеты за первую покупку друга",promo:"Промокоды",promoD:"Создайте код за кэшбэк или активируйте код",suppD:"Свяжитесь с владельцами по вопросам",lite:"Меньше анимаций",liteD:"Для быстрой работы на старых телефонах",night:"Ночной режим",nightD:"Тёмная и светлая тема",sec:"Безопасность и данные",secD:"Изменить пароль, имя и адрес",save:"Сохранить",copied:"Скопировано",bad:"Неверный логин или пароль",exists:"Этот номер уже зарегистрирован",noMoney:"Недостаточно средств",bought:"Заказ принят",code:"Код",use:"Активировать",create:"Создать код",coins:"Количество монет",newpass:"Новый пароль (необязательно)",done:"Готово",send:"Отправить ссылку-приглашение",topD:"Переведите на карту и отправьте чек владельцам:",st1:"🇨🇳 На складе в Китае",st2:"🚚 В пути",st3:"🇺🇿 Прибыл",rate:"1 юань (сум)",fee:"Плата за услугу (сум)",addm:"Добавить деньги",track:"Трек-код",weight:"Вес (грамм)",pname:"Название",img:"Ссылка на фото",yuan:"Цена (юань)",colors:"Цвета (через запятую)",sizes:"Размеры (через запятую)",add:"Добавить",resetp:"Сброс пароля",pk:"ID или телефон",disc:"Скидка",out:"Выход",sum:"Сумма",dsc:"Сумма скидки",welcome:"Добро пожаловать",usd:"1 доллар (сум)",locked:"Много попыток. Повторите через 10 минут",conflict:"В этом Telegram уже есть аккаунт",auth:"Откройте приложение в Telegram",server:"Ошибка сервера",search:"Поиск товаров",chat:"Чат",msg:"Напишите сообщение...",nomsg:"Сообщений пока нет",pay:"Оплатить карго",all:"Все",cat:"Категория",admins:"Админы",tid:"Telegram ID",aname:"Имя",mine:"Товары"}};
+/* ========== YORDAMCHILAR ========== */
+const tg=window.Telegram&&Telegram.WebApp;if(tg){tg.ready();tg.expand();try{tg.setHeaderColor('#120708');tg.setBackgroundColor('#120708')}catch(e){}}
+const TU=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)||{};const TID=String(TU.id||'demo');
+const REF=String((tg&&tg.initDataUnsafe&&tg.initDataUnsafe.start_param)||new URLSearchParams(location.search).get('ref')||'').replace(/^ref_/,'');
+const $=s=>document.querySelector(s),v=id=>$('#'+id).value.trim();
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=n=>Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g,' ');
+let P={lang:'uz',lite:0,dark:1,fav:[]};try{P=Object.assign(P,JSON.parse(localStorage.xbp))}catch(e){}
+const T=k=>(L[P.lang]&&L[P.lang][k])||k;
+const savP=()=>{try{localStorage.xbp=JSON.stringify(P)}catch(e){}document.body.className=(P.lite?'lite ':'')+(P.dark?'':'light')};
+let tt;function toast(m){const e=$('#toast');e.textContent=m;e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),2400)}
+const hap=t=>{try{tg.HapticFeedback.impactOccurred(t||'light')}catch(e){}};
+function cp(t){(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).catch(()=>{const e=document.createElement('textarea');e.value=t;document.body.appendChild(e);e.select();document.execCommand('copy');e.remove()});toast(T('copied'));hap()}
+const openTG=u=>tg?tg.openTelegramLink(u):window.open(u,'_blank');
+function sheet(h){$('#sh').innerHTML='<div class=bk onclick="closeS()"></div><div class=sb>'+h+'</div>';$('#sh').classList.add('on')}
+function closeS(){$('#sh').classList.remove('on')}
+/* ========== MA'LUMOTLAR QATLAMI ========== */
+/* CFG.API bo'sh bo'lsa — demo (localStorage). To'ldirilsa — har bir amal POST {a,d,init} bilan serverga ketadi, javob {ok:true,r:...} yoki {ok:false,e:'bad'} */
+const DB0={users:{},tg:{},orders:[],promos:{},cfg:{rate:1800,fee:20000,usd:12700},products:[{id:1,name:'Kuzgi krossovka Nike',img:'',yuan:120,colors:['Qora','Oq'],sizes:['40','41','42','43']},{id:2,name:'Erkaklar kurtkasi',img:'',yuan:180,colors:['Qora','Xaki'],sizes:['M','L','XL']}]};
+let db;const load=()=>{db=null;try{db=JSON.parse(localStorage.xb)}catch(e){}db=db||JSON.parse(JSON.stringify(DB0))};const save=()=>{try{localStorage.xb=JSON.stringify(db)}catch(e){}};
+const isAdmin=()=>CFG.ADMINS.includes(Number(TID))||(S&&S.admin)||(!CFG.API&&location.search.includes('admin'));
+const me=()=>db.users[db.tg[TID]];const E=c=>{throw new Error(c)};
+const price=p=>Math.ceil((p.yuan*S.cfg.rate+S.cfg.fee)/1000)*1000;
+const H={
+ me(){const u=me();return{u:u?Object.assign({},u,{pass:undefined}):null,orders:u?db.orders.filter(o=>o.uid===u.id).reverse():[],all:isAdmin()?db.orders.length:0,products:db.products,cfg:db.cfg}},
+ reg(d){if(db.users[d.phone])E('exists');let id;do{id='XB-'+(1000+Math.floor(Math.random()*9000))}while(Object.values(db.users).some(x=>x.id===id));db.users[d.phone]={id,name:d.name,phone:d.phone,region:d.region,addr:d.addr,pass:d.pass,bal:0,coins:0,disc:0,ref:d.ref||'',bought:0};db.tg[TID]=d.phone},
+ login(d){const u=db.users[d.phone];if(!u||u.pass!==d.pass)E('bad');db.tg[TID]=d.phone},
+ buy(d){const u=me(),p=db.products.find(x=>x.id==d.pid);const pr=price(p),dc=Math.min(u.disc,pr),tot=pr-dc;if(u.bal<tot)E('noMoney');u.bal-=tot;u.disc-=dc;u.coins+=Math.floor(tot/CFG.CASHBACK_PER);
+  if(!u.bought&&u.ref){const r=Object.values(db.users).find(x=>x.id===u.ref);if(r)r.coins+=CFG.REF_BONUS}u.bought++;
+  const n=db.orders.filter(o=>o.uid===u.id).length+1;db.orders.push({track:u.id+'-'+String(n).padStart(2,'0'),uid:u.id,name:p.name,price:tot,color:d.color,size:d.size,cargo:d.cargo,status:1,weight:0})},
+ prof(d){const u=me();Object.assign(u,{name:d.name,region:d.region,addr:d.addr});if(d.pass)u.pass=d.pass},
+ promoNew(d){const u=me(),n=Math.floor(+d.n);if(!(n>=1)||u.coins<n)E('noMoney');const c='XB'+Math.random().toString(36).slice(2,7).toUpperCase();u.coins-=n;db.promos[c]={val:n*CFG.COIN,used:0};return c},
+ promoUse(d){const p=db.promos[d.code.toUpperCase()];if(!p||p.used)E('bad');p.used=1;me().disc+=p.val},
+ /* admin */
+ cfg(d){db.cfg={rate:+d.rate,fee:+d.fee,usd:+d.usd||12700}},
+ addm(d){const u=Object.values(db.users).find(x=>x.id===d.id.toUpperCase());if(!u)E('bad');u.bal+=+d.sum},
+ status(d){const o=db.orders.find(x=>x.track===d.track.toUpperCase());if(!o)E('bad');o.status=+d.st;if(d.w)o.weight=+d.w},
+ addp(d){db.products.push({id:Date.now(),name:d.name,img:d.img,yuan:+d.yuan,colors:d.colors.split(',').map(s=>s.trim()),sizes:d.sizes.split(',').map(s=>s.trim())})},
+ resetp(d){const u=Object.values(db.users).find(x=>x.id===d.k.toUpperCase()||x.phone===d.k);if(!u)E('bad');u.pass=d.pass},
+ addpromo(d){db.promos[d.code.toUpperCase()]={val:+d.val,used:0}}
+};
+async function call(a,d){d=d||{};if(CFG.API){const r=await fetch(CFG.API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({a,d,init:tg?tg.initData:''})});const j=await r.json();if(!j.ok)throw new Error(j.e);return j.r}
+ load();if(a!=='me'&&String(a).match(/^(cfg|addm|status|addp|resetp|addpromo)$/)&&!isAdmin())E('bad');const r=H[a](d);save();return r}
+/* ========== EKRANLAR ========== */
+let S=null,tab='home',au='',sel={};
+const go=async(fn,ok)=>{try{const r=await fn();S=await call('me');if(ok)toast(T(ok));render();return r}catch(e){toast(T(e.message)==e.message?'⚠ '+e.message:T(e.message))}};
+function render(){const a=$('#app');if(!S.u){a.innerHTML=authV();return}
+ const views={home:homeV,hist:histV,chat:chatV,prof:profV,adm:admV};a.innerHTML=views[tab]()+navV()}
+const logo='<img class=logo3d src="1000013568.jpg" alt="">';
+function authV(){
+ if(!au)return`<div class=auth>${logo}<h1>Xitoydan Buyumlar</h1><p class=mu>Eng arzon va sifatli!</p><button class="b3 g" onclick="au='reg';render()">${T('new')}</button><button class=b3 onclick="au='login';render()">${T('login')}</button>${langSeg()}</div>`;
+ const reg=au==='reg';
+ return`<div class=auth style="justify-content:flex-start;padding-top:20px"><div class=row style="width:100%"><button class="chip" onclick="au='';render()">←</button><h1>${T(reg?'new':'login')}</h1></div><form onsubmit="return sub(event)" style="margin-top:12px">
+ ${reg?`<input id=n placeholder="${T('name')}" required>`:''}<input id=p type=tel placeholder="+998 __ ___ __ __" required>
+ ${reg?`<select id=r><option>Farg'ona</option><option>Toshkent</option><option>Boshqa viloyatlar</option></select><input id=a placeholder="${T('addr')}" required><p class=mu style="margin:0 4px 10px">${T('free')}</p>`:''}
+ <input id=w type=password placeholder="${T('pass')}" minlength=6 required><button class="b3 g" type=submit>${T('ok')}</button></form></div>`}
+function sub(e){e.preventDefault();const ph=v('p').replace(/[^\d+]/g,'');
+ if(au==='reg')go(()=>call('reg',{name:v('n'),phone:ph,region:$('#r').value,addr:v('a'),pass:v('w'),ref:REF}));
+ else go(()=>call('login',{phone:ph,pass:v('w')}));return false}
+const langSeg=()=>`<div class=seg style="width:100%"><button class="${P.lang=='uz'?'on':''}" onclick="setL('uz')">O'zbekcha</button><button class="${P.lang=='ru'?'on':''}" onclick="setL('ru')">Русский</button></div>`;
+function setL(l){P.lang=l;savP();hap();render()}
+function homeV(){const u=S.u;
+ return`<div class=row><div class=av>${esc((u.name||'?')[0])}</div><div><h4>${esc(u.name)}</h4><span class=mu>${T('welcome')} 👋</span></div><div class=coin>🪙 ${u.coins}</div></div>
+ <div class=bal><span style="opacity:.8">${T('bal')}</span><br><b>${money(u.bal)}</b> so'm${u.disc?`<div style="font-size:13px;margin-top:4px;color:var(--gd)">🏷 ${T('disc')}: ${money(u.disc)} so'm</div>`:''}
+ <div class=btns><button onclick="topUp()"><span>💳</span>${T('top')}</button><button onclick="promoS()"><span>🎟</span>${T('bonus')}</button><button onclick="suppS()"><span>💬</span>${T('supp')}</button></div></div>
+ ${shopBar()}<div class=grid>${shown().map(p=>`<div class=pc onclick="pick(${p.id})"><div class=pi style="background-image:url('${esc(p.img)}')">${p.img?'':'📦'}<span onclick="event.stopPropagation();fv(${p.id})" style="position:absolute;top:4px;right:8px;font-size:20px">${P.fav.includes(p.id)?'❤️':'🤍'}</span>${p.sold>20?'<b class=tag>HIT</b>':''}</div><h4>${esc(p.name)}</h4><p>${money(price(p))} so'm</p>${p.sold?`<span class=mu>🔥 ${p.sold}</span>`:''}</div>`).join('')}</div>`}
+function pick(id,keep){const p=S.products.find(x=>x.id==id);if(!keep)sel={id,c:0,s:0,g:'auto'};
+ const ch=(a,k)=>a.map((x,i)=>`<span class="chip ${sel[k]==i?'on':''}" onclick="sel.${k}=${i};pick(${id},1)">${esc(x)}</span>`).join('');
+ sheet(`<h1>${esc(p.name)}</h1><p class="gd" style="font-size:22px;font-weight:800;margin:6px 0 14px">${money(price(p))} so'm</p>
+ <p class=mu>${T('color')}</p>${ch(p.colors,'c')}<p class=mu>${T('size')}</p>${ch(p.sizes,'s')}<p class=mu>${T('cargo')}</p>
+ <span class="chip ${sel.g=='auto'?'on':''}" onclick="sel.g='auto';pick(${id},1)">${T('auto')}</span><span class="chip ${sel.g=='avia'?'on':''}" onclick="sel.g='avia';pick(${id},1)">${T('avia')}</span>
+ <button class="b3 g" style="margin-top:14px" onclick="doBuy(${id})">${T('buy')}</button>`)}
+function doBuy(id){const p=S.products.find(x=>x.id==id);closeS();go(async()=>{await call('buy',{pid:id,color:p.colors[sel.c],size:p.sizes[sel.s],cargo:sel.g});tab='hist'},'bought')}
+function topUp(){sheet(`<h1>💳 ${T('top')}</h1><p class=mu style="margin:8px 0">${T('topD')}</p><div class=idc onclick="cp('${CFG.CARD}')" style="font-size:20px;padding:12px 16px">${CFG.CARD} 📋</div><div style="height:14px"></div>${suppBtns()}`)}
+const suppBtns=()=>CFG.SUPPORT.map((u,i)=>`<button class="b3 ${i?'':'g'}" style="margin-bottom:12px" onclick="openTG('https://t.me/${u}')">💬 @${esc(u)}</button>`).join('');
+function suppS(){sheet(`<h1>💬 ${T('supp')}</h1><p class=mu style="margin:8px 0 16px">${T('suppD')}</p>${suppBtns()}`)}
+function histV(){return`<h1>📦 ${T('hist')}</h1>${(S.tx||[]).length?`<div class=card style="margin-top:12px">${S.tx.slice(0,5).map(x=>`<div class="row sp"><span class=mu>${esc(x.w)}</span><b class="${x.a>0?'gd':''}">${x.a>0?'+':''}${money(x.a)}</b></div>`).join('')}</div>`:''}<div style="margin-top:14px;display:grid;gap:10px">${S.orders.length?S.orders.map(o=>`<div class=card><div class="row sp"><b>${esc(o.name)}</b><span class=st>${T('st'+o.status)}</span></div><p class=mu style="margin:6px 0">${esc(o.track)} · ${esc(o.color)} · ${esc(o.size)} · ${o.cargo=='avia'?'Avia':'Avto'}</p><div class="row sp"><span class=gd><b>${money(o.price)} so'm</b></span>${o.weight?`<span class=mu>${o.weight} g${o.due?' · 🚚 '+money(o.due)+" so'm":''}</span>`:''}</div>${o.due?`<button class="b3 g" style="margin-top:10px;padding:10px" data-t="${esc(o.track)}" onclick="go(()=>call('paydue',{track:this.dataset.t}),'done')">🚚 ${T('pay')} · ${money(o.due)}</button>`:''}</div>`).join(''):`<div class=empty>📭<br>${T('none')}</div>`}</div>`}
+const li=(i,t,d,r,f)=>`<div class=li onclick="${f}"><div class=ic>${i}</div><div><b>${t}</b><small>${d}</small></div>${r}</div>`;
+const chev='<span class=mu style="font-size:22px">›</span>',tgl=on=>`<span class="tg ${on?'on':''}"></span>`;
+function profV(){const u=S.u;
+ return`<div class=card><div class=row><div class=av style="width:64px;height:64px;font-size:26px">${esc((u.name||'?')[0])}</div><div><h4>${esc(u.name)}</h4><div class=gd>${esc(u.phone)}</div><div class=idc onclick="cp('${esc(u.id)}')">ID: ${esc(u.id)} 📋</div></div></div>
+ <div class=pf><div><span class=mu>${T('bal').toUpperCase()}</span><br><b>${money(u.bal)}</b> <span class=mu>so'm</span></div><div><span class=mu>${T('cash').toUpperCase()}</span><br><b class=gd>${u.coins}</b></div></div></div>
+ <h3>${T('lang').toUpperCase()}</h3>${langSeg()}<h3>${T('svc').toUpperCase()}</h3>
+ <div class=card style="padding:6px 14px">${li('👥',T('inv'),T('invD'),chev,'invS()')}${li('🪙',T('promo'),T('promoD'),chev,'promoS()')}${li('💬',T('supp'),T('suppD'),chev,'suppS()')}
+ ${li('⚡',T('lite'),T('liteD'),tgl(P.lite),'P.lite=P.lite?0:1;savP();hap();render()')}${li('🌙',T('night'),T('nightD'),tgl(!P.dark),'P.dark=P.dark?0:1;savP();hap();render()')}${li('🛡️',T('sec'),T('secD'),chev,'secS()')}</div>
+ <button class="chip" style="margin-top:16px;width:100%;text-align:center" onclick="out()">${T('out')}</button>`}
+function out(){if(CFG.API){S={u:null};render()}else{load();delete db.tg[TID];save();S={u:null};au='';render()}}
+function invS(){const l=`https://t.me/${CFG.BOT}?start=ref_${S.u.id}`;sheet(`<h1>👥 ${T('inv')}</h1><p class=mu style="margin:8px 0 14px">${T('invD')} (+${CFG.REF_BONUS} 🪙)</p><div class=idc style="word-break:break-all" onclick="cp('${l}')">${l} 📋</div><button class="b3 g" style="margin-top:16px" onclick="openTG('https://t.me/share/url?url='+encodeURIComponent('${l}'))">${T('send')}</button>`)}
+function promoS(){sheet(`<h1>🎟 ${T('promo')}</h1><p class=mu style="margin:8px 0">🪙 ${S.u.coins} · 1 🪙 = ${CFG.COIN} so'm</p>
+ <input id=c1 placeholder="${T('code')}"><button class=b3 onclick="go(()=>call('promoUse',{code:v('c1')}),'done');closeS()">${T('use')}</button><div style="height:18px"></div>
+ <input id=c2 type=number placeholder="${T('coins')}"><button class="b3 g" onclick="mk()">${T('create')}</button>`)}
+async function mk(){try{const c=await call('promoNew',{n:v('c2')});S=await call('me');render();sheet(`<h1>🎟 ${T('code')}</h1><div class=idc style="font-size:26px;padding:14px 20px" onclick="cp('${c}')">${c} 📋</div>`)}catch(e){toast(T(e.message))}}
+function secS(){const u=S.u;sheet(`<h1>🛡️ ${T('sec')}</h1><div style="height:12px"></div><input id=n value="${esc(u.name)}" placeholder="${T('name')}"><select id=r>${["Farg'ona","Toshkent","Boshqa viloyatlar"].map(x=>`<option ${x==u.region?'selected':''}>${x}</option>`).join('')}</select><input id=a value="${esc(u.addr)}" placeholder="${T('addr')}"><input id=w type=password placeholder="${T('newpass')}"><button class="b3 g" onclick="go(()=>call('prof',{name:v('n'),region:$('#r').value,addr:v('a'),pass:v('w')}),'done');closeS()">${T('save')}</button>`)}
+/* admin */
+const f=(id,ph,t)=>`<input id=${id} ${t?'type='+t:''} placeholder="${ph}">`,btn=(t,a,keys)=>`<button class="b3 g" style="margin-bottom:6px" onclick="go(()=>call('${a}',{${keys}}),'done')">${t}</button>`;
+const sec=(t,h)=>`<div class=card style="margin-bottom:12px"><h4 style="margin-bottom:10px">${t}</h4>${h}</div>`;
+function ownV(){return`
+ ${sec('📈 '+T('rate'),f('a1',T('rate'),'number')+f('a2',T('fee'),'number')+f('a3',T('usd'),'number')+btn(T('save'),'cfg',"rate:v('a1'),fee:v('a2'),usd:v('a3')"))}
+ ${sec('💰 '+T('addm'),f('b1','XB-1234')+f('b2',T('sum'),'number')+btn(T('addm'),'addm',"id:v('b1'),sum:v('b2')"))}
+ ${sec('🚚 '+T('track'),f('c1','XB-1234-01')+`<select id=c2><option value=1>${T('st1')}</option><option value=2>${T('st2')}</option><option value=3>${T('st3')}</option></select>`+f('c3',T('weight'),'number')+btn(T('save'),'status',"track:v('c1'),st:$('#c2').value,w:v('c3')"))}
+  ${sec('🎟 '+T('promo'),f('e1',T('code'))+f('e2',T('dsc'),'number')+btn(T('add'),'addpromo',"code:v('e1'),val:v('e2')"))}
+ ${sec('🔑 '+T('resetp'),f('g1',T('pk'))+f('g2',T('newpass'))+btn(T('resetp'),'resetp',"k:v('g1'),pass:v('g2')"))}`}
+let q='',cat='',fo=0,cur='',TH=[];
+const rg=()=>{render();const i=$('#q');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}};
+const shown=()=>S.products.filter(p=>(!cat||p.cat===cat)&&(!fo||P.fav.includes(p.id))&&p.name.toLowerCase().includes(q.toLowerCase()));
+const shopBar=()=>{const cs=[...new Set(S.products.map(p=>p.cat).filter(Boolean))];return`<input id=q placeholder="🔍 ${T('search')}" value="${esc(q)}" oninput="q=this.value;rg()" style="margin-top:14px"><div style="overflow-x:auto;white-space:nowrap;margin-bottom:10px"><span class="chip ${fo?'on':''}" onclick="fo=!fo;rg()">❤️</span>${['',...cs].map(c=>`<span class="chip ${cat===c?'on':''}" data-c="${esc(c)}" onclick="cat=this.dataset.c;rg()">${c?esc(c):T('all')}</span>`).join('')}</div>`};
+const fv=id=>{P.fav=P.fav.includes(id)?P.fav.filter(x=>x!==id):[...P.fav,id];savP();hap();rg()};
+const delB=(a,k,id)=>`<button class=chip data-k="${id}" onclick="go(()=>call('${a}',{${k}:this.dataset.k}),'done')">🗑</button>`;
+const admMgr=()=>sec('👥 '+T('admins'),(S.admins||[]).map(a=>`<div class="row sp" style="margin:6px 0"><span>${esc(a.name||'-')} · ${a.id}</span>${delB('deladm','tid',a.id)}</div>`).join('')+f('m1',T('tid'),'number')+f('m2',T('aname'))+btn(T('add'),'addadm',"tid:v('m1'),name:v('m2')"));
+function admV(){const o=S.role==='owner'||(!CFG.API&&location.search.includes('admin'));
+ const pl=S.products.filter(p=>o||p.by===Number(TID)).map(p=>`<div class="row sp" style="margin:6px 0"><span>${esc(p.name)}</span>${delB('delp','id',p.id)}</div>`).join('');
+ return`<h1>⚙️ ${T('adm')}</h1><p class=mu style="margin:4px 0 14px">${o?'👑 Owner':'🛠 Admin'} · Orders: ${S.all}</p>
+ ${sec('🛍 '+T('add'),f('d1',T('pname'))+f('d2',T('img'))+f('d3',T('yuan'),'number')+f('d6',T('cat'))+f('d4',T('colors'))+f('d5',T('sizes'))+btn(T('add'),'addp',"name:v('d1'),img:v('d2'),yuan:v('d3'),cat:v('d6'),colors:v('d4'),sizes:v('d5')"))}
+ ${pl?sec('📋 '+T('mine'),pl):''}${o?ordL()+admMgr()+ownV():''}`}
+const ordL=()=>sec('📦 '+T('hist'),(S.ords||[]).map(x=>`<div style="margin:8px 0"><b>${esc(x.p)}</b> <span class=st>${T('st'+x.st)}</span><br><span class=mu>${esc(x.t)} · ${esc(x.n||'')} · ${esc(x.ph||'')} · ${money(x.s)}</span></div>`).join('')||'-');
+const bub=m=>`<div style="display:flex;justify-content:${m.f==='u'?'flex-end':'flex-start'}"><div style="max-width:80%;padding:9px 13px;margin:4px 0;border-radius:16px;background:${m.f==='u'?'var(--rd)':'var(--cd2)'};color:${m.f==='u'?'#fff':'var(--tx)'}">${esc(m.t)}</div></div>`;
+const sendB=a=>`<div class=row style="margin-top:12px"><input id=cm placeholder="${T('msg')}" style="margin:0"><button class="b3 g" style="width:auto;padding:14px 18px" onclick="${a}">➤</button></div>`;
+const sendM=()=>{const t=v('cm');if(t)go(()=>call('msg',{t}))};
+const openT=c=>go(async()=>{cur=c;TH=await call('thread',{code:c})});
+const replyM=()=>{const t=v('cm');if(t)go(async()=>{await call('reply',{code:cur,t});TH=await call('thread',{code:cur})})};
+function chatV(){const em=`<div class=empty>${T('nomsg')}</div>`;
+ if(S.role==='user'||(!S.role&&!isAdmin()))return`<h1>💬 ${T('chat')}</h1><div style="margin-top:12px">${(S.msgs||[]).map(bub).join('')||em}</div>${sendB('sendM()')}`;
+ if(cur)return`<div class=row><button class=chip onclick="cur='';render()">←</button><h1>${esc(cur)}</h1></div><div style="margin-top:12px">${TH.map(bub).join('')}</div>${sendB('replyM()')}`;
+ return`<h1>💬 ${T('chat')}</h1><div class=card style="margin-top:12px;padding:6px 14px">${(S.inbox||[]).map(i=>li('👤',esc(i.n||i.c),esc(i.t),'',`openT('${esc(i.c)}')`)).join('')||em}</div>`}
+function navV(){const t=[['home','🏠',T('home')],['hist','🕘',T('hist')],['chat','💬',T('chat')],['prof','👤',T('prof')]];if(isAdmin())t.push(['adm','⚙️',T('adm')]);
+ return'<nav>'+t.map(x=>`<button class="${tab==x[0]?'on':''}" onclick="tab='${x[0]}';hap();render();scrollTo(0,0)"><span>${x[1]}</span>${x[2]}</button>`).join('')+'</nav>'}
+/* ========== BOSHLASH ========== */
+(async function(){savP();const pg=$('#pg');let w=0;const iv=setInterval(()=>{w=Math.min(w+Math.random()*14,90);pg.style.width=w+'%'},220);
+ const t0=Date.now();try{S=await call('me')}catch(e){S={u:null,orders:[],products:[],cfg:{rate:1800,fee:20000}};toast('⚠ '+e.message)}
+ await new Promise(r=>setTimeout(r,Math.max(0,1600-(Date.now()-t0))));clearInterval(iv);pg.style.width='100%';render();
+ setTimeout(()=>$('#splash').classList.add('off'),350);setTimeout(()=>$('#splash').remove(),900)})();
+</script></body></html>
