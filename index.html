@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Xitoydan Buyumlar Premium</title>
+    <!-- Telegram WebApp JS -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- FontAwesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        /* =========================================
+           1. ASOSIY DIZAYN VA O'ZGARUVCHILAR
+        ========================================= */
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+        
+        :root {
+            /* Dark Theme by default */
+            --bg-color: #0b0d14;
+            --surface-color: rgba(22, 25, 37, 0.7);
+            --surface-border: rgba(255, 255, 255, 0.05);
+            --primary-color: #e60000;
+            --gold-color: #ffb700;
+            --text-main: #ffffff;
+            --text-muted: #8b92a5;
+            --nav-bg: rgba(15, 17, 26, 0.95);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --input-bg: rgba(0, 0, 0, 0.4);
+        }
+
+        /* Light Theme variables (toggled via settings) */
+        [data-theme="light"] {
+            --bg-color: #f4f5f8;
+            --surface-color: rgba(255, 255, 255, 0.9);
+            --surface-border: rgba(0, 0, 0, 0.05);
+            --text-main: #111111;
+            --text-muted: #666666;
+            --nav-bg: rgba(255, 255, 255, 0.95);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+            --input-bg: rgba(0, 0, 0, 0.03);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; }
+        body { background: var(--bg-color); color: var(--text-main); overflow-x: hidden; transition: 0.3s; padding-bottom: 90px; }
+
+        /* 3D GLOW EFFECTS (Xakkerlar buza olmaydigan vizual qism :) ) */
+        .glow-circle { position: fixed; width: 300px; height: 300px; border-radius: 50%; filter: blur(140px); z-index: -1; pointer-events: none; opacity: 0.2; transition: 0.5s; }
+        .glow-red { background: var(--primary-color); top: -100px; left: -100px; }
+        .glow-gold { background: var(--gold-color); bottom: -100px; right: -100px; }
+
+        /* =========================================
+           2. UMUMIY KOMPONENTLAR
+        ========================================= */
+        /* Glassmorphism Card */
+        .glass-card { background: var(--surface-color); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--surface-border); border-radius: 20px; padding: 20px; box-shadow: var(--glass-shadow); margin-bottom: 20px; transition: 0.3s; }
+        
+        /* Inputs & Forms */
+        .form-group { margin-bottom: 18px; position: relative; }
+        .form-group label { display: block; font-size: 11px; font-weight: 700; color: var(--gold-color); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
+        .form-control { width: 100%; padding: 16px; background: var(--input-bg); border: 1px solid var(--surface-border); border-radius: 15px; color: var(--text-main); font-size: 15px; outline: none; transition: 0.3s; font-family: inherit; }
+        .form-control:focus { border-color: var(--gold-color); box-shadow: 0 0 10px rgba(255,183,0,0.2); }
+        .form-control::placeholder { color: var(--text-muted); }
+
+        /* Buttons */
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 15px; font-size: 16px; font-weight: 800; cursor: pointer; transition: 0.2s; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn:active { transform: scale(0.96); }
+        .btn-red { background: linear-gradient(135deg, var(--primary-color), #990000); color: #fff; box-shadow: 0 5px 15px rgba(230,0,0,0.3); }
+        .btn-gold { background: linear-gradient(135deg, var(--gold-color), #cc9200); color: #000; box-shadow: 0 5px 15px rgba(255,183,0,0.3); }
+        .btn-outline { background: transparent; border: 1px solid var(--text-muted); color: var(--text-main); }
+
+        /* Views / Pages Logic */
+        .view-section { display: none; padding: 20px; animation: fadeIn 0.4s ease forwards; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* =========================================
+           3. MAXSUS BO'LIMLAR DIZAYNI
+        ========================================= */
+
+        /* BOSH SAHIFA / KATALOG (Juda katta alohida joy) */
+        .search-bar { display: flex; gap: 10px; margin-bottom: 20px; }
+        .search-bar .form-control { border-radius: 20px; padding-left: 20px; }
+        .search-btn { width: 50px; border-radius: 20px; background: var(--surface-color); border: 1px solid var(--surface-border); color: var(--gold-color); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        
+        .categories-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px; }
+        .categories-scroll::-webkit-scrollbar { display: none; }
+        .cat-chip { padding: 10px 20px; background: var(--surface-color); border: 1px solid var(--surface-border); border-radius: 20px; font-size: 13px; font-weight: 600; white-space: nowrap; color: var(--text-main); transition: 0.3s; }
+        .cat-chip.active { background: var(--gold-color); color: #000; border-color: var(--gold-color); }
+
+        .empty-state { text-align: center; padding: 80px 20px; color: var(--text-muted); }
+        .empty-state i { font-size: 60px; color: var(--surface-border); margin-bottom: 20px; }
+
+        /* HAMYON BO'LIMI */
+        .balance-card { background: linear-gradient(135deg, rgba(230,0,0,0.2), rgba(255,183,0,0.1)); border: 1px solid var(--gold-color); position: relative; overflow: hidden; }
+        .balance-amount { font-size: 32px; font-weight: 800; color: var(--gold-color); margin: 10px 0; letter-spacing: 1px; }
+        .hamkor-card-box { background: rgba(0,0,0,0.6); padding: 15px; border-radius: 12px; margin-bottom: 15px; border-left: 4px solid var(--gold-color); }
+        .hamkor-card-number { font-family: 'Courier New', monospace; font-size: 18px; font-weight: 800; color: var(--gold-color); letter-spacing: 2px; }
+        .hamkor-card-name { font-size: 12px; color: #fff; margin-top: 5px; font-weight: 600; text-transform: uppercase; }
+        .bank-logo { float: right; font-size: 24px; color: #fff; opacity: 0.5; }
+
+        /* SOZLAMALAR BO'LIMI */
+        .settings-list { list-style: none; }
+        .settings-item { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; border-bottom: 1px solid var(--surface-border); cursor: pointer; }
+        .settings-item:last-child { border-bottom: none; }
+        .settings-icon { width: 35px; height: 35px; border-radius: 10px; background: rgba(255,183,0,0.1); color: var(--gold-color); display: flex; align-items: center; justify-content: center; font-size: 16px; margin-right: 15px; }
+        .settings-text { flex: 1; font-size: 15px; font-weight: 600; }
+        .settings-chevron { color: var(--text-muted); font-size: 12px; }
+        
+        /* Toggle Switch */
+        .toggle-switch { position: relative; width: 50px; height: 26px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.1); transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: var(--text-muted); transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--gold-color); }
+        input:checked + .slider:before { transform: translateX(24px); background-color: #000; }
+
+        /* =========================================
+           4. PASTKI NAVIGATSIYA (5 TA TAB)
+        ========================================= */
+        .bottom-nav { position: fixed; bottom: 15px; left: 5%; width: 90%; background: var(--nav-bg); backdrop-filter: blur(20px); border: 1px solid var(--surface-border); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; padding: 8px 5px; z-index: 1000; box-shadow: 0 10px 40px rgba(0,0,0,0.6); transition: 0.3s; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 20%; color: var(--text-muted); cursor: pointer; transition: 0.3s; position: relative; padding: 8px 0; }
+        .nav-item i { font-size: 20px; margin-bottom: 4px; transition: 0.3s; }
+        .nav-item span { font-size: 10px; font-weight: 700; transition: 0.3s; }
+        
+        .nav-item.active { color: var(--gold-color); }
+        .nav-item.active i { transform: translateY(-3px) scale(1.1); text-shadow: 0 0 10px rgba(255,183,0,0.5); }
+        .nav-item.active span { transform: translateY(-2px); }
+
+        /* =========================================
+           5. SPLASH SCREEN (YUKLANISH)
+        ========================================= */
+        #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease; }
+        .splash-logo { width: 100px; height: 100px; border-radius: 25px; border: 2px solid var(--gold-color); display: flex; align-items: center; justify-content: center; font-size: 40px; color: var(--gold-color); margin-bottom: 20px; animation: pulseLogo 1.5s infinite alternate; box-shadow: 0 0 30px rgba(255,183,0,0.2); }
+        @keyframes pulseLogo { 0% { transform: scale(0.9); box-shadow: 0 0 10px rgba(255,183,0,0.1); } 100% { transform: scale(1.05); box-shadow: 0 0 40px rgba(255,183,0,0.4); } }
+        .loader-bar { width: 150px; height: 4px; background: var(--surface-border); border-radius: 2px; overflow: hidden; margin-top: 20px; }
+        .loader-fill { width: 0%; height: 100%; background: var(--gold-color); animation: loadingProgress 1.5s ease-in-out forwards; }
+        @keyframes loadingProgress { 0% { width: 0%; } 100% { width: 100%; } }
+
+    </style>
+</head>
+<body>
+
+    <!-- 3D ORQA FON -->
+    <div class="glow-circle glow-red"></div>
+    <div class="glow-circle glow-gold"></div>
+
+    <!-- SPLASH SCREEN -->
+    <div id="splash-screen">
+        <div class="splash-logo"><i class="fas fa-box-open"></i></div>
+        <h2 style="font-weight: 800; letter-spacing: 1px; color: var(--text-main);">Xitoydan Buyumlar</h2>
+        <p style="font-size: 12px; color: var(--text-muted); margin-top: 5px; font-weight: 600;">PREMIUM & SECURE APP</p>
+        <div class="loader-bar"><div class="loader-fill"></div></div>
+    </div>
+
+    <!-- ========================================================
+         XAVFSIZ AVTORIZATSIYA (LOGIN & REGISTRATSIYA)
+    ========================================================= -->
+    <div id="auth-flow" class="view-section" style="padding-top: 40px;">
+        <!-- Tizimga Kirish (Login) -->
+        <div id="auth-login">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <i class="fas fa-shield-halved" style="font-size: 40px; color: var(--gold-color); margin-bottom: 15px;"></i>
+                <h1 style="font-weight: 800;" data-i18n="login_title">Tizimga Kirish</h1>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: 5px;" data-i18n="login_desc">Ma'lumotlaringiz 100% himoyalangan</p>
+            </div>
+            <div class="glass-card">
+                <div class="form-group">
+                    <label data-i18n="phone">Telefon Raqam</label>
+                    <input type="tel" id="log-phone" class="form-control" placeholder="+998 90 123 45 67">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="password">Maxfiy Parol</label>
+                    <input type="password" id="log-pass" class="form-control" placeholder="••••••••">
+                </div>
+                <button class="btn btn-gold" onclick="secureAuth('login')" style="margin-top: 25px;">
+                    <i class="fas fa-sign-in-alt"></i> <span data-i18n="btn_login">Kirish</span>
+                </button>
+                <button class="btn btn-outline" onclick="toggleAuthView('reg')" style="margin-top: 15px;">
+                    <i class="fas fa-user-plus"></i> <span data-i18n="btn_reg">Ro'yxatdan o'tish</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Ro'yxatdan o'tish (Register) -->
+        <div id="auth-register" style="display: none;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h1 style="font-weight: 800;" data-i18n="reg_title">Yangi Akkaunt</h1>
+            </div>
+            <div class="glass-card">
+                <div class="form-group">
+                    <label data-i18n="fullname">Ism Familiya</label>
+                    <input type="text" id="reg-name" class="form-control" placeholder="Masalan: Aliyev Vali">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="phone">Telefon Raqam</label>
+                    <input type="tel" id="reg-phone" class="form-control" placeholder="+998 90 123 45 67">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="new_password">Yangi Parol o'ylab toping</label>
+                    <input type="password" id="reg-pass" class="form-control" placeholder="Xavfsiz parol kiriting">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="region">Viloyat</label>
+                    <select id="reg-region" class="form-control">
+                        <option value="Toshkent">Toshkent</option>
+                        <option value="Farg'ona">Farg'ona</option>
+                        <option value="Andijon">Andijon</option>
+                        <option value="Namangan">Namangan</option>
+                        <option value="Boshqa">Boshqa viloyat</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="address">Aniq Manzil</label>
+                    <input type="text" id="reg-address" class="form-control" placeholder="Tuman, ko'cha, uy raqami">
+                </div>
+                
+                <button class="btn btn-gold" onclick="secureAuth('register')" style="margin-top: 20px;">
+                    <i class="fas fa-check-circle"></i> <span data-i18n="btn_save">Tasdiqlash</span>
+                </button>
+                <button class="btn btn-outline" onclick="toggleAuthView('login')" style="margin-top: 15px;">
+                    <i class="fas fa-arrow-left"></i> <span data-i18n="btn_back">Orqaga qaytish</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         MAIN APP CONTAINER (5 TA TAB YASHIRILGAN HOLATDA)
+    ========================================================= -->
+    <div id="main-app" style="display: none;">
+
+        <!-- 1. KATALOG (BOSH SAHIFA) -->
+        <div id="tab-catalog" class="view-section">
+            <!-- Channel Banner -->
+            <div class="glass-card" style="display: flex; align-items: center; padding: 15px; border: 1px solid var(--primary-color); background: linear-gradient(90deg, rgba(230,0,0,0.1), transparent);">
+                <div style="width: 40px; height: 40px; border-radius: 12px; background: var(--primary-color); display: flex; align-items: center; justify-content: center; font-size: 20px; margin-right: 15px;">
+                    <i class="fab fa-telegram-plane"></i>
+                </div>
+                <div style="flex: 1;">
+                    <h3 style="font-size: 14px; font-weight: 800;">@Xitoydan_Buyumlar</h3>
+                    <p style="font-size: 11px; color: var(--text-muted);">Rasmiy kanalimizga a'zo bo'ling</p>
+                </div>
+                <button class="btn-gold" style="padding: 8px 12px; font-size: 11px; border: none; border-radius: 10px; font-weight: 800;" onclick="window.open('https://t.me/xitoydan_buyumlar')">A'zo bo'lish</button>
+            </div>
+
+            <!-- Qidirish -->
+            <div class="search-bar">
+                <input type="text" class="form-control" placeholder="Mahsulot qidirish..." data-i18n-ph="search_ph">
+                <div class="search-btn"><i class="fas fa-search"></i></div>
+            </div>
+
+            <!-- Kategoriya -->
+            <div class="categories-scroll">
+                <div class="cat-chip active" data-i18n="cat_all">Barchasi</div>
+                <div class="cat-chip" data-i18n="cat_clothes">Kiyimlar</div>
+                <div class="cat-chip" data-i18n="cat_shoes">Poyabzal</div>
+                <div class="cat-chip" data-i18n="cat_tech">Texnika</div>
+                <div class="cat-chip" data-i18n="cat_home">Uy-ro'zg'or</div>
+            </div>
+
+            <!-- Mahsulotlar oynasi (Hozircha bo'sh, faqat dizayn tayyor) -->
+            <div class="empty-state">
+                <i class="fas fa-box-open"></i>
+                <h2 style="font-weight: 800; font-size: 20px; color: var(--text-main);" data-i18n="empty_catalog">Katalog hozircha bo'sh</h2>
+                <p style="font-size: 13px; margin-top: 10px;" data-i18n="empty_catalog_desc">Adminlar tomonidan yangi tovarlar yuklanishi kutilmoqda. Biz faqat sifatli mahsulotlarni joylaymiz.</p>
+            </div>
+        </div>
+
+        <!-- 2. SAVAT (CART) -->
+        <div id="tab-cart" class="view-section">
+            <h2 style="font-weight: 800; margin-bottom: 20px; font-size: 24px;"><i class="fas fa-shopping-cart" style="color: var(--gold-color);"></i> <span data-i18n="tab_cart">Savat</span></h2>
+            
+            <div class="empty-state" style="padding-top: 40px;">
+                <i class="fas fa-shopping-basket" style="font-size: 50px;"></i>
+                <h3 style="font-weight: 700; font-size: 18px; margin-top: 15px; color: var(--text-main);" data-i18n="empty_cart">Savatingiz bo'sh</h3>
+                <p style="font-size: 12px; margin-top: 8px;" data-i18n="empty_cart_desc">Katalogdan mahsulot tanlab savatga qo'shishingiz mumkin.</p>
+                <button class="btn btn-outline" style="margin-top: 20px; width: 60%; margin-left: auto; margin-right: auto; padding: 12px;" onclick="switchTab('catalog')">Katalogga o'tish</button>
+            </div>
+        </div>
+
+        <!-- 3. HAMYON (BALANS VA TO'LOVLAR) -->
+        <div id="tab-wallet" class="view-section">
+            <h2 style="font-weight: 800; margin-bottom: 20px; font-size: 24px;"><i class="fas fa-wallet" style="color: var(--gold-color);"></i> <span data-i18n="tab_wallet">Hamyon</span></h2>
+            
+            <div class="glass-card balance-card">
+                <p style="font-size: 12px; font-weight: 700; color: #fff; opacity: 0.8; text-transform: uppercase;" data-i18n="current_balance">Joriy Balans</p>
+                <h1 class="balance-amount">0 <span style="font-size: 18px; font-weight: 600;">so'm</span></h1>
+                <p style="font-size: 11px; color: var(--gold-color);"><i class="fas fa-shield-check"></i> 100% Xavfsiz hisob</p>
+            </div>
+
+            <div class="glass-card">
+                <h3 style="font-size: 15px; font-weight: 800; margin-bottom: 15px; color: var(--text-main);"><i class="fas fa-money-bill-transfer"></i> <span data-i18n="topup_title">Balansni To'ldirish</span></h3>
+                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;" data-i18n="topup_desc">Quyidagi Hamkorbank (Uzcard) raqamiga pul o'tkazing va chekni ilova qiling.</p>
+                
+                <!-- HAMKORBANK MA'LUMOTLARI -->
+                <div class="hamkor-card-box">
+                    <i class="fas fa-credit-card bank-logo"></i>
+                    <div class="hamkor-card-number" id="copy-card">5614 6818 0286 9515</div>
+                    <div class="hamkor-card-name">JORAYEV ISROILJON | HAMKORBANK</div>
+                    <button class="btn-outline" style="border: none; color: var(--gold-color); font-size: 11px; padding: 5px; margin-top: 10px; cursor: pointer;" onclick="copyCard()"><i class="fas fa-copy"></i> Raqamni nusxalash</button>
+                </div>
+
+                <div class="form-group">
+                    <label data-i18n="amount">O'tkazilgan Summa (so'm)</label>
+                    <input type="number" id="pay-amount" class="form-control" placeholder="Masalan: 120 000">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="receipt">To'lov Cheki (Skrinshot majburiy)</label>
+                    <input type="file" id="pay-file" class="form-control" style="padding: 12px;">
+                </div>
+                <button class="btn btn-gold" onclick="submitPayment()"><i class="fas fa-paper-plane"></i> <span data-i18n="btn_send_receipt">Tasdiqlash va Yuborish</span></button>
+            </div>
+        </div>
+
+        <!-- 4. PROFIL (MA'LUMOTLARNI O'ZGARTIRISH) -->
+        <div id="tab-profile" class="view-section">
+            <h2 style="font-weight: 800; margin-bottom: 20px; font-size: 24px;"><i class="fas fa-user-circle" style="color: var(--gold-color);"></i> <span data-i18n="tab_profile">Profil</span></h2>
+            
+            <div class="glass-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div>
+                        <h3 style="font-size: 18px; font-weight: 800; color: var(--gold-color);">ID: XB-0000</h3>
+                        <p style="font-size: 12px; color: var(--text-muted);">Shaxsiy identifikatsiya kodi</p>
+                    </div>
+                    <i class="fas fa-qrcode" style="font-size: 30px; color: var(--surface-border);"></i>
+                </div>
+                
+                <!-- O'zgartirish mumkin bo'lgan formalar -->
+                <div class="form-group">
+                    <label data-i18n="fullname">Ism Familiya</label>
+                    <input type="text" id="prof-name" class="form-control" value="Foydalanuvchi">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="region">Viloyat</label>
+                    <select id="prof-region" class="form-control">
+                        <option value="Toshkent">Toshkent</option>
+                        <option value="Farg'ona">Farg'ona</option>
+                        <option value="Boshqa">Boshqa viloyat</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="address">Aniq Manzil</label>
+                    <input type="text" id="prof-address" class="form-control" value="Manzil kiritilmagan">
+                </div>
+                <button class="btn btn-red" onclick="saveProfileInfo()"><i class="fas fa-save"></i> <span data-i18n="btn_update">Ma'lumotlarni Yangilash</span></button>
+            </div>
+        </div>
+
+        <!-- 5. SOZLAMALAR (SETTINGS & ADMIN) -->
+        <div id="tab-settings" class="view-section">
+            <h2 style="font-weight: 800; margin-bottom: 20px; font-size: 24px;"><i class="fas fa-cog" style="color: var(--text-muted);"></i> <span data-i18n="tab_settings">Sozlamalar</span></h2>
+            
+            <div class="glass-card" style="padding: 10px 20px;">
+                <ul class="settings-list">
+                    <!-- Tillar -->
+                    <li class="settings-item" onclick="toggleLanguage()">
+                        <div class="settings-icon"><i class="fas fa-globe"></i></div>
+                        <div class="settings-text" data-i18n="lang_setting">Tilni o'zgartirish (UZ/RU)</div>
+                        <div class="settings-chevron" id="current-lang">UZ</div>
+                    </li>
+                    <!-- Tema -->
+                    <li class="settings-item">
+                        <div class="settings-icon"><i class="fas fa-moon"></i></div>
+                        <div class="settings-text" data-i18n="theme_setting">Tungi rejim</div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="theme-toggle" checked onchange="toggleTheme()">
+                            <span class="slider"></span>
+                        </label>
+                    </li>
+                    <!-- Animatsiyalar -->
+                    <li class="settings-item">
+                        <div class="settings-icon"><i class="fas fa-bolt"></i></div>
+                        <div class="settings-text" data-i18n="anim_setting">Animatsiyalarni kamaytirish</div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" onchange="document.body.style.animation = this.checked ? 'none' : ''">
+                            <span class="slider"></span>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <h3 style="font-size: 14px; font-weight: 800; margin: 25px 0 10px 10px; color: var(--text-muted); text-transform: uppercase;" data-i18n="support_title">Qo'llab-quvvatlash</h3>
+            <div class="glass-card" style="padding: 10px 20px;">
+                <ul class="settings-list">
+                    <li class="settings-item" onclick="window.open('https://t.me/iskashax')">
+                        <div class="settings-icon" style="background: rgba(230,0,0,0.1); color: var(--primary-color);"><i class="fas fa-headset"></i></div>
+                        <div class="settings-text">1-Menejer (Isroiljon) bilan bog'lanish</div>
+                        <div class="settings-chevron"><i class="fas fa-external-link-alt"></i></div>
+                    </li>
+                    <li class="settings-item" onclick="window.open('https://t.me/partner_username')">
+                        <div class="settings-icon" style="background: rgba(230,0,0,0.1); color: var(--primary-color);"><i class="fas fa-headset"></i></div>
+                        <div class="settings-text">2-Menejer bilan bog'lanish</div>
+                        <div class="settings-chevron"><i class="fas fa-external-link-alt"></i></div>
+                    </li>
+                </ul>
+            </div>
+
+            <button class="btn btn-outline" style="border-color: var(--primary-color); color: var(--primary-color); margin-top: 20px;" onclick="logOut()">
+                <i class="fas fa-sign-out-alt"></i> Tizimdan chiqish
+            </button>
+        </div>
+
+        <!-- ========================================================
+             BOTTOM NAVIGATION BAR (5 TA TAB)
+        ========================================================= -->
+        <nav class="bottom-nav">
+            <div class="nav-item active" data-tab="catalog" onclick="switchTab('catalog')">
+                <i class="fas fa-th-large"></i>
+                <span data-i18n="nav_catalog">Katalog</span>
+            </div>
+            <div class="nav-item" data-tab="cart" onclick="switchTab('cart')">
+                <i class="fas fa-shopping-cart"></i>
+                <span data-i18n="nav_cart">Savat</span>
+            </div>
+            <div class="nav-item" data-tab="wallet" onclick="switchTab('wallet')">
+                <i class="fas fa-wallet"></i>
+                <span data-i18n="nav_wallet">Hamyon</span>
+            </div>
+            <div class="nav-item" data-tab="profile" onclick="switchTab('profile')">
+                <i class="fas fa-user"></i>
+                <span data-i18n="nav_profile">Profil</span>
+            </div>
+            <div class="nav-item" data-tab="settings" onclick="switchTab('settings')">
+                <i class="fas fa-cog"></i>
+                <span data-i18n="nav_settings">Sozlama</span>
+            </div>
+        </nav>
+
+    </div>
+
+    <!-- ========================================================
+         JAVASCRIPT LOGIC (MUKAMMAL)
+    ========================================================= -->
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.setHeaderColor('#0b0d14');
+        tg.setBackgroundColor('#0b0d14');
+
+        // --- TIZIM YUKLANISHI (SPLASH) ---
+        setTimeout(() => {
+            document.getElementById('splash-screen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('splash-screen').style.display = 'none';
+                
+                // Mantiq: Agar foydalanuvchi "ro'yxatdan o'tgan" bo'lsa, main-app ochiladi. 
+                // Hozircha simulyatsiya uchun auth-flow ochamiz:
+                document.getElementById('auth-flow').style.display = 'block';
+            }, 500);
+        }, 1800);
+
+        // --- AUTH LOGIC (LOGIN / REGISTER) ---
+        function toggleAuthView(view) {
+            if(view === 'reg') {
+                document.getElementById('auth-login').style.display = 'none';
+                document.getElementById('auth-register').style.display = 'block';
+            } else {
+                document.getElementById('auth-register').style.display = 'none';
+                document.getElementById('auth-login').style.display = 'block';
+            }
+        }
+
+        function secureAuth(type) {
+            let data = { action: type };
+            if(type === 'login') {
+                data.phone = document.getElementById('log-phone').value;
+                data.password = document.getElementById('log-pass').value;
+                if(!data.phone || !data.password) return tg.showAlert("Ma'lumotlarni to'liq kiriting!");
+            } else {
+                data.name = document.getElementById('reg-name').value;
+                data.phone = document.getElementById('reg-phone').value;
+                data.password = document.getElementById('reg-pass').value;
+                data.region = document.getElementById('reg-region').value;
+                data.address = document.getElementById('reg-address').value;
+                if(!data.name || !data.phone || !data.password || !data.address) return tg.showAlert("Barcha maydonlarni to'ldirish majburiy!");
+            }
+            
+            tg.sendData(JSON.stringify(data));
+            
+            // Xavfsiz tizimga kirish simulyatsiyasi (Aslida backenddan javob kutiladi)
+            document.getElementById('auth-flow').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            switchTab('catalog');
+        }
+
+        function logOut() {
+            document.getElementById('main-app').style.display = 'none';
+            document.getElementById('auth-flow').style.display = 'block';
+            toggleAuthView('login');
+        }
+
+        // --- TAB NAVIGATION (5 TA TAB) ---
+        function switchTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.view-section').forEach(el => {
+                if(el.id.startsWith('tab-')) el.classList.remove('active');
+            });
+            // Remove active class from nav
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            
+            // Show selected tab
+            document.getElementById('tab-' + tabId).classList.add('active');
+            document.querySelector(`.nav-item[data-tab="${tabId}"]`).classList.add('active');
+            
+            // Haptic Feedback for premium feel
+            tg.HapticFeedback.selectionChanged();
+        }
+
+        // --- PROFIL & HAMYON ---
+        function saveProfileInfo() {
+            let data = {
+                action: 'update_profile',
+                name: document.getElementById('prof-name').value,
+                region: document.getElementById('prof-region').value,
+                address: document.getElementById('prof-address').value
+            };
+            tg.sendData(JSON.stringify(data));
+            tg.showAlert("Profil ma'lumotlari muvaffaqiyatli yangilandi!");
+        }
+
+        function submitPayment() {
+            let amount = document.getElementById('pay-amount').value;
+            let file = document.getElementById('pay-file').files.length;
+            if(!amount) return tg.showAlert("Summani kiriting!");
+            if(file === 0) return tg.showAlert("Xavfsizlik qoidasi: To'lov chekini yuklash majburiy!");
+            
+            let data = { action: 'payment', amount: amount };
+            tg.sendData(JSON.stringify(data));
+            tg.showAlert("Chek qabul qilindi! Adminlar tekshirgach balansga tushadi.");
+            
+            // Reset input
+            document.getElementById('pay-amount').value = '';
+            document.getElementById('pay-file').value = '';
+        }
+
+        function copyCard() {
+            let text = "5614681802869515";
+            navigator.clipboard.writeText(text).then(() => {
+                tg.showAlert("Karta raqami nusxalandi!");
+            });
+        }
+
+        // --- SOZLAMALAR (THEME & LANG) ---
+        function toggleTheme() {
+            let isDark = document.getElementById('theme-toggle').checked;
+            if(!isDark) {
+                document.body.setAttribute('data-theme', 'light');
+                tg.setHeaderColor('#f4f5f8');
+                tg.setBackgroundColor('#f4f5f8');
+            } else {
+                document.body.removeAttribute('data-theme');
+                tg.setHeaderColor('#0b0d14');
+                tg.setBackgroundColor('#0b0d14');
+            }
+        }
+
+        // Dictionary
+        let currentLang = 'uz';
+        const dict = {
+            uz: {
+                login_title: "Tizimga Kirish", login_desc: "Ma'lumotlaringiz 100% himoyalangan",
+                phone: "Telefon Raqam", password: "Maxfiy Parol", btn_login: "Kirish", btn_reg: "Ro'yxatdan o'tish",
+                reg_title: "Yangi Akkaunt", fullname: "Ism Familiya", new_password: "Yangi Parol o'ylab toping",
+                region: "Viloyat", address: "Aniq Manzil", btn_save: "Tasdiqlash", btn_back: "Orqaga qaytish",
+                search_ph: "Mahsulot qidirish...", cat_all: "Barchasi", cat_clothes: "Kiyimlar", cat_shoes: "Poyabzal", cat_tech: "Texnika", cat_home: "Uy-ro'zg'or",
+                empty_catalog: "Katalog hozircha bo'sh", empty_catalog_desc: "Adminlar tomonidan yangi tovarlar yuklanishi kutilmoqda.",
+                tab_cart: "Savat", empty_cart: "Savatingiz bo'sh", empty_cart_desc: "Katalogdan mahsulot tanlab savatga qo'shishingiz mumkin.",
+                tab_wallet: "Hamyon", current_balance: "Joriy Balans", topup_title: "Balansni To'ldirish", topup_desc: "Quyidagi Hamkorbank (Uzcard) raqamiga pul o'tkazing va chekni ilova qiling.", amount: "O'tkazilgan Summa (so'm)", receipt: "To'lov Cheki (Skrinshot majburiy)", btn_send_receipt: "Tasdiqlash va Yuborish",
+                tab_profile: "Profil", btn_update: "Ma'lumotlarni Yangilash",
+                tab_settings: "Sozlamalar", lang_setting: "Tilni o'zgartirish (UZ/RU)", theme_setting: "Tungi rejim", anim_setting: "Animatsiyalarni kamaytirish", support_title: "Qo'llab-quvvatlash",
+                nav_catalog: "Katalog", nav_cart: "Savat", nav_wallet: "Hamyon", nav_profile: "Profil", nav_settings: "Sozlama"
+            },
+            ru: {
+                login_title: "Вход в систему", login_desc: "Ваши данные защищены на 100%",
+                phone: "Номер телефона", password: "Секретный Пароль", btn_login: "Войти", btn_reg: "Регистрация",
+                reg_title: "Новый Аккаунт", fullname: "Имя Фамилия", new_password: "Придумайте новый пароль",
+                region: "Область", address: "Точный адрес", btn_save: "Подтвердить", btn_back: "Назад",
+                search_ph: "Поиск товаров...", cat_all: "Все", cat_clothes: "Одежда", cat_shoes: "Обувь", cat_tech: "Техника", cat_home: "Для дома",
+                empty_catalog: "Каталог пока пуст", empty_catalog_desc: "Ожидается загрузка новых товаров от администраторов.",
+                tab_cart: "Корзина", empty_cart: "Ваша корзина пуста", empty_cart_desc: "Вы можете выбрать товары из каталога и добавить их в корзину.",
+                tab_wallet: "Кошелек", current_balance: "Текущий Баланс", topup_title: "Пополнить Баланс", topup_desc: "Переведите деньги на номер Hamkorbank (Uzcard) и прикрепите чек.", amount: "Сумма перевода (сум)", receipt: "Чек об оплате (Скриншот обязателен)", btn_send_receipt: "Подтвердить и Отправить",
+                tab_profile: "Профиль", btn_update: "Обновить данные",
+                tab_settings: "Настройки", lang_setting: "Сменить язык (UZ/RU)", theme_setting: "Ночной режим", anim_setting: "Уменьшить анимации", support_title: "Поддержка",
+                nav_catalog: "Каталог", nav_cart: "Корзина", nav_wallet: "Кошелек", nav_profile: "Профиль", nav_settings: "Настройки"
+            }
+        };
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'uz' ? 'ru' : 'uz';
+            document.getElementById('current-lang').innerText = currentLang.toUpperCase();
+            
+            const trans = dict[currentLang];
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                let key = el.getAttribute('data-i18n');
+                if(trans[key]) el.innerText = trans[key];
+            });
+            document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+                let key = el.getAttribute('data-i18n-ph');
+                if(trans[key]) el.placeholder = trans[key];
+            });
+        }
+    </script>
+</body>
+</html>
