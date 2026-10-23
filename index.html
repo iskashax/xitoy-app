@@ -6,105 +6,127 @@
     <title>Xitoydan Buyumlar</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #000000);
-            padding: 20px;
-            margin: 0;
-        }
-        h2 { text-align: center; }
-        .input-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid var(--tg-theme-hint-color, #ccc);
-            border-radius: 8px;
-            box-sizing: border-box;
-            font-size: 16px;
-        }
-        .btn {
-            width: 100%;
-            padding: 12px;
-            background-color: var(--tg-theme-button-color, #2481cc);
-            color: var(--tg-theme-button-text-color, #ffffff);
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            margin-top: 10px;
-        }
-        .result {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f0f0f0;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 18px;
-            color: #333;
-        }
+        body { font-family: sans-serif; background: #f4f4f5; margin: 0; padding: 10px; }
+        .header { text-align: center; font-size: 22px; font-weight: bold; margin-bottom: 15px; color: #333; }
+        
+        /* Витрина дизайни */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .card { background: #fff; border-radius: 12px; padding: 10px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .card img { width: 100%; height: 140px; object-fit: cover; border-radius: 8px; }
+        .title { font-size: 14px; margin: 10px 0 5px; font-weight: bold; color: #222; }
+        .price { color: #e53935; font-weight: bold; font-size: 16px; margin-bottom: 10px; }
+        .btn-buy { background: #2481cc; color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        
+        /* Калькулятор ойнаси (бошида яширин туради) */
+        #calculator { display: none; background: #fff; padding: 20px; border-radius: 12px; margin-top: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        .btn-calc { background: #4caf50; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; margin-top: 10px; font-size: 16px; }
+        .btn-back { background: #eee; color: #333; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <h2>📦 Карго Калькулятори</h2>
-
-    <div class="input-group">
-        <label>Товарнинг Хитойдаги нархи (Юань - ¥):</label>
-        <input type="number" id="price" placeholder="Масалан: 50">
+    <!-- АСОСИЙ ВИТРИНА -->
+    <div id="storefront">
+        <div class="header">🔥 Хит Товарлар</div>
+        <div class="grid">
+            <!-- 1-Товар -->
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300" alt="Krossovka">
+                <div class="title">Nike Air Max (Реплика)</div>
+                <div class="price">¥ 120</div>
+                <button class="btn-buy" onclick="openCalc('Nike Air Max (Реплика)', 120)">Олиш</button>
+            </div>
+            <!-- 2-Товар -->
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300" alt="Soat">
+                <div class="title">Smart Watch X8</div>
+                <div class="price">¥ 85</div>
+                <button class="btn-buy" onclick="openCalc('Smart Watch X8', 85)">Олиш</button>
+            </div>
+            <!-- 3-Товар -->
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1584916201218-f4242ceb4809?w=300" alt="Sumka">
+                <div class="title">Аёллар сумкаси</div>
+                <div class="price">¥ 65</div>
+                <button class="btn-buy" onclick="openCalc('Аёллар сумкаси', 65)">Олиш</button>
+            </div>
+            <!-- 4-Товар -->
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=300" alt="Quloqchin">
+                <div class="title">AirPods Pro 2 (Копия)</div>
+                <div class="price">¥ 90</div>
+                <button class="btn-buy" onclick="openCalc('AirPods Pro 2 (Копия)', 90)">Олиш</button>
+            </div>
+        </div>
     </div>
 
-    <div class="input-group">
-        <label>Оғирлиги қандай ўлчанади?</label>
-        <select id="weightType">
-            <option value="gram">Грамм (г)</option>
-            <option value="jin">Жин (斤 - 500г)</option>
-        </select>
-    </div>
-
-    <div class="input-group">
-        <label>Оғирлик миқдори:</label>
-        <input type="number" id="weight" placeholder="Масалан: 300">
-    </div>
-
-    <button class="btn" onclick="calculate()">Ҳисоблаш</button>
-
-    <div class="result" id="resultBox" style="display: none;">
-        Умумий нарх: <b id="totalSum">0</b> сўм
+    <!-- ТОВАР ИЧИДАГИ КАЛЬКУЛЯТОР -->
+    <div id="calculator">
+        <h3 id="calc-title" style="margin-top: 0;">Товар номи</h3>
+        <p style="font-size: 18px;">Нархи: <b id="calc-price" style="color:#e53935;">0</b> <b>Юань</b></p>
+        
+        <label style="font-weight:bold; color:#555;">Карго учун тахминий вазни (Грамм):</label>
+        <input type="number" id="weight" placeholder="Масалан: 450">
+        
+        <button class="btn-calc" onclick="calculateTotal()">Ҳисоблаш ва Кўриш</button>
+        <button class="btn-back" onclick="closeCalc()">🔙 Ортга қайтиш</button>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
-        tg.expand(); // Ойнани тўлиқ очиш
+        tg.expand();
 
-        function calculate() {
-            let priceYuan = parseFloat(document.getElementById("price").value) || 0;
-            let weightType = document.getElementById("weightType").value;
+        let currentProduct = "";
+        let currentPrice = 0;
+        let finalData = {};
+
+        // Товар тугмаси босилганда
+        function openCalc(name, price) {
+            currentProduct = name;
+            currentPrice = price;
+            
+            document.getElementById('storefront').style.display = 'none';
+            document.getElementById('calculator').style.display = 'block';
+            
+            document.getElementById('calc-title').innerText = name;
+            document.getElementById('calc-price').innerText = price;
+            tg.MainButton.hide();
+        }
+
+        // Ортга қайтиш
+        function closeCalc() {
+            document.getElementById('storefront').style.display = 'block';
+            document.getElementById('calculator').style.display = 'none';
+            tg.MainButton.hide();
+        }
+
+        // ЖАМИ СУММАНИ ХИСОБЛАШ
+        function calculateTotal() {
             let weightVal = parseFloat(document.getElementById("weight").value) || 0;
+            let yuanToSum = 2000; 
+            let cargoPricePerKg = 72000; 
+            
+            let weightInKg = weightVal / 1000; // Граммни КГ га ўгирамиз
+            let totalSum = (currentPrice * yuanToSum) + (weightInKg * cargoPricePerKg);
 
-            // Бу ерда курсни ва 1 кг карго нархини ўзгартирсангиз бўлади
-            let yuanToSum = 1800; // 1 Юань = 1800 сўм
-            let cargoPricePerKg = 70000; // 1 кг = 70,000 сўм
+            // Ботга жўнатиладиган тайёр маълумот
+            finalData = { 
+                productName: currentProduct,
+                priceYuan: currentPrice, 
+                weightVal: weightVal, 
+                totalSum: totalSum 
+            };
 
-            let weightInKg = 0;
-            if (weightType === "gram") {
-                weightInKg = weightVal / 1000;
-            } else if (weightType === "jin") {
-                weightInKg = weightVal * 0.5; // 1 жин = 500 грамм
-            }
-
-            let itemPriceSum = priceYuan * yuanToSum;
-            let cargoPriceSum = weightInKg * cargoPricePerKg;
-            let totalSum = itemPriceSum + cargoPriceSum;
-
-            document.getElementById("resultBox").style.display = "block";
-            document.getElementById("totalSum").innerText = totalSum.toLocaleString("uz-UZ");
-
-            // Пастда Телеграмнинг асосий тугмасини чиқариш
             tg.MainButton.text = "БУЮРТМА БЕРИШ (" + totalSum.toLocaleString("uz-UZ") + " сўм)";
             tg.MainButton.show();
         }
+
+        // Телеграмдаги Асосий тугма босилганда
+        tg.MainButton.onClick(function() {
+            tg.sendData(JSON.stringify(finalData));
+            tg.close();
+        });
     </script>
 </body>
 </html>
