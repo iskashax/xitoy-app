@@ -210,6 +210,17 @@
         .cart-row .cvar { font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .cart-row .cimg { width: 64px; height: 64px; }
         .cat-top { justify-content: space-between; align-items: center; }
+        .stk-grp { background: var(--input-bg); border-radius: 12px; margin-top: 8px; overflow: hidden; }
+        .stk-h { display: flex; align-items: center; gap: 8px; padding: 9px 10px; cursor: pointer; }
+        .stk-chev { color: var(--text-muted); font-size: 11px; transition: transform .2s; }
+        .stk-grp.open .stk-chev { transform: rotate(90deg); }
+        .stk-grp .stk-grid { display: none; padding: 0 10px 10px; }
+        .stk-pre { font-size: 11px; color: var(--text-muted); padding: 0 10px 6px; } .stk-grp:not(.open) .stk-pre { display: none; }
+        .stk-grp.open .stk-grid { display: grid; }
+        .stk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        .stk-cell { display: flex; align-items: center; gap: 6px; background: var(--surface-color); border: 1px solid var(--surface-border); border-radius: 10px; padding: 4px 4px 4px 9px; min-width: 0; }
+        .stk-cell span { flex: 1; min-width: 0; font-size: 12px; line-height: 1.25; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; word-break: break-word; }
+        .stk-cell input { width: 52px; flex: none; padding: 6px; margin: 0; font-size: 13px; text-align: center; }
         .pr-wrap { border-bottom: 1px solid var(--surface-border); }
         .pr { display: flex; align-items: center; gap: 10px; padding: 10px 0; cursor: pointer; }
         .pr .avatar { width: 38px; height: 38px; font-size: 15px; flex: none; }
@@ -2025,14 +2036,19 @@
             let h = `<p style="font-size:12px;color:var(--gold-color);margin-bottom:8px">Rasmlar: <b>${pfCount()}</b> / 15</p>`
                 + PF_KEYS.map((k, ki) => `<div class="form-group"><label>${k === '__g' ? 'Umumiy rasmlar' : 'Rang: ' + esc(k) + ' rasmlari'}</label><div class="thumbs">${th(k, ki)}<div class="th add" onclick="pfPick(${ki})">+</div></div></div>`).join('');
             const vs = []; (colors.length ? colors : ['']).forEach(c => (sizes.length ? sizes : ['']).forEach(s => vs.push([c, s])));
-            const row = (c, s, short) => { const k = c + '|' + s, t = (short ? s : [c, s].filter(Boolean).join(' / ')) || 'Umumiy'; return `<div class="hrow" style="gap:8px"><span class="vk-l" title="${esc(t)}" onclick="this.classList.toggle('full')">${esc(t)}</span><input type="number" min="0" class="form-control" style="width:84px;padding:8px;margin:0;flex:none" data-vk="${esc(k)}" value="${esc(PF.stock[k] ?? '')}" oninput="PF.stock[this.dataset.vk]=this.value"></div>`; };
+            const pre = (() => { const w = sizes.length > 3 && sizes[0].split(' ')[0]; return w && w.length > 2 && sizes.every(x => x.startsWith(w + ' ')) ? w + ' ' : ''; })();   // "iPhone " hammasida bo'lsa — qisqartiramiz
+            const cell = (c, s, short) => { const k = c + '|' + s, t = (short ? (pre ? s.slice(pre.length) : s) : [c, s].filter(Boolean).join(' / ')) || 'Umumiy'; return `<div class="stk-cell" data-s="${esc(normS(short ? s : t))}"><span title="${esc(t)}">${esc(t)}</span><input type="number" min="0" inputmode="numeric" class="form-control" data-vk="${esc(k)}" data-c="${esc(c)}" value="${esc(PF.stock[k] ?? '')}" placeholder="∞" oninput="PF.stock[this.dataset.vk]=this.value;stkSum(this.dataset.c)"></div>`; };
             const grp = colors.length && sizes.length > 1;
             h += `<label class="lbl">OMBORDAGI SONI (bo'sh qoldirsangiz — cheksiz)</label>`
                 + (vs.length > 1 ? `<div class="hrow" style="gap:8px;flex-wrap:wrap"><span style="flex:1;font-size:12.5px;font-weight:700;min-width:120px">Hammasiga bir xil son:</span><input type="number" min="0" id="pf-fill-all" class="form-control" style="width:84px;padding:8px;margin:0" placeholder="10"><button class="btn btn-gold" style="width:auto;padding:8px 14px;font-size:12px" onclick="pfFill(null)">Qo'yish</button></div>` : '')
-                + (grp ? colors.map(c => `<div class="hrow" style="gap:8px;background:var(--input-bg);border-radius:12px;padding:8px 10px;margin-top:10px"><span style="flex:1;font-size:12.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">🎨 <b>${esc(c)}</b> — hammasiga:</span><input type="number" min="0" id="pf-fill-${PF_KEYS.indexOf(c)}" class="form-control" style="width:70px;padding:7px;margin:0"><button class="btn btn-outline" style="width:auto;padding:7px 12px;font-size:12px" onclick="pfFill(${ja(c)})">✓</button></div>` + sizes.map(s => row(c, s, true)).join('')).join('')
-                    : vs.map(([c, s]) => row(c, s)).join(''))
+                + (vs.length > 8 ? `<input id="stk-q" class="form-control" style="margin:10px 0 0;padding:10px 12px" placeholder="🔍 Model / razmer qidirish (masalan: 15 Pro)" oninput="stkFilter()"><div id="stk-qn" style="font-size:11px;color:var(--text-muted);margin-top:4px"></div>` : '')
+                + (grp ? colors.map(c => { const ci = PF_KEYS.indexOf(c); return `<div class="stk-grp ${STK_OPEN.has(c) ? 'open' : ''}" data-c="${esc(c)}">
+                    <div class="stk-h" onclick="if(!event.target.closest('input,button'))stkToggle(this.parentNode)"><i class="fas fa-chevron-right stk-chev"></i><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">🎨 ${esc(c)}</div><div class="stk-sum" style="font-size:11px;color:var(--text-muted)"></div></div>
+                    <input type="number" min="0" id="pf-fill-${ci}" class="form-control" style="width:62px;padding:7px;margin:0" placeholder="son"><button class="btn btn-outline" style="width:auto;padding:7px 11px;font-size:12px;margin:0" onclick="pfFill(${ja(c)})">✓</button></div>
+                    ${pre ? `<div class="stk-pre">${esc(pre.trim())} modellari:</div>` : ''}<div class="stk-grid">${sizes.map(s => cell(c, s, true)).join('')}</div></div>`; }).join('')
+                    : `<div class="stk-grid" style="margin-top:10px">${vs.map(([c, s]) => cell(c, s)).join('')}</div>`)
                 + (vs.length > 1 ? `<p style="font-size:11.5px;color:var(--text-muted);margin-top:8px;cursor:pointer" onclick="pfClearStock()">🧹 Hammasini tozalash (soni cheksiz bo'ladi)</p>` : '');
-            $('pf-body').innerHTML = h;
+            $('pf-body').innerHTML = h; colors.forEach(stkSum);
         }
         function pfPick(ki) {
             const k = PF_KEYS[ki], inp = fileInput('image/*', true);
@@ -3142,9 +3158,23 @@
             const colors = pfColors(), sizes = pfSizes();
             (color === null ? (colors.length ? colors : ['']) : [color]).forEach(c => (sizes.length ? sizes : ['']).forEach(s => PF.stock[c + '|' + s] = v));
             document.querySelectorAll('#pf-body input[data-vk]').forEach(i => i.value = PF.stock[i.dataset.vk] ?? '');
-            toast("Qo'yildi ✓");
+            pfColors().forEach(stkSum); toast("Qo'yildi ✓");
         }
-        function pfClearStock() { PF.stock = {}; document.querySelectorAll('#pf-body input[data-vk]').forEach(i => i.value = ''); toast('Tozalandi — soni cheksiz'); }
+        // ---- ombor: ixcham guruhlar, qidiruv, yig'indi
+        const STK_OPEN = new Set();
+        function stkToggle(g) { const on = !g.classList.contains('open'); g.classList.toggle('open', on); on ? STK_OPEN.add(g.dataset.c) : STK_OPEN.delete(g.dataset.c); }
+        function stkSum(c) {
+            const g = [...document.querySelectorAll('#pf-body .stk-grp')].find(x => x.dataset.c === c); if (!g) return;
+            const vals = [...g.querySelectorAll('input[data-vk]')].map(i => i.value), set = vals.filter(v => v !== ''), tot = set.reduce((t, v) => t + (+v || 0), 0), zero = set.filter(v => +v === 0).length;
+            g.querySelector('.stk-sum').innerHTML = `${vals.length} ta · ${set.length ? `jami <b style="color:var(--text-main)">${fmt(tot)}</b> dona` : 'cheksiz'}${set.length && set.length < vals.length ? ` · ${vals.length - set.length} tasi cheksiz` : ''}${zero ? ` · <span style="color:var(--primary-color)">${zero} tasi tugagan</span>` : ''}`;
+        }
+        function stkFilter() {
+            const q = normS($('stk-q').value); let n = 0;
+            document.querySelectorAll('#pf-body .stk-cell').forEach(el => { const ok = !q || q.split(' ').every(w => el.dataset.s.includes(w)); el.style.display = ok ? '' : 'none'; if (ok) n++; });
+            document.querySelectorAll('#pf-body .stk-grp').forEach(g => { const any = [...g.querySelectorAll('.stk-cell')].some(x => x.style.display !== 'none'); g.style.display = any ? '' : 'none'; g.classList.toggle('open', q ? any : STK_OPEN.has(g.dataset.c)); });
+            $('stk-qn').innerText = q ? `${n} ta topildi` : '';
+        }
+        function pfClearStock() { PF.stock = {}; document.querySelectorAll('#pf-body input[data-vk]').forEach(i => i.value = ''); pfColors().forEach(stkSum); toast('Tozalandi — soni cheksiz'); }
         // ---- mahsulot tafsilotlari (forma)
         const SPEC_TPL = { 'Telefon aksessuarlari': ['Mos brend', 'Mos modellar', 'Material', 'Dizayn', 'Uslub'], 'Kiyimlar': ['Material', 'Mavsum', 'Uslub', 'Kimlar uchun', 'Yoqa turi'],
             'Poyabzal': ['Material', 'Taglik', 'Mavsum', 'Kimlar uchun'], 'Sumkalar': ['Material', "O'lchami", 'Bo\'limlar soni', 'Yopilishi'], 'Texnika': ['Brend', 'Model', 'Quvvat', 'Batareya', 'Kafolat'] };
