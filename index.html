@@ -99,6 +99,7 @@
         input:checked + .slider:before { transform: translateX(24px); background-color: #000; }
 
         .bottom-nav { position: fixed; bottom: 15px; left: 5%; width: 90%; background: var(--nav-bg); backdrop-filter: blur(20px); border: 1px solid var(--surface-border); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; padding: 8px 5px; z-index: 1000; box-shadow: 0 10px 40px rgba(0,0,0,0.6); transition: 0.3s; }
+        body.kb-open .bottom-nav, body.kb-open #calc-fab { display: none !important; }   /* klaviatura ochiq — pastki menyu yozish joyini to'smasin */
         .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 20%; color: var(--text-muted); cursor: pointer; transition: 0.3s; position: relative; padding: 8px 0; }
         .nav-item i { font-size: 20px; margin-bottom: 4px; transition: 0.3s; }
         .nav-item span { font-size: 10px; font-weight: 700; transition: 0.3s; }
@@ -3068,6 +3069,15 @@
                     + '<p style="font-size:10.5px;color:var(--text-muted);margin-top:10px">Umumiy sonda har bir kishi bir marta sanaladi — qayta ko\'rsa yoki bossa qo\'shilmaydi. Ega va adminlar hisobga olinmaydi. Tafsilotdagi «marta» — o\'sha kishining o\'zi necha marta ko\'rgani (6 soatda 1 marta hisoblanadi).</p>';
             } catch (e) { tg.showAlert(e.message); }
         }
+        // ===== KLAVIATURA OCHIQ: pastki menyu yashiriladi =====
+        (() => {
+            const isField = el => el && (el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && !/^(checkbox|radio|button|submit|file|range|color)$/i.test(el.type)) || el.isContentEditable);
+            let H = innerHeight, T = null;
+            const upd = () => { const kb = isField(document.activeElement) || (window.visualViewport ? visualViewport.height < H * 0.75 : innerHeight < H * 0.75); document.body.classList.toggle('kb-open', !!kb); };
+            document.addEventListener('focusin', e => { if (isField(e.target)) { clearTimeout(T); document.body.classList.add('kb-open'); } });
+            document.addEventListener('focusout', () => { clearTimeout(T); T = setTimeout(upd, 150); });
+            (window.visualViewport || window).addEventListener('resize', () => { const h = window.visualViewport ? visualViewport.height : innerHeight; if (h > H) H = h; clearTimeout(T); T = setTimeout(upd, 100); });
+        })();
         // ===== MAHSULOTLAR ORASIDA ORQAGA QAYTISH =====
         let PROD_STACK = [], PROD_NAV = false;
         function prodGo(fn) { PROD_NAV = true; try { fn(); } finally { PROD_NAV = false; } }
