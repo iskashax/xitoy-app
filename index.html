@@ -1337,8 +1337,8 @@
             if (!isGuest()) return true;
             AUTH_NEXT = next || null;
             document.querySelectorAll('.modal.show').forEach(m => m.classList.remove('show'));
-            $('auth-reason').innerHTML = `🔐 ${esc(reason || 'Davom etish uchun')} — ro'yxatdan o'ting yoki hisobingizga kiring. Bu bir daqiqa oladi, savatingiz saqlanib qoladi.`;
-            $('auth-guest-bar').style.display = 'block'; toggleAuthView('reg');
+            $('auth-reason').innerHTML = `🔐 ${esc(reason || 'Davom etish uchun')} — hisobingizga kiring yoki ro'yxatdan o'ting. Bu bir daqiqa oladi, savatingiz saqlanib qoladi.`;
+            $('auth-guest-bar').style.display = 'block'; toggleAuthView('login');   // asosiy kirish oynasi; yangi mijoz u yerdan «Ro'yxatdan o'tish» ga o'tadi
             $('main-app').style.display = 'none'; $('auth-flow').style.display = 'block'; window.scrollTo(0, 0); calcVisible();
             return false;
         }
