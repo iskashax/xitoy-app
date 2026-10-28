@@ -210,6 +210,13 @@
         .cart-row .cvar { font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .cart-row .cimg { width: 64px; height: 64px; }
         .cat-top { justify-content: space-between; align-items: center; }
+        .sim-strip { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; margin: 0 -20px; padding: 0 20px 4px; scrollbar-width: none; }
+        .sim-strip::-webkit-scrollbar { display: none; }
+        .sim-card { flex: 0 0 128px; scroll-snap-align: start; cursor: pointer; }
+        .sim-strip { padding: 0 0 4px !important; scroll-padding-left: 20px; } .sim-card:first-child { margin-left: 20px; } .sim-card:last-child { margin-right: 20px; }
+        .sim-img { width: 128px; height: 128px; border-radius: 14px; overflow: hidden; background: var(--input-bg); display: flex; align-items: center; justify-content: center; color: var(--gold-color); font-size: 28px; }
+        .sim-img img { width: 100%; height: 100%; object-fit: cover; }
+        .sim-name { font-size: 12px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: var(--text-main); }
         .stk-grp { background: var(--input-bg); border-radius: 12px; margin-top: 8px; overflow: hidden; }
         .stk-h { display: flex; align-items: center; gap: 8px; padding: 9px 10px; cursor: pointer; }
         .stk-chev { color: var(--text-muted); font-size: 11px; transition: transform .2s; }
@@ -438,6 +445,7 @@
             </div>
             <div class="search-bar"><input type="text" id="search-input" oninput="renderCatalog()" class="form-control" placeholder="Mahsulot qidirish..."><div class="search-btn"><i class="fas fa-search"></i></div></div>
             <div class="categories-scroll cat-mini" id="cat-chips"><div class="cat-chip active" onclick="filterCatalog(this, 'Barchasi')"><i class="fas fa-border-all"></i> Barchasi</div></div>
+            <div id="search-note" style="display:none;font-size:12.5px;color:var(--gold-color);margin:0 4px 10px"></div>
             <div id="product-grid" class="pgrid"></div>
             <div class="empty-state" id="catalog-empty">
                 <i class="fas fa-box-open"></i>
@@ -1154,7 +1162,7 @@
             "Og'irlikni kiriting": ["Введите вес", "Enter weight"], "Yopish": ["Закрыть", "Close"], "AKSIYA": ["АКЦИЯ", "SALE"], "YANGI": ["НОВИНКА", "NEW"], "🔥 Ko'p sotilgan": ["🔥 Хит продаж", "🔥 Bestseller"], "Aksiya": ["Акция", "Sale"],
             "🏷 Aksiya bo'yicha tejadingiz:": ["🏷 Экономия по акции:", "🏷 You save:"], "✨ Yangi": ["✨ Новинка", "✨ New"], "Hozircha aksiya yo'q": ["Пока нет акций", "No sales yet"], "TUGADI": ["НЕТ В НАЛИЧИИ", "SOLD OUT"], "MENING SO'ROVLARIM": ["МОИ ЗАПРОСЫ", "MY REQUESTS"], "yopish": ["закрыть", "close"],
             "XARIDORLAR SHARHLARI": ["ОТЗЫВЫ ПОКУПАТЕЛЕЙ", "CUSTOMER REVIEWS"], "Ko'rish ›": ["Смотреть ›", "View ›"], "⭐ Mijozlar sharhlari": ["⭐ Отзывы покупателей", "⭐ Customer reviews"],
-            "Hozircha sharhlar yo'q": ["Пока нет отзывов", "No reviews yet"], "Xaridorlar fikrlari": ["Отзывы покупателей", "Customer reviews"], "🔔 Bildirishnomalar": ["🔔 Уведомления", "🔔 Notifications"], "Hozircha bildirishnoma yo'q": ["Пока нет уведомлений", "No notifications yet"], "O'zgarishni saqlash": ["Сохранить изменения", "Save changes"], "✎ o'zgartirish": ["✎ изменить", "✎ edit"], "Bu variant tugadi": ["Этот вариант закончился", "This variant is sold out"], "Sizdan: ": ["С вас: ", "You pay: "], "Ulashish": ["Поделиться", "Share"], "👥 Kim ko'rdi ›": ["👥 Кто видел ›", "👥 Who saw ›"], "👥 Kim ko'rdi": ["👥 Кто видел", "👥 Who saw"], "👆 Bosganlar": ["👆 Нажавшие", "👆 Clicked"], "👁 Faqat ko'rganlar": ["👁 Только видели", "👁 Viewed only"], "👆 Bosgan": ["👆 Нажал", "👆 Clicked"], "👁 Ko'rgan": ["👁 Видел", "👁 Viewed"], "Katalogga qaytish": ["Вернуться в каталог", "Back to catalog"], "Kirish / Ro'yxatdan o'tish": ["Вход / Регистрация", "Log in / Sign up"], "Ro'yxatdan o'tgach hisoblanadi": ["Рассчитается после регистрации", "Calculated after sign-up"], "🗺 BTS punktini tanlang": ["🗺 Выберите пункт BTS", "🗺 Choose a BTS point"], "Mening joyim": ["Моё местоположение", "My location"], "Xaritadan BTS punktini tanlash": ["Выбрать пункт BTS на карте", "Pick BTS point on map"], "ENG YAQIN PUNKTLAR": ["БЛИЖАЙШИЕ ПУНКТЫ", "NEAREST POINTS"], "PIN-kodni unutdingizmi?": ["Забыли PIN-код?", "Forgot PIN?"], "🛒 Xarid va kargo to'lovlarini ham PIN bilan tasdiqlash": ["🛒 Подтверждать покупки и оплату карго PIN-кодом", "🛒 Confirm purchases and cargo payments with PIN"], "(ixtiyoriy)": ["(по желанию)", "(optional)"], "Hamyon PIN-kodi": ["PIN-код кошелька", "Wallet PIN"], "Hamyon faqat PIN yoki barmoq izi / Face ID bilan ochiladi — bu majburiy. Telefoningiz boshqa odam qo'liga tushsa ham hamyoningizga kira olmaydi. Xohlasangiz, xarid va kargo to'lovlarini ham PIN bilan tasdiqlashni yoqishingiz mumkin.": ["Кошелёк открывается только по PIN или отпечатку / Face ID — это обязательно. Даже если телефон попадёт в чужие руки, в кошелёк не войти. По желанию можно включить подтверждение PIN-кодом и для покупок и оплаты карго.", "The wallet opens only with PIN or fingerprint / Face ID — this is mandatory. Even if someone else gets your phone, they cannot open your wallet. Optionally, you can also require PIN for purchases and cargo payments."], "Hamyonni (va yoqilgan bo'lsa xaridlarni) PIN o'rniga barmoq izi yoki yuz bilan ochasiz. Ishlamasa, PIN so'raladi.": ["Открывайте кошелёк (и подтверждайте покупки, если включено) отпечатком или лицом вместо PIN. Если не сработает — будет запрошен PIN.", "Open the wallet (and confirm purchases, if enabled) with fingerprint or face instead of PIN. If it fails, PIN is requested."], "PIN-kodni unutdingizmi? — yangisini o'rnatish": ["Забыли PIN? — установить новый", "Forgot PIN? — set a new one"], "🛍 O'xshash mahsulotlar": ["🛍 Похожие товары", "🛍 Similar products"],
+            "Hozircha sharhlar yo'q": ["Пока нет отзывов", "No reviews yet"], "Xaridorlar fikrlari": ["Отзывы покупателей", "Customer reviews"], "🔔 Bildirishnomalar": ["🔔 Уведомления", "🔔 Notifications"], "Hozircha bildirishnoma yo'q": ["Пока нет уведомлений", "No notifications yet"], "O'zgarishni saqlash": ["Сохранить изменения", "Save changes"], "✎ o'zgartirish": ["✎ изменить", "✎ edit"], "Bu variant tugadi": ["Этот вариант закончился", "This variant is sold out"], "Sizdan: ": ["С вас: ", "You pay: "], "Ulashish": ["Поделиться", "Share"], "🔥 Sizga yoqishi mumkin": ["🔥 Вам может понравиться", "🔥 You may like"], "🛍 O'xshash va sizga yoqishi mumkin": ["🛍 Похожие и рекомендуемые", "🛍 Similar and recommended"], "Aynan shunday mahsulot topilmadi — o'xshashlari:": ["Точно такого товара нет — похожие:", "No exact match — similar items:"], "👥 Kim ko'rdi ›": ["👥 Кто видел ›", "👥 Who saw ›"], "👥 Kim ko'rdi": ["👥 Кто видел", "👥 Who saw"], "👆 Bosganlar": ["👆 Нажавшие", "👆 Clicked"], "👁 Faqat ko'rganlar": ["👁 Только видели", "👁 Viewed only"], "👆 Bosgan": ["👆 Нажал", "👆 Clicked"], "👁 Ko'rgan": ["👁 Видел", "👁 Viewed"], "Katalogga qaytish": ["Вернуться в каталог", "Back to catalog"], "Kirish / Ro'yxatdan o'tish": ["Вход / Регистрация", "Log in / Sign up"], "Ro'yxatdan o'tgach hisoblanadi": ["Рассчитается после регистрации", "Calculated after sign-up"], "🗺 BTS punktini tanlang": ["🗺 Выберите пункт BTS", "🗺 Choose a BTS point"], "Mening joyim": ["Моё местоположение", "My location"], "Xaritadan BTS punktini tanlash": ["Выбрать пункт BTS на карте", "Pick BTS point on map"], "ENG YAQIN PUNKTLAR": ["БЛИЖАЙШИЕ ПУНКТЫ", "NEAREST POINTS"], "PIN-kodni unutdingizmi?": ["Забыли PIN-код?", "Forgot PIN?"], "🛒 Xarid va kargo to'lovlarini ham PIN bilan tasdiqlash": ["🛒 Подтверждать покупки и оплату карго PIN-кодом", "🛒 Confirm purchases and cargo payments with PIN"], "(ixtiyoriy)": ["(по желанию)", "(optional)"], "Hamyon PIN-kodi": ["PIN-код кошелька", "Wallet PIN"], "Hamyon faqat PIN yoki barmoq izi / Face ID bilan ochiladi — bu majburiy. Telefoningiz boshqa odam qo'liga tushsa ham hamyoningizga kira olmaydi. Xohlasangiz, xarid va kargo to'lovlarini ham PIN bilan tasdiqlashni yoqishingiz mumkin.": ["Кошелёк открывается только по PIN или отпечатку / Face ID — это обязательно. Даже если телефон попадёт в чужие руки, в кошелёк не войти. По желанию можно включить подтверждение PIN-кодом и для покупок и оплаты карго.", "The wallet opens only with PIN or fingerprint / Face ID — this is mandatory. Even if someone else gets your phone, they cannot open your wallet. Optionally, you can also require PIN for purchases and cargo payments."], "Hamyonni (va yoqilgan bo'lsa xaridlarni) PIN o'rniga barmoq izi yoki yuz bilan ochasiz. Ishlamasa, PIN so'raladi.": ["Открывайте кошелёк (и подтверждайте покупки, если включено) отпечатком или лицом вместо PIN. Если не сработает — будет запрошен PIN.", "Open the wallet (and confirm purchases, if enabled) with fingerprint or face instead of PIN. If it fails, PIN is requested."], "PIN-kodni unutdingizmi? — yangisini o'rnatish": ["Забыли PIN? — установить новый", "Forgot PIN? — set a new one"], "🛍 O'xshash mahsulotlar": ["🛍 Похожие товары", "🛍 Similar products"],
             "Hozircha sharh yo'q": ["Пока нет отзывов", "No reviews yet"], "Haqiqiy xaridorlar sharhlari": ["Отзывы реальных покупателей", "Reviews from real buyers"], "Do'kon javobi:": ["Ответ магазина:", "Shop reply:"],
             // so'rov holatlari
             "Yangi": ["Новый", "New"], "Narx berildi": ["Цена указана", "Price offered"], "Buyurtma qilindi": ["Заказано", "Ordered"], "Topilmadi": ["Не найдено", "Not found"], "Yopildi": ["Закрыт", "Closed"],
@@ -1441,8 +1449,14 @@
         function renderCatalog() {
             renderCats();
             const q = normS($('search-input').value);
-            let l = PRODUCTS.filter(p => (CUR_CAT === 'Barchasi' || p.cat === CUR_CAT || (CUR_CAT === '__sale' && p.old_price))).map(p => [p, searchScore(p, q)]).filter(x => x[1] > 0);
+            const inCat = p => CUR_CAT === 'Barchasi' || p.cat === CUR_CAT || (CUR_CAT === '__sale' && p.old_price);
+            let note = '', l = PRODUCTS.filter(p => q || inCat(p)).map(p => [p, searchScore(p, q)]).filter(x => x[1] > 0);   // qidirilganda — barcha bo'limlardan
+            if (q && !l.length) {   // hamma so'z topilmasa — kamida bittasi mos kelganlarini taklif qilamiz
+                l = PRODUCTS.map(p => { if (!p.__sw) searchScore(p, 'x'); return [p, q.split(' ').reduce((t, w) => t + (w ? wordHit(w, p.__sw) : 0), 0)]; }).filter(x => x[1] > 0);
+                if (l.length) note = "Aynan shunday mahsulot topilmadi — o'xshashlari:";
+            }
             if (q) l.sort((a, b) => b[1] - a[1]); l = l.map(x => x[0]);
+            if ($('search-note')) { $('search-note').innerText = note; $('search-note').style.display = note ? 'block' : 'none'; }
             const hot = hotLimit();
             $('product-grid').innerHTML = l.map(p => pcard(p, hot)).join('');
             $('catalog-empty').style.display = l.length ? 'none' : 'block';
@@ -1480,7 +1494,7 @@
                 <p style="font-size:11px;color:var(--text-muted);line-height:1.5;margin-bottom:8px">⚠️ Kargo haqi narxga kirmagan. Mahsulot O'zbekistonga kelganda chiqqan og'irlik (kg) bo'yicha alohida to'lanadi, to'lov tasdiqlangach BTS orqali jo'natamiz. Kargo haqi mahsulot kelganidan keyin ${ME ? ME.cfg.cargo_days : 10} kun ichida to'lanmasa, mahsulot musodara qilinadi va to'langan pul qaytarilmaydi.</p>
                 ${btsNote(p.weight)}
                 <div style="display:flex;gap:10px;margin-top:10px;align-items:center">${EDIT_CI !== null && CART[EDIT_CI] ? `<button class="btn btn-gold" style="margin:0;flex:1" ${out ? 'disabled' : ''} onclick="saveCartEdit()"><i class="fas fa-check"></i> ${out ? 'Bu variant tugadi' : "O'zgarishni saqlash"}</button>` : `<button class="btn btn-gold" style="margin:0;flex:1" ${out ? 'disabled' : ''} onclick="addToCart()"><i class="fas fa-cart-plus"></i> ${out ? 'Tugadi' : "Savatga qo'shish"}</button>`}</div>
-                ${specsBlock(p)}<div id="prod-rev"></div>${similarBlock(p)}<div style="height:20px"></div></div>`;
+                ${similarBlock(p)}${specsBlock(p)}<div id="prod-rev"></div><div style="height:20px"></div></div>`;
             sheetReviews(p.id);
         }
         function pick(k, i) {
@@ -2950,11 +2964,48 @@
         })();
         // ===== AQLLI QIDIRUV: imlo xatosi, lotin/kirill, sinonimlar =====
         const CYR = { 'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo', 'ж': 'j', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u', 'ф': 'f', 'х': 'h', 'ц': 's', 'ч': 'ch', 'ш': 'sh', 'щ': 'sh', 'ъ': '', 'ы': 'i', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya', 'ў': 'o', 'қ': 'k', 'ғ': 'g', 'ҳ': 'h' };
-        const SYN = [['gilof', 'chehol', 'chexol', 'chexl', 'cheh', 'case', 'kейс', 'keys', 'qopqoq', 'kopkok', 'nakladka'], ['silikon', 'selekon', 'silikonli', 'silicone', 'selikon'],
-            ['telefon', 'phone', 'iphone', 'ayfon', 'smartfon'], ['krossovka', 'krasovka', 'krosovka', 'sneaker', 'snikers', 'kedi', 'ked'], ['futbolka', 'tshirt', 't-shirt', 'mayka', 'footbolka'],
-            ['sumka', 'bag', 'ryukzak', 'rukzak', 'portfel'], ['soat', 'chasi', 'watch', 'chasy'], ['quloqchin', 'kulokchin', 'naushnik', 'airpods', 'earphone', 'headphone'],
-            ['zaryadka', 'zaryadnik', 'charger', 'quvvatlagich', 'kuvvatlagich', 'kabel', 'provod'], ['kurtka', 'kurtqa', 'jacket', 'kurtkalar'], ['shim', 'bruki', 'jinsi', 'djinsi', 'jeans'],
-            ['koylak', 'platye', 'plate', 'dress'], ['poyabzal', 'oyoq kiyim', 'obuv', 'tufli', 'shoes'], ['kozoynak', 'ochki', 'glasses'], ['oyinchoq', 'igrushka', 'toy']];
+        const SYN = [   // bir xil ma'noli so'zlar (o'zbek / rus / ingliz, lotin / kirill, xato yozilishlar)
+            ['gilof', 'chehol', 'chexol', 'chexl', 'cheh', 'чехол', 'case', 'keys', 'kейс', 'qopqoq', 'kopkok', 'nakladka', 'bamper', 'bumper', 'oblojka', 'obloshka', 'kabura', 'futlyar'],
+            ['silikon', 'selekon', 'silikonli', 'silicone', 'selikon', 'силикон', 'rezina', 'rezinka'],
+            ['telefon', 'phone', 'smartfon', 'smartphone', 'mobil', 'ayfon', 'iphone', 'айфон', 'телефон'],
+            ['steklo', 'стекло', 'plyonka', 'plenka', 'плёнка', 'пленка', 'glass', 'bronesteklo', 'bronya', 'himoya'],
+            ['quloqchin', 'kulokchin', 'naushnik', 'наушники', 'naushniki', 'airpods', 'earpods', 'earbuds', 'earphone', 'headphone', 'headphones', 'garnitura', 'headset'],
+            ['zaryadka', 'zaryadnik', 'zaryadnoe', 'зарядка', 'charger', 'quvvatlagich', 'kuvvatlagich', 'adapter', 'blok'],
+            ['kabel', 'кабель', 'shnur', 'шнур', 'provod', 'провод', 'cable'],
+            ['powerbank', 'pauerbank', 'павербанк', 'akkumulyator', 'аккумулятор', 'batareya', 'батарея'],
+            ['krossovka', 'krasovka', 'krosovka', 'кроссовки', 'kross', 'sneaker', 'sneakers', 'snikers', 'kedi', 'ked', 'кеды'],
+            ['poyabzal', 'oyokkiyim', 'obuv', 'обувь', 'tufli', 'туфли', 'shoes', 'botinka', 'ботинки', 'etik', 'sapog', 'сапоги', 'boots'],
+            ['shippak', 'tapochki', 'тапочки', 'tapka', 'shlepanci', 'шлепанцы', 'slippers', 'sandal', 'sandali', 'сандали'],
+            ['futbolka', 'футболка', 'tshirt', 'mayka', 'майка', 'footbolka', 'futbolkalar'],
+            ['kofta', 'кофта', 'sviter', 'свитер', 'sweater', 'hudi', 'hoodie', 'худи', 'tolstovka', 'толстовка', 'svitshot', 'свитшот', 'sweatshirt'],
+            ['kurtka', 'kurtqa', 'куртка', 'jacket', 'palto', 'пальто', 'puhovik', 'pukhovik', 'пуховик', 'kurtkalar'],
+            ['shim', 'bruki', 'брюки', 'shtany', 'штаны', 'jinsi', 'djinsi', 'dzhinsy', 'джинсы', 'jeans', 'pants'],
+            ['koylak', 'платье', 'platye', 'plate', 'dress', 'sarafan', 'сарафан'],
+            ['yubka', 'юбка', 'skirt'], ['paypok', 'noski', 'носки', 'socks', 'paypoklar'],
+            ['shapka', 'шапка', 'kepka', 'кепка', 'cap', 'beanie', 'kalpok', 'boshkiyim', 'panama', 'панама'],
+            ['kolkop', 'perchatki', 'перчатки', 'gloves'], ['sharf', 'шарф', 'scarf', 'romol', 'platok', 'платок'],
+            ['sumka', 'сумка', 'bag', 'ryukzak', 'rukzak', 'рюкзак', 'backpack', 'portfel', 'портфель'],
+            ['hamyon', 'koshelek', 'кошелек', 'кошелёк', 'wallet', 'portmone', 'портмоне'],
+            ['soat', 'chasy', 'часы', 'watch', 'smartwatch', 'braslet', 'браслет'],
+            ['kozoynak', 'ochki', 'очки', 'glasses', 'sunglasses'],
+            ['oyinchok', 'igrushka', 'игрушка', 'igrushki', 'toy', 'toys', 'konstruktor', 'конструктор', 'lego'],
+            ['idish', 'posuda', 'посуда', 'tarelka', 'тарелка', 'likopcha', 'kosa'],
+            ['krujka', 'кружка', 'piyola', 'stakan', 'стакан', 'cup', 'mug', 'termos', 'термос'],
+            ['choynak', 'chaynik', 'чайник', 'kettle'],
+            ['chirok', 'lampa', 'лампа', 'fonar', 'фонарь', 'lamp', 'svetilnik', 'светильник'],
+            ['gilam', 'kovyor', 'kover', 'ковер', 'ковёр', 'carpet', 'palos', 'kovrik', 'коврик'],
+            ['parda', 'shtora', 'штора', 'curtain', 'tyul', 'тюль'],
+            ['yostik', 'podushka', 'подушка', 'pillow'], ['adyol', 'odeyalo', 'одеяло', 'blanket', 'korpa', 'pled', 'плед'],
+            ['atir', 'duhi', 'духи', 'parfyum', 'парфюм', 'perfume', 'parfum'],
+            ['krem', 'крем', 'cream'], ['pomada', 'помада', 'lipstick', 'labboyok'],
+            ['tarok', 'raschyoska', 'расческа', 'расчёска', 'comb'], ['fen', 'фен', 'hairdryer', 'sochkuritgich'],
+            ['kolonka', 'колонка', 'dinamik', 'динамик', 'speaker', 'karnay'],
+            ['sichkoncha', 'mishka', 'мышка', 'mouse'], ['klaviatura', 'клавиатура', 'keyboard'],
+            ['noutbuk', 'ноутбук', 'laptop', 'notebook'], ['planshet', 'планшет', 'tablet', 'ipad'],
+            ['kamera', 'камера', 'camera', 'videokamera'], ['fleshka', 'флешка', 'flesh', 'flash', 'usb'],
+            ['bolalar', 'detskiy', 'детский', 'детские', 'kids', 'baby', 'chakalok', 'bola'],
+            ['mashina', 'avto', 'авто', 'avtomobil', 'автомобиль'],
+            ['anime', 'аниме', 'manga', 'манга']];
         const normS = s => String(s || '').toLowerCase().replace(/[а-яёўқғҳ]/g, ch => CYR[ch] ?? ch).replace(/[ʻʼ‘’`'"]/g, '').replace(/kh|x/g, 'h').replace(/q/g, 'k').replace(/ye/g, 'e').replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
         const SYN_MAP = {}; SYN.forEach(g => { const n = g.map(normS); n.forEach(w => SYN_MAP[w] = n); });
         function lev(a, b, max) {   // ikki so'z orasidagi farq (imlo xatosi uchun)
@@ -2981,9 +3032,13 @@
                 let sc = x.cat === p.cat ? 5 : 0; normS(x.name).split(' ').forEach(t => { if (w.has(t) || (SYN_MAP[t] || []).some(a => w.has(a))) sc += 3; });
                 if (x.old_price) sc += 1; sc += Math.min(2, (x.sold || 0) / 20); return [x, sc + Math.random() * 0.5];
             }).filter(x => x[1] >= 3).sort((a, b) => b[1] - a[1]).slice(0, 6).map(x => x[0]);
+            let title = "🛍 O'xshash mahsulotlar";
+            if (l.length < 3) {   // o'xshashi kam bo'lsa — ommabop mahsulotlar bilan to'ldiramiz
+                const pop = PRODUCTS.filter(x => x.id !== p.id && !l.includes(x) && !(x.tracked && totalStock(x) <= 0)).sort((a, b) => (b.sold || 0) - (a.sold || 0) || (b.new ? 1 : 0) - (a.new ? 1 : 0)).slice(0, 8 - l.length);
+                title = l.length ? "🛍 O'xshash va sizga yoqishi mumkin" : '🔥 Sizga yoqishi mumkin'; l = l.concat(pop);
+            }
             if (!l.length) return '';
-            const hot = hotLimit();
-            return `<div style="margin:22px 0 10px;font-weight:800;font-size:15px">🛍 O'xshash mahsulotlar</div><div class="pgrid">${l.map(x => pcard(x, hot)).join('')}</div>`;
+            return `<div style="margin:18px 0 8px;font-weight:800;font-size:15px">${title}</div><div class="sim-strip" style="overflow-x:auto">${l.map(x => `<div class="sim-card" onclick="openProduct(${ja(x.id)})"><div class="sim-img">${firstImg(x) ? `<img src="${esc(firstImg(x))}" loading="lazy">` : '<i class="fas fa-box-open"></i>'}</div><div class="prow ${x.old_price ? 'sale' : ''}" style="margin:6px 0 2px"><span class="pprice" style="font-size:13.5px">${fmt(x.price)}</span>${x.sale_pct ? `<span class="pdisc" style="font-size:10px">↓${Number(x.sale_pct)}%</span>` : ''}</div><div class="sim-name">${esc(x.name)}</div></div>`).join('')}</div>`;
         }
         // ===== REKLAMANI KIM KO'RDI / BOSDI =====
         let ADV_ID = 0, ADV_F = 'all'; const ADV_OPEN = new Set();
