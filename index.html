@@ -206,6 +206,13 @@
         .ad-sw span.on { border-color: var(--gold-color); }
         /* --- katalog: ixcham kirish --- */
         .cat-top { display: flex; justify-content: flex-end; margin: -4px 0 10px; }
+        .cart-row .pname { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 13px; line-height: 1.3; }
+        .cart-row .cvar { font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cart-row .cimg { width: 64px; height: 64px; }
+        .cat-top { justify-content: space-between; align-items: center; }
+        .bell { position: relative; width: 38px; height: 38px; border-radius: 12px; background: var(--surface-color); border: 1px solid var(--surface-border); display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; color: var(--text-main); }
+        .bell span { position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--primary-color); color: #fff; font-size: 10px; font-weight: 800; align-items: center; justify-content: center; }
+
         .wpill { display: inline-flex; align-items: center; gap: 7px; font-size: 11.5px; font-weight: 600; padding: 6px 12px; border-radius: 20px; background: var(--surface-color); border: 1px solid var(--surface-border); color: var(--text-muted); }
         .wpill .dot { width: 8px; height: 8px; border-radius: 50%; background: #2ecc71; box-shadow: 0 0 0 3px rgba(46,204,113,0.2); }
         .wpill.closed { color: var(--primary-color); border-color: rgba(230,0,0,0.35); }
@@ -252,6 +259,17 @@
         .iv-dots i { width: 6px; height: 6px; border-radius: 3px; background: rgba(255,255,255,.35); transition: all .3s; } .iv-dots i.on { width: 20px; background: #fff; }
         .iv-hint { position: absolute; bottom: 44px; left: 0; right: 0; text-align: center; color: rgba(255,255,255,.55); font-size: 11px; }
         .gal-wrap { position: relative; margin-bottom: 12px; }
+        #prod-modal .sheet { padding-top: 0; }
+        #prod-modal .sheet::before { display: none; }
+        .ps-gal { position: sticky; top: 0; z-index: 1; margin: 0 -20px; }
+        .ps-gal .gal-wrap { margin: 0; } .ps-gal .pimg { border-radius: 0; height: 330px !important; }
+        .ps-gal .gal-n { bottom: 30px; }
+        .ps-body { position: relative; z-index: 2; background: var(--bg-color); border-radius: 22px 22px 0 0; margin: -20px -20px 0; padding: 10px 20px 0; box-shadow: 0 -8px 24px rgba(0,0,0,.18); min-height: 60vh; }
+        .ps-body::before { content: ''; display: block; width: 42px; height: 5px; border-radius: 3px; background: var(--surface-border); margin: 0 auto 12px; }
+        .ps-act { position: sticky; top: 0; z-index: 5; height: 0; }
+        .ps-act > div { position: absolute; top: 12px; right: -8px; display: flex; gap: 8px; }
+        .ps-act .fav, .ps-act .psb { position: static; width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,.55); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; backdrop-filter: blur(6px); }
+        .ps-act .fav.on { color: #ff4d6d; }
         .gal-n { position: absolute; right: 10px; bottom: 10px; background: rgba(0,0,0,.6); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 9px; border-radius: 12px; pointer-events: none; }
         .sheet::before { content: ''; display: block; width: 42px; height: 5px; border-radius: 3px; background: var(--surface-border); margin: -8px auto 12px; }
         .sheet-x { position: sticky; top: 0; float: right; z-index: 3; width: 34px; height: 34px; margin: -6px -6px 0 8px; border-radius: 50%; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 15px; color: #fff; }
@@ -287,7 +305,7 @@
         .calc-card { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 16px; background: var(--input-bg); margin-bottom: 10px; }
         .calc-card i.fas { font-size: 20px; width: 26px; text-align: center; }
         .calc-card b { font-size: 18px; font-weight: 800; }
-        .opt.vopt { max-width: 165px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
+        .opt.vopt { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
         .opt.vopt.sel { max-width: none; }
         .opt.more { color: var(--gold-color); border-style: dashed; }
         .pchips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -323,6 +341,8 @@
 
     <!-- AUTH FLOW (LOGIN/REG) -->
     <div id="auth-flow" class="view-section" style="padding-top: 40px;">
+        <div id="auth-guest-bar" style="display:none;margin:-20px 0 18px"><b onclick="closeAuth()" style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:var(--text-muted)"><i class="fas fa-arrow-left"></i> Katalogga qaytish</b>
+            <div id="auth-reason" style="margin-top:14px;padding:12px 14px;border-radius:12px;background:rgba(255,183,0,0.1);border:1px solid var(--gold-color);font-size:13px;line-height:1.5"></div></div>
         <div id="auth-login">
             <div style="text-align: center; margin-bottom: 30px;">
                 <i class="fas fa-shield-halved" style="font-size: 40px; color: var(--gold-color); margin-bottom: 15px;"></i>
@@ -376,7 +396,7 @@
     <div id="main-app" style="display: none;">
         <!-- TAB: KATALOG -->
         <div id="tab-catalog" class="view-section">
-            <div class="cat-top"><div class="work-note"></div></div>
+            <div class="cat-top"><div class="bell" onclick="openNotices()" title="Bildirishnomalar"><i class="far fa-bell"></i><span id="bell-n" style="display:none">0</span></div><div class="work-note"></div></div>
             <div id="ad-wrap" style="display:none" data-noi18n><div class="ad-track" id="ad-track"></div><div class="ad-dots" id="ad-dots"></div></div>
             <div class="qtiles">
                 <div class="qtile" onclick="openReq()">
@@ -571,7 +591,7 @@
                     <div class="form-group"><label>Viloyat</label><select id="prof-region" class="form-control"></select></div>
                     <div class="form-group"><label>Aniq Manzil</label><input type="text" id="prof-address" class="form-control" value="Manzil kiritilmagan"></div>
                     <div class="form-group"><label>BTS pochta — viloyat</label><select id="prof-bts-region" class="form-control"></select></div>
-                    <div class="form-group"><label>BTS pochta manzili (tuman / shahar va filial)</label><input type="text" id="prof-bts-point" class="form-control" placeholder="Masalan: Asaka tumani, BTS filiali"></div>
+                    <div class="form-group"><label>BTS pochta manzili (tuman / shahar va filial)</label><input type="text" id="prof-bts-point" class="form-control" placeholder="Masalan: Asaka tumani, BTS filiali"><button class="btn btn-outline" type="button" style="margin-top:8px;padding:11px;font-size:13px" onclick="btsMapOpen()"><i class="fas fa-map-location-dot"></i> Xaritadan BTS punktini tanlash</button></div>
                     <button class="btn btn-red" onclick="saveProfileInfo()"><i class="fas fa-save"></i> Saqlash</button>
                 </div>
             </div>
@@ -619,7 +639,7 @@
                 <ul class="settings-list">
                     <li class="settings-item" id="rev-item" onclick="openReviews()">
                         <div class="settings-icon" style="background:rgba(255,183,0,0.12);color:var(--gold-color)"><i class="fas fa-star"></i></div>
-                        <div class="settings-text" style="flex:1"><div>Xaridorlar fikrlari</div><div class="pm-sub" id="rev-sub">Haqiqiy xaridorlar otzivlari</div></div>
+                        <div class="settings-text" style="flex:1"><div>Xaridorlar fikrlari</div><div class="pm-sub" id="rev-sub">Haqiqiy xaridorlar sharhlari</div></div>
                         <div class="settings-chevron"><i class="fas fa-chevron-right"></i></div>
                     </li>
                     <li class="settings-item" onclick="tg.openTelegramLink('https://t.me/zakaz_uchun_ad')">
@@ -627,7 +647,12 @@
                         <div class="settings-text">Admin bilan bog'lanish (@zakaz_uchun_ad)</div>
                         <div class="settings-chevron"><i class="fas fa-external-link-alt"></i></div>
                     </li>
-                    <li class="settings-item" onclick="doLogout()">
+                    <li class="settings-item" id="login-item" style="display:none" onclick="needAuth('Hisobingizga kirish uchun')">
+                        <div class="settings-icon" style="background: rgba(46,204,113,0.12); color: #2ecc71;"><i class="fas fa-right-to-bracket"></i></div>
+                        <div class="settings-text" style="color:#2ecc71">Kirish / Ro'yxatdan o'tish</div>
+                        <div class="settings-chevron"><i class="fas fa-chevron-right"></i></div>
+                    </li>
+                    <li class="settings-item" id="logout-item" onclick="doLogout()">
                         <div class="settings-icon" style="background: rgba(230,0,0,0.1); color: var(--primary-color);"><i class="fas fa-right-from-bracket"></i></div>
                         <div class="settings-text" style="color: var(--primary-color);">Profildan chiqish / akkauntni almashtirish</div>
                         <div class="settings-chevron"><i class="fas fa-chevron-right"></i></div>
@@ -649,6 +674,8 @@
                     <button class="btn btn-gold" onclick="pinSave()"><i class="fas fa-check"></i> PIN-ni saqlash</button>
                 </div>
                 <div id="pin-btns" style="display:flex;gap:10px"></div>
+                <div id="wlock-row" class="hrow" style="display:none;margin-top:12px"><span style="flex:1;font-size:13px">🔒 Hamyonga kirishda PIN / barmoq izi so'rash</span><label class="toggle-switch"><input type="checkbox" id="wlock-tog" onchange="wlockToggle(this.checked)"><span class="slider"></span></label></div>
+                <div id="pin-forgot2" style="display:none;margin-top:12px;font-size:12.5px;color:var(--gold-color);cursor:pointer;font-weight:700" onclick="pinForgot()">PIN-kodni unutdingizmi? — yangisini o'rnatish</div>
             </div>
             <div class="glass-card sec-card" id="bio-card">
                 <div class="sec-h" style="justify-content:space-between"><div style="display:flex;gap:12px;align-items:center"><div class="settings-icon" style="background:rgba(46,204,113,0.12);color:#2ecc71"><i class="fas fa-fingerprint"></i></div><div><b>Barmoq izi / Face ID</b><div class="pm-sub" id="bio-status"></div></div></div>
@@ -691,6 +718,7 @@
             <input type="password" id="pin-ask" class="form-control pin-in" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="••••" onkeydown="if(event.key==='Enter')pinDone($('pin-ask').value)">
             <button class="btn btn-gold" style="margin-top:14px" onclick="pinDone($('pin-ask').value)"><i class="fas fa-check"></i> Tasdiqlash</button>
             <button class="btn btn-outline" style="margin-top:10px" onclick="pinDone(null)">Bekor qilish</button>
+            <div id="pin-forgot" style="margin-top:14px;font-size:12.5px;color:var(--gold-color);cursor:pointer;font-weight:700" onclick="pinForgot()">PIN-kodni unutdingizmi?</div>
         </div>
     </div>
 
@@ -767,7 +795,7 @@
             <div class="cat-chip" data-t="products" onclick="admTab('products')">📦 Mahsulot</div>
             <div class="cat-chip" data-t="ord" onclick="admTab('ord')">🚚 Buyurtma</div>
             <div class="cat-chip" data-t="req" onclick="admTab('req')">🔍 So'rovlar</div>
-            <div class="cat-chip" data-t="rev" onclick="admTab('rev')">⭐ Otzivlar</div>
+            <div class="cat-chip" data-t="rev" onclick="admTab('rev')">⭐ Sharhlar</div>
             <div class="cat-chip" data-t="users" onclick="admTab('users')">👥 Mijozlar</div>
             <div class="cat-chip" data-t="staff" onclick="admTab('staff')">🛡 Adminlar</div>
             <div class="cat-chip" data-t="msg" onclick="admTab('msg')">📣 Xabar</div>
@@ -926,7 +954,7 @@
         </div>
         <div id="adm-rev" class="adm-sec" style="display:none">
             <div class="categories-scroll" id="adm-rv-tabs"><div class="cat-chip active" data-s="Kutilmoqda" onclick="admRvTab('Kutilmoqda')">Kutilmoqda</div><div class="cat-chip" data-s="Chop etildi" onclick="admRvTab('Chop etildi')">Chop etilgan</div><div class="cat-chip" data-s="Rad etildi" onclick="admRvTab('Rad etildi')">Rad etilgan</div></div>
-            <div class="glass-card"><div id="adm-rv-sum" style="font-size:13px;margin-bottom:8px"></div><p style="font-size:11.5px;color:var(--text-muted);line-height:1.5;margin-bottom:10px">Otzivni faqat mahsulotni olgan mijoz yoza oladi. Halol salbiy otzivlarni ham chop eting va javob yozing — bu ishonchni oshiradi. Faqat haqorat va spamni rad eting.</p><div id="adm-rvs"></div></div>
+            <div class="glass-card"><div id="adm-rv-sum" style="font-size:13px;margin-bottom:8px"></div><p style="font-size:11.5px;color:var(--text-muted);line-height:1.5;margin-bottom:10px">Sharhni faqat mahsulotni olgan mijoz yoza oladi. Halol salbiy sharhlarni ham chop eting va javob yozing — bu ishonchni oshiradi. Faqat haqorat va spamni rad eting.</p><div id="adm-rvs"></div></div>
         </div>
         <div id="adm-msg" class="adm-sec" style="display:none">
             <div class="glass-card">
@@ -935,6 +963,16 @@
                 <div class="form-group"><textarea id="bc-text" class="form-control" rows="5" maxlength="1000" placeholder="Xabar matni..."></textarea></div>
                 <div class="form-group"><label>Rasm (ixtiyoriy)</label><input type="file" id="bc-file" accept="image/*" class="form-control" style="padding:12px;"></div>
                 <button class="btn btn-gold" onclick="sendBroadcast()"><i class="fas fa-paper-plane"></i> Yuborish</button>
+            </div>
+            <div class="glass-card">
+                <h3 style="margin-bottom:6px;color:var(--text-main)"><i class="fas fa-bell"></i> Ilova bildirishnomasi</h3>
+                <p style="font-size:11.5px;color:var(--text-muted);line-height:1.5;margin-bottom:12px">Yangiliklar, o'zgarishlar, aksiyalar — barcha mijozlarning ilovasida katalog tepasidagi 🔔 da chiqadi va o'qilmaganlar soni ko'rinadi.</p>
+                <div class="form-group"><input id="nt-title" class="form-control" maxlength="120" placeholder="Sarlavha (masalan: Yangi kolleksiya keldi!)"></div>
+                <div class="form-group"><textarea id="nt-text" class="form-control" rows="4" maxlength="1500" placeholder="Matn..."></textarea></div>
+                <div class="hrow" style="cursor:pointer" onclick="NT_IMG?(NT_IMG=null,this.firstElementChild.innerText='🖼 Rasm qo\'shish (ixtiyoriy)'):ntPick()"><span id="nt-img-l" style="flex:1;font-size:13px">🖼 Rasm qo'shish (ixtiyoriy)</span></div>
+                <div class="hrow"><span style="flex:1;font-size:13px">Telegram orqali ham yuborish</span><label class="toggle-switch"><input type="checkbox" id="nt-tg"><span class="slider"></span></label></div>
+                <button class="btn btn-gold" style="margin-top:10px" onclick="ntSend()"><i class="fas fa-bell"></i> Bildirishnoma chiqarish</button>
+                <div style="font-size:11px;color:var(--gold-color);font-weight:700;margin:16px 0 6px">CHIQARILGANLAR</div><div id="nt-list"></div>
             </div>
         </div>
     </div>
@@ -956,16 +994,23 @@
         <button class="btn btn-gold" onclick="sendReq()"><i class="fas fa-paper-plane"></i> Yuborish</button>
     </div></div>
     <div class="modal" id="specs-modal" onclick="if(event.target===this)closeModal('specs-modal')"><div class="sheet" id="specs-body"></div></div>
+    <div class="modal" id="bts-modal" onclick="if(event.target===this)closeModal('bts-modal')"><div class="sheet" style="max-height:92vh">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h3 style="font-size:17px">🗺 BTS punktini tanlang</h3><b class="sheet-x" style="float:none;margin:0" onclick="closeModal('bts-modal')"><i class="fas fa-xmark"></i></b></div>
+        <div id="bts-map" data-noi18n style="height:52vh;border-radius:14px;overflow:hidden;background:var(--surface-color)"></div>
+        <div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-outline" style="margin:0;padding:11px;font-size:13px" onclick="btsLocate()"><i class="fas fa-location-crosshairs"></i> Mening joyim</button></div>
+        <div id="bts-info" style="font-size:12px;color:var(--text-muted);margin-top:10px;line-height:1.5"></div><div id="bts-near"></div>
+    </div></div>
+    <div class="modal" id="notice-modal" onclick="if(event.target===this)closeModal('notice-modal')"><div class="sheet" id="notice-body"></div></div>
     <div class="modal" id="revs-modal" onclick="if(event.target===this)closeModal('revs-modal')"><div class="sheet" id="revs-body"></div></div>
     <div class="modal" id="rv-modal" onclick="if(event.target===this)closeModal('rv-modal')"><div class="sheet">
-        <h3 style="margin-bottom:4px">⭐ Otziv qoldirish</h3>
+        <h3 style="margin-bottom:4px">⭐ Sharh qoldirish</h3>
         <p id="rv-title" style="font-size:12px;color:var(--text-muted);margin-bottom:12px"></p>
         <div id="rv-stars" style="display:flex;gap:6px;justify-content:center"></div>
         <p id="rv-stars-lbl" style="text-align:center;font-size:13px;font-weight:700;color:var(--gold-color);margin:2px 0 14px"></p>
         <div class="form-group"><label>Fikringiz</label><textarea id="rv-text" class="form-control" rows="4" maxlength="1000" placeholder="Mahsulot sifati, yetkazish, xizmat haqida yozing"></textarea></div>
         <label class="lbl">MAHSULOT RASMI (3 tagacha, ixtiyoriy)</label>
         <div class="thumbs" id="rv-media" style="margin:8px 0 14px"></div>
-        <p style="font-size:11px;color:var(--text-muted);margin-bottom:12px">Otzivda ismingiz qisqa ko'rinishda (masalan "Ali V.") va viloyatingiz chiqadi. Telefon raqamingiz ko'rinmaydi.</p>
+        <p style="font-size:11px;color:var(--text-muted);margin-bottom:12px">Sharhda ismingiz qisqa ko'rinishda (masalan "Ali V.") va viloyatingiz chiqadi. Telefon raqamingiz ko'rinmaydi.</p>
         <button class="btn btn-gold" onclick="sendReview()">Yuborish</button>
     </div></div>
     <div class="modal" id="mv-modal" onclick="if(event.target===this)closeModal('mv-modal')"><div class="sheet" id="mv-body"></div></div>
@@ -1016,7 +1061,7 @@
     <script>
         const API_FIXED = "https://YOUR-API-DOMAIN";   // doimiy domen bo'lsa shu yerga yozing (oxirida "/" siz)
         const API = (() => {   // bot ilovani ?api=<server manzili> bilan ochadi — telefon tunneli o'zgarsa ham GitHub'ga qayta yuklash shart emas
-            const ok = v => /^https:\/\/[a-z0-9-]+\.trycloudflare\.com$/.test(v) || (!!v && v === API_FIXED);
+            const ok = v => /^https:\/\/[a-z0-9-]+\.trycloudflare\.com$/.test(v) || /^https:\/\/\d{1,3}-\d{1,3}-\d{1,3}-\d{1,3}\.sslip\.io$/.test(v) || (!!v && v === API_FIXED);   // telefon tunneli yoki doimiy server (IP.sslip.io)
             const q = new URLSearchParams(location.search).get('api') || '';
             if (ok(q)) { try { localStorage.setItem('xb_api', q); } catch (e) {} return q; }
             let last = ''; try { last = localStorage.getItem('xb_api') || ''; } catch (e) {}
@@ -1081,9 +1126,9 @@
             "Taxminiy hisob. Aniq summa mahsulot O'zbekistonga kelganda tortilgan og'irlik bo'yicha chiqadi. Kargo haqi mahsulot narxiga kirmaydi.": ["Примерный расчёт. Точная сумма — по фактическому весу при прибытии в Узбекистан. Карго не входит в цену товара.", "Estimate. The exact amount is based on the actual weight on arrival in Uzbekistan. Cargo is not included in the product price."],
             "Og'irlikni kiriting": ["Введите вес", "Enter weight"], "Yopish": ["Закрыть", "Close"], "AKSIYA": ["АКЦИЯ", "SALE"], "YANGI": ["НОВИНКА", "NEW"], "🔥 Ko'p sotilgan": ["🔥 Хит продаж", "🔥 Bestseller"], "Aksiya": ["Акция", "Sale"],
             "🏷 Aksiya bo'yicha tejadingiz:": ["🏷 Экономия по акции:", "🏷 You save:"], "✨ Yangi": ["✨ Новинка", "✨ New"], "Hozircha aksiya yo'q": ["Пока нет акций", "No sales yet"], "TUGADI": ["НЕТ В НАЛИЧИИ", "SOLD OUT"], "MENING SO'ROVLARIM": ["МОИ ЗАПРОСЫ", "MY REQUESTS"], "yopish": ["закрыть", "close"],
-            "XARIDORLAR OTZIVLARI": ["ОТЗЫВЫ ПОКУПАТЕЛЕЙ", "CUSTOMER REVIEWS"], "Ko'rish ›": ["Смотреть ›", "View ›"], "⭐ Mijozlar otzivlari": ["⭐ Отзывы покупателей", "⭐ Customer reviews"],
-            "Hozircha otzivlar yo'q": ["Пока нет отзывов", "No reviews yet"], "Xaridorlar fikrlari": ["Отзывы покупателей", "Customer reviews"],
-            "Hozircha otziv yo'q": ["Пока нет отзывов", "No reviews yet"], "Haqiqiy xaridorlar otzivlari": ["Отзывы реальных покупателей", "Reviews from real buyers"], "Do'kon javobi:": ["Ответ магазина:", "Shop reply:"],
+            "XARIDORLAR SHARHLARI": ["ОТЗЫВЫ ПОКУПАТЕЛЕЙ", "CUSTOMER REVIEWS"], "Ko'rish ›": ["Смотреть ›", "View ›"], "⭐ Mijozlar sharhlari": ["⭐ Отзывы покупателей", "⭐ Customer reviews"],
+            "Hozircha sharhlar yo'q": ["Пока нет отзывов", "No reviews yet"], "Xaridorlar fikrlari": ["Отзывы покупателей", "Customer reviews"], "🔔 Bildirishnomalar": ["🔔 Уведомления", "🔔 Notifications"], "Hozircha bildirishnoma yo'q": ["Пока нет уведомлений", "No notifications yet"], "O'zgarishni saqlash": ["Сохранить изменения", "Save changes"], "✎ o'zgartirish": ["✎ изменить", "✎ edit"], "Bu variant tugadi": ["Этот вариант закончился", "This variant is sold out"], "Sizdan: ": ["С вас: ", "You pay: "], "Ulashish": ["Поделиться", "Share"], "Katalogga qaytish": ["Вернуться в каталог", "Back to catalog"], "Kirish / Ro'yxatdan o'tish": ["Вход / Регистрация", "Log in / Sign up"], "Ro'yxatdan o'tgach hisoblanadi": ["Рассчитается после регистрации", "Calculated after sign-up"], "🗺 BTS punktini tanlang": ["🗺 Выберите пункт BTS", "🗺 Choose a BTS point"], "Mening joyim": ["Моё местоположение", "My location"], "Xaritadan BTS punktini tanlash": ["Выбрать пункт BTS на карте", "Pick BTS point on map"], "ENG YAQIN PUNKTLAR": ["БЛИЖАЙШИЕ ПУНКТЫ", "NEAREST POINTS"], "PIN-kodni unutdingizmi?": ["Забыли PIN-код?", "Forgot PIN?"], "🔒 Hamyonga kirishda PIN / barmoq izi so'rash": ["🔒 Запрашивать PIN / отпечаток при входе в кошелёк", "🔒 Ask PIN / fingerprint to open wallet"], "PIN-kodni unutdingizmi? — yangisini o'rnatish": ["Забыли PIN? — установить новый", "Forgot PIN? — set a new one"], "🛍 O'xshash mahsulotlar": ["🛍 Похожие товары", "🛍 Similar products"],
+            "Hozircha sharh yo'q": ["Пока нет отзывов", "No reviews yet"], "Haqiqiy xaridorlar sharhlari": ["Отзывы реальных покупателей", "Reviews from real buyers"], "Do'kon javobi:": ["Ответ магазина:", "Shop reply:"],
             // so'rov holatlari
             "Yangi": ["Новый", "New"], "Narx berildi": ["Цена указана", "Price offered"], "Buyurtma qilindi": ["Заказано", "Ordered"], "Topilmadi": ["Не найдено", "Not found"], "Yopildi": ["Закрыт", "Closed"],
             // mahsulot oynasi
@@ -1132,7 +1177,7 @@
             "BTS pochta — viloyat": ["Почта BTS — область", "BTS post — region"], "BTS pochta manzili (tuman / shahar va filial)": ["Адрес BTS (район / город и филиал)", "BTS address (district / city and branch)"],
             "Masalan: Asaka tumani, BTS filiali": ["Например: Асакинский район, филиал BTS", "e.g. Asaka district, BTS branch"], "Saqlash": ["Сохранить", "Save"], "Saqlandi ✓": ["Сохранено ✓", "Saved ✓"],
             "Faol buyurtmalar yo'q": ["Нет активных заказов", "No active orders"], "Yakunlangan buyurtmalar yo'q": ["Нет завершённых заказов", "No completed orders"], "Bekor qilish": ["Отменить", "Cancel"],
-            "⭐ Otziv qoldirish": ["⭐ Оставить отзыв", "⭐ Leave a review"], "⭐ Otzivingiz:": ["⭐ Ваш отзыв:", "⭐ Your review:"], "Fikringiz": ["Ваше мнение", "Your opinion"], "Izoh": ["Комментарий", "Comment"],
+            "⭐ Sharh qoldirish": ["⭐ Оставить отзыв", "⭐ Leave a review"], "⭐ Sharhingiz:": ["⭐ Ваш отзыв:", "⭐ Your review:"], "Fikringiz": ["Ваше мнение", "Your opinion"], "Izoh": ["Комментарий", "Comment"],
             "to'langan": ["оплачено", "paid"], "to'lanmagan": ["не оплачено", "unpaid"], "Yuborish": ["Отправить", "Send"], "RASM / VIDEO": ["ФОТО / ВИДЕО", "PHOTO / VIDEO"],
             "🔍 Mahsulotni topib berish": ["🔍 Найти товар", "🔍 Find a product"],
             "Mahsulot rasmi, skrinshoti yoki videosini yuklang (5 tagacha, video 15 MB gacha). Razmer, rang va sonini yozing — topib, narxini aytamiz.": ["Загрузите фото, скриншот или видео товара (до 5 шт, видео до 15 МБ). Укажите размер, цвет и количество — найдём и назовём цену.", "Upload a photo, screenshot or video (up to 5, video up to 15 MB). Write size, color and quantity — we'll find it and quote a price."],
@@ -1161,12 +1206,13 @@
         };
         // matn ichidagi bo'laklar (raqamli matnlar uchun)
         const I18N_RE = [
+            [/🔥 Bu hafta (\d+) kishi sotib oldi/g, "🔥 На этой неделе купили: $1", "🔥 $1 bought this week"], [/(\d+) ta buyurtma\b/g, "$1 заказ(ов)", "$1 order(s)"], [/(\d+) ta sharh\b/g, "$1 отзыв(ов)", "$1 review(s)"],
             [/so'mlik chek rad etildi/g, "сум — чек отклонён", "UZS receipt rejected"], [/so'm/g, "сум", "UZS"], [/(\d) ta faol/g, "$1 активных", "$1 active"], [/(\d) ta jami/g, "$1 всего", "$1 total"], [/(\d) ta chek tekshirilmoqda/g, "$1 чек(а) на проверке", "$1 receipt(s) under review"],
             [/(\d) ta kod/g, "$1 код(ов)", "$1 code(s)"], [/(\d) ta buyurtma/g, "$1 заказ(ов)", "$1 order(s)"], [/ dona/g, " шт", " pcs"], [/(\d) ta fayl/g, "$1 файл(а)", "$1 file(s)"],
-            [/(\d+) ta mijoz otzivi/g, "$1 отзыв(ов)", "$1 review(s)"], [/(\d+) ta otziv\b/g, "$1 отзыв(ов)", "$1 review(s)"], [/faqat haqiqiy xaridorlar/g, "только реальные покупатели", "verified buyers only"], [/(\d) ta urinish/g, "$1 попыт.", "$1 attempts"],
+            [/(\d+) ta mijoz sharhi/g, "$1 отзыв(ов)", "$1 review(s)"], [/(\d+) ta sharh\b/g, "$1 отзыв(ов)", "$1 review(s)"], [/faqat haqiqiy xaridorlar/g, "только реальные покупатели", "verified buyers only"], [/(\d) ta urinish/g, "$1 попыт.", "$1 attempts"],
             [/Balans: /g, "Баланс: ", "Balance: "], [/Taklif qilganlar: /g, "Приглашено: ", "Invited: "], [/havolani ulashing/g, "поделитесь ссылкой", "share your link"], [/ token\b/g, " токенов", " tokens"],
             [/faol kod/g, "активный код", "active code"], [/kun qoldi/g, "дн. осталось", "days left"], [/Kargo haqini to'lash uchun/g, "На оплату карго", "To pay cargo:"], [/To'lash \(/g, "Оплатить (", "Pay ("],
-            [/Batafsil tarix/g, "Подробная история", "Full history"], [/Barchasini ko'rish \((\d+)\) ›/g, "Смотреть все ($1) ›", "See all ($1) ›"], [/Otzivlar \((\d+)\)/g, "Отзывы ($1)", "Reviews ($1)"],
+            [/Batafsil tarix/g, "Подробная история", "Full history"], [/Barchasini ko'rish \((\d+)\) ›/g, "Смотреть все ($1) ›", "See all ($1) ›"], [/Sharhlar \((\d+)\)/g, "Отзывы ($1)", "Reviews ($1)"],
             [/(\d+) ta mahsulot/g, "$1 товар(ов)", "$1 product(s)"], [/Yana (\d+) ta ▾/g, "Ещё $1 ▾", "$1 more ▾"], [/✓ tasdiqlangan xarid/g, "✓ подтверждённая покупка", "✓ verified purchase"], [/ ta sotildi/g, " продано", " sold"], [/Kam qoldi: (\d+) ta/g, "Осталось: $1 шт", "Only $1 left"], [/BTS pochta orqali/g, "через почту BTS", "via BTS post"], [/Farg'ona ofisidan olib ketish/g, "Самовывоз из офиса в Фергане", "Pickup at Fergana office"],
             [/Farg'ona ofisidan/g, "Из офиса в Фергане", "Fergana office"], [/BTS pochta/g, "Почта BTS", "BTS post"], [/keyingi: /g, "далее: ", "next: "], [/xil · jami/g, "вида · всего", "kinds · total"],
             [/balansga tushdi/g, "зачислено на баланс", "added to balance"], [/to'lov tasdiqlandi/g, "оплата подтверждена", "payment approved"], [/chek rad etildi/g, "чек отклонён", "receipt rejected"],
@@ -1257,7 +1303,8 @@
             document.querySelectorAll('.work-note').forEach(e => e.innerHTML = h);
         }
         function fillUI() {
-            fillSelects(); workNote();
+            fillSelects(); workNote(); renderBell();
+            if ($('logout-item')) { $('logout-item').style.display = ME.registered ? '' : 'none'; $('login-item').style.display = ME.registered ? 'none' : ''; }
             $('admin-entry-card').style.display = ME.is_staff ? 'block' : 'none';
             if (!ME.registered) return;
             $('prof-id').innerText = 'ID: ' + ME.code; $('prof-login').innerText = '@' + ME.username;
@@ -1283,7 +1330,20 @@
             const s = ME.lang || 'uz';
             if (s === 'uz' && LANG !== 'uz') setLang(LANG, true); else setLang(s, false);
         }
-        function enterApp() { $('auth-flow').style.display = 'none'; $('main-app').style.display = 'block'; switchTab('catalog'); calcVisible(); }
+        // ===== MEHMON REJIMI: katalog ochiq, xarid / profil / hamyon uchun kirish so'raladi =====
+        let AUTH_NEXT = null;
+        const isGuest = () => !ME || !ME.registered;
+        function needAuth(reason, next) {
+            if (!isGuest()) return true;
+            AUTH_NEXT = next || null;
+            document.querySelectorAll('.modal.show').forEach(m => m.classList.remove('show'));
+            $('auth-reason').innerHTML = `🔐 ${esc(reason || 'Davom etish uchun')} — ro'yxatdan o'ting yoki hisobingizga kiring. Bu bir daqiqa oladi, savatingiz saqlanib qoladi.`;
+            $('auth-guest-bar').style.display = 'block'; toggleAuthView('reg');
+            $('main-app').style.display = 'none'; $('auth-flow').style.display = 'block'; window.scrollTo(0, 0); calcVisible();
+            return false;
+        }
+        function closeAuth() { AUTH_NEXT = null; $('auth-flow').style.display = 'none'; $('main-app').style.display = 'block'; calcVisible(); }
+        function enterApp() { $('auth-guest-bar').style.display = 'none'; $('auth-flow').style.display = 'none'; $('main-app').style.display = 'block'; switchTab('catalog'); calcVisible(); }
         async function boot() {
             const wait = new Promise(r => setTimeout(r, 1500));
             let err = null;
@@ -1292,12 +1352,12 @@
             setTimeout(() => {
                 $('splash-screen').style.display = 'none';
                 if (err) { $('boot-fail-msg').innerText = err.message; $('boot-fail').style.display = 'flex'; return; }
-                if (ME.registered) enterApp(); else { $('auth-flow').style.display = 'block'; $('main-app').style.display = 'none'; }
+                enterApp();   // ro'yxatdan o'tmagan mijoz ham katalogni ko'radi; kerak bo'lganda kirish so'raladi
             }, 500);
         }
         setInterval(() => { if (ME && !document.hidden) refreshMe().then(() => netBar(false)).catch(() => netBar(true)); }, 5000);
-        setInterval(() => { if (ME && ME.registered && !document.hidden) refreshProducts(); }, 15000);
-        document.addEventListener('visibilitychange', () => { if (!document.hidden && ME && ME.registered) { refreshMe().catch(() => {}); refreshProducts(); } });
+        setInterval(() => { if (ME && !document.hidden) refreshProducts(); }, 15000);
+        document.addEventListener('visibilitychange', () => { if (!document.hidden && ME) { refreshMe().catch(() => {}); refreshProducts(); } });
 
         function toggleAuthView(v) { $('auth-login').style.display = v === 'reg' ? 'none' : 'block'; $('auth-register').style.display = v === 'reg' ? 'block' : 'none'; }
         function secureAuth(type) {
@@ -1314,7 +1374,7 @@
                 }
                 if (!unRe.test(d.username)) throw new Error("Login faqat lotin alifbosi va raqamlardan iborat bo'lishi shart.");
                 await api(type === 'login' ? '/api/login' : '/api/register', d);
-                FIRST = true; await refreshMe(); enterApp(); hap('success'); toast('Xush kelibsiz ✓');
+                FIRST = true; await refreshMe(); const nx = AUTH_NEXT; AUTH_NEXT = null; enterApp(); hap('success'); toast('Xush kelibsiz ✓'); if (nx) setTimeout(nx, 300);
             });
         }
         function saveProfileInfo() {
@@ -1331,7 +1391,7 @@
                 <div style="font-size:11px;color:var(--text-muted);line-height:1.5;margin-bottom:8px">BTS haqi (bo'lsa) savatda aniq ko'rinadi va buyurtmadan keyin o'zgarmaydi — og'irlik uchun qo'shimcha BTS haqi olinmaydi.</div>${winterNote()}`;
         }
         function winterNote() { const w = ME && ME.cfg.winter; return w && w.on ? `<div style="font-size:11.5px;line-height:1.5;margin:6px 0 10px;padding:10px;border-radius:10px;background:rgba(80,160,255,0.12);border:1px solid rgba(80,160,255,0.5)">${esc(w.note)}</div>` : ''; }
-        async function loadProducts() { PRODUCTS = await api('/api/products'); renderCatalog(); renderCart(); if (ME && ME.registered) renderReqs(); }
+        async function loadProducts() { PRODUCTS = await api('/api/products'); renderCatalog(); renderCart(); if (ME && ME.registered) renderReqs(); openDeepProduct(); }
         async function refreshProducts() {   // narx / ombor o'zgarsa ochiq ilovada ham o'zi yangilanadi
             try {
                 const np = await api('/api/products'), sig = a => JSON.stringify(a.map(p => [p.id, p.price, p.stock, p.name, p.imgs.length]));
@@ -1353,8 +1413,9 @@
         const firstImg = p => { const u = p.imgs[0] || Object.values(p.cimgs).flat()[0]; return u ? API + u : ''; };
         function renderCatalog() {
             renderCats();
-            const q = ($('search-input').value || '').toLowerCase();
-            const l = PRODUCTS.filter(p => (CUR_CAT === 'Barchasi' || p.cat === CUR_CAT || (CUR_CAT === '__sale' && p.old_price)) && p.name.toLowerCase().includes(q));
+            const q = normS($('search-input').value);
+            let l = PRODUCTS.filter(p => (CUR_CAT === 'Barchasi' || p.cat === CUR_CAT || (CUR_CAT === '__sale' && p.old_price))).map(p => [p, searchScore(p, q)]).filter(x => x[1] > 0);
+            if (q) l.sort((a, b) => b[1] - a[1]); l = l.map(x => x[0]);
             const hot = hotLimit();
             $('product-grid').innerHTML = l.map(p => pcard(p, hot)).join('');
             $('catalog-empty').style.display = l.length ? 'none' : 'block';
@@ -1366,33 +1427,33 @@
             $('empty-cat-desc').innerText = catName === 'Barchasi' ? "Adminlar tomonidan yangi tovarlar yuklanishi kutilmoqda. Biz faqat sifatli mahsulotlarni joylaymiz." : "Hozircha ushbu toifada yangi mahsulotlar yo'q.";
             sel();
         }
-        function openProduct(id, color, size, cargo) {
-            curP = PRODUCTS.find(p => p.id === id); if (!curP) return;
+        function openProduct(id, color, size, cargo, ci) {
+            EDIT_CI = ci ?? null; curP = PRODUCTS.find(p => p.id === id); if (!curP) return;
             selCargo = ''; selC = curP.colors[0] || ''; selS = curP.sizes[0] || ''; OPT_OPEN = {};
             outer: for (const c of (curP.colors.length ? curP.colors : [''])) for (const s of (curP.sizes.length ? curP.sizes : [''])) if (stockOf(curP, c, s) > 0) { selC = c; selS = s; break outer; }
             if (color !== undefined && (!curP.colors.length || curP.colors.includes(color))) selC = color;   // savatdan ochilganda tanlangan variant
             if (size !== undefined && (!curP.sizes.length || curP.sizes.includes(size))) selS = size;
             if (cargo) selCargo = cargo;
-            drawSheet(); $('prod-modal').classList.add('show');
+            drawSheet(); $('prod-modal').classList.add('show'); $('prod-body').scrollTop = 0;
         }
         function drawSheet() {
             const p = curP, sizes = p.sizes.length ? p.sizes : [''];
             const opt = (arr, k, cur, dis) => arr.map((v, i) => `<span class="opt ${v === cur ? 'sel' : ''} ${dis(v) ? 'dis' : ''}" onclick="pick('${k}',${i})">${esc(v)}</span>`).join('');
             const pics = [...new Set([...(p.cimgs[selC] || []), ...p.imgs, ...Object.values(p.cimgs).flat()])];   // tanlangan rang birinchi, keyin qolgan hamma rasmlar
             SHEET_PICS = pics.map(u => API + u);
-            const gal = pics.length ? `<div class="gal-wrap"><div class="gal" style="display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory" onscroll="const n=this.nextElementSibling,i=Math.round(this.scrollLeft/(this.firstElementChild.offsetWidth+8));if(n)n.firstChild.nodeValue=(i+1)+' / ${pics.length} '">${pics.map((u, i) => `<div class="pimg" style="height:240px;min-width:${pics.length > 1 ? '85%' : '100%'};scroll-snap-align:start;cursor:zoom-in" onclick="prodView(${i})"><img src="${esc(API + u)}"></div>`).join('')}</div><span class="gal-n">${pics.length > 1 ? `1 / ${pics.length} ` : ''}<i class="fas fa-expand"></i></span></div>` : '<div class="pimg" style="height:140px;margin-bottom:12px"><i class="fas fa-box-open"></i></div>';
+            const gal = pics.length ? `<div class="gal-wrap"><div class="gal" style="display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory" onscroll="const n=this.nextElementSibling,i=Math.round(this.scrollLeft/(this.firstElementChild.offsetWidth+8));if(n)n.firstChild.nodeValue=(i+1)+' / ${pics.length} '">${pics.map((u, i) => `<div class="pimg" style="height:240px;min-width:100%;scroll-snap-align:start;cursor:zoom-in" onclick="prodView(${i})"><img src="${esc(API + u)}"></div>`).join('')}</div><span class="gal-n">${pics.length > 1 ? `1 / ${pics.length} ` : ''}<i class="fas fa-expand"></i></span></div>` : '<div class="pimg" style="height:140px;margin-bottom:12px"><i class="fas fa-box-open"></i></div>';
             const left = stockOf(p, selC, selS), out = left <= 0;
             const cg = ME.cfg.cargo;
-            $('prod-body').innerHTML = `<b class="sheet-x" onclick="closeModal('prod-modal')"><i class="fas fa-xmark"></i></b>${gal}<h3 style="margin-bottom:6px">${esc(p.name)}</h3><div class="prow ${p.old_price ? 'sale' : ''}" style="margin-top:0"><span class="pprice" style="font-size:20px">${fmt(p.price)} so'm</span>${p.sale_pct ? `<span class="pdisc" style="font-size:13px">↓${Number(p.sale_pct)}%</span>` : ''}${p.old_price ? cdChip(p.sale_until) : ''}</div>
-                ${p.old_price ? `<div class="pold" style="font-size:13px">${fmt(p.old_price)} so'm</div>` : ''}<div class="pmeta" style="margin:4px 0">${p.sold ? `<span>🛍 ${Number(p.sold)} ta sotildi</span>` : ''}${p.new ? '<span style="color:#10b981">✨ Yangi</span>' : ''}</div><div id="prod-rev-sum" style="margin-bottom:10px;min-height:4px"></div>
+            $('prod-body').innerHTML = `<div class="ps-act"><div><b class="psb" onclick="shareProduct()" title="Ulashish"><i class="fas fa-share-nodes"></i></b>${favBtn(p.id)}<b class="psb" onclick="closeModal('prod-modal')"><i class="fas fa-xmark"></i></b></div></div><div class="ps-gal">${pics.length ? gal : '<div class="pimg" style="height:200px"><i class="fas fa-box-open"></i></div>'}</div><div class="ps-body"><h3 style="margin-bottom:6px">${esc(p.name)}</h3><div class="prow ${p.old_price ? 'sale' : ''}" style="margin-top:0"><span class="pprice" style="font-size:20px">${fmt(p.price)} so'm</span>${p.sale_pct ? `<span class="pdisc" style="font-size:13px">↓${Number(p.sale_pct)}%</span>` : ''}${p.old_price ? cdChip(p.sale_until) : ''}</div>
+                ${p.old_price ? `<div class="pold" style="font-size:13px">${fmt(p.old_price)} so'm</div>` : ''}<div class="pmeta" style="margin:4px 0">${p.week_buyers ? `<span style="color:#ff7a45">🔥 Bu hafta ${Number(p.week_buyers)} kishi sotib oldi</span>` : ''}${p.sold ? `<span>🛍 ${Number(p.sold)} ta sotildi</span>` : ''}${p.new ? '<span style="color:#10b981">✨ Yangi</span>' : ''}</div><div id="prod-rev-sum" style="margin-bottom:10px;min-height:4px"></div>
                 ${p.colors.length ? `<label class="lbl">RANG</label><div style="margin:8px 0">${optList(p.colors, 'c', selC, c => p.tracked && sizes.every(s => stockOf(p, c, s) <= 0))}</div>` : ''}
                 ${p.sizes.length ? `<label class="lbl">${sizeLbl(p.cat)}${selS ? `: <span style="color:var(--text-main);text-transform:none">${esc(selS)}</span>` : ''}</label><div style="margin:8px 0">${optList(p.sizes, 's', selS, s => stockOf(p, selC, s) <= 0)}</div>` : ''}
                 ${p.tracked ? `<p style="font-size:12px;margin:4px 0 10px;color:${out ? 'var(--primary-color)' : 'var(--text-muted)'}">${out ? 'Bu variant tugadi' : (left <= 10 ? 'Qoldi: ' + left + ' ta' : 'Mavjud')}</p>` : ''}
                 <label class="lbl">KARGO TURI (majburiy)</label><div style="margin:8px 0">${['avia', 'avto'].map(k => `<span class="opt ${selCargo === k ? 'sel' : ''}" onclick="pickCargo('${k}')">${CARGO[k]} · $${cg[k].usd}/kg · ${esc(cg[k].days)} kun</span>`).join('')}</div>
                 <p style="font-size:11px;color:var(--text-muted);line-height:1.5;margin-bottom:8px">⚠️ Kargo haqi narxga kirmagan. Mahsulot O'zbekistonga kelganda chiqqan og'irlik (kg) bo'yicha alohida to'lanadi, to'lov tasdiqlangach BTS orqali jo'natamiz. Kargo haqi mahsulot kelganidan keyin ${ME ? ME.cfg.cargo_days : 10} kun ichida to'lanmasa, mahsulot musodara qilinadi va to'langan pul qaytarilmaydi.</p>
                 ${btsNote(p.weight)}
-                <div style="display:flex;gap:10px;margin-top:10px;align-items:center">${favBtn(p.id, true)}<button class="btn btn-gold" style="margin:0;flex:1" ${out ? 'disabled' : ''} onclick="addToCart()"><i class="fas fa-cart-plus"></i> ${out ? 'Tugadi' : "Savatga qo'shish"}</button></div>
-                ${specsBlock(p)}<div id="prod-rev"></div>`;
+                <div style="display:flex;gap:10px;margin-top:10px;align-items:center">${EDIT_CI !== null && CART[EDIT_CI] ? `<button class="btn btn-gold" style="margin:0;flex:1" ${out ? 'disabled' : ''} onclick="saveCartEdit()"><i class="fas fa-check"></i> ${out ? 'Bu variant tugadi' : "O'zgarishni saqlash"}</button>` : `<button class="btn btn-gold" style="margin:0;flex:1" ${out ? 'disabled' : ''} onclick="addToCart()"><i class="fas fa-cart-plus"></i> ${out ? 'Tugadi' : "Savatga qo'shish"}</button>`}</div>
+                ${specsBlock(p)}<div id="prod-rev"></div>${similarBlock(p)}<div style="height:20px"></div></div>`;
             sheetReviews(p.id);
         }
         function pick(k, i) {
@@ -1442,10 +1503,10 @@
             if (DELIVERY === 'pickup' && sh && !sh.pickup) DELIVERY = 'bts';
             const ps = DELIVERY === 'pickup' ? 'pickup' : (!QUOTE || QUOTE.key !== qKey() ? 'wait' : QUOTE.error ? 'err' : QUOTE.need_addr ? 'addr' : 'ok');
             if (ps === 'wait') quoteNow();
-            const fee = cartFee(), bv = ps === 'pickup' ? 'Bepul' : ps === 'wait' ? 'hisoblanmoqda…' : ps === 'addr' ? 'Profilda BTS manzilini kiriting' : ps === 'err' ? esc(QUOTE.error) : (fee ? (QUOTE.cost > fee ? `<s style="color:var(--text-muted);font-weight:400">${fmt(QUOTE.cost)}</s> ` : '') + fmt(fee) + " so'm" : (QUOTE.cost ? `<s style="color:var(--text-muted);font-weight:400">${fmt(QUOTE.cost)}</s> ` : '') + 'Bepul 🎉');
+            const fee = cartFee(), bv = ps === 'pickup' ? 'Bepul' : ps === 'wait' ? 'hisoblanmoqda…' : ps === 'addr' ? (isGuest() ? "Ro'yxatdan o'tgach hisoblanadi" : 'Profilda BTS manzilini kiriting') : ps === 'err' ? esc(QUOTE.error) : (fee ? (QUOTE.cost > fee ? `<s style="color:var(--text-muted);font-weight:400">${fmt(QUOTE.cost)}</s> ` : '') + fmt(fee) + " so'm" : (QUOTE.cost ? `<s style="color:var(--text-muted);font-weight:400">${fmt(QUOTE.cost)}</s> ` : '') + 'Bepul 🎉');
             const saved = ps === 'ok' && QUOTE.cost ? QUOTE.cost - fee : 0;   // BTS tarifining biz qoplagan qismi
             box.innerHTML = '<div class="glass-card" style="padding:5px 20px">' + CART.map((x, i) => { const p = PRODUCTS.find(p => p.id === x.id); if (!p) return '';
-                return `<div class="cart-row" style="gap:12px"><div onclick="openProduct(${ja(p.id)},${ja(x.color)},${ja(x.size)},${ja(x.cargo)})" style="display:flex;gap:12px;flex:1;align-items:center;cursor:pointer;min-width:0">${thumb(itemImg(x))}<div style="flex:1;min-width:0"><div class="pname" style="margin:0">${esc(p.name)}</div><div style="font-size:11px;color:var(--text-muted)">${esc([x.color, x.size].filter(Boolean).join(' · '))} · ${CARGO[x.cargo]}</div><div class="pprice">${fmt(p.price * x.qty)} so'm</div></div></div><div class="qty"><b onclick="chQty(${i},-1)">−</b>${x.qty}<b onclick="chQty(${i},1)">+</b></div></div>`; }).join('') + '</div>'
+                return `<div class="cart-row" style="gap:12px"><div onclick="openProduct(${ja(p.id)},${ja(x.color)},${ja(x.size)},${ja(x.cargo)},${i})" style="display:flex;gap:12px;flex:1;align-items:center;cursor:pointer;min-width:0">${thumb(itemImg(x))}<div style="flex:1;min-width:0"><div class="pname" style="margin:0">${esc(p.name)}</div><div class="cvar">${esc([x.color, x.size].filter(Boolean).join(' · '))} · ${CARGO[x.cargo]} <span style="color:var(--gold-color)">✎ o'zgartirish</span></div><div class="pprice">${fmt(p.price * x.qty)} so'm</div></div></div><div class="qty"><b onclick="chQty(${i},-1)">−</b>${x.qty}<b onclick="chQty(${i},1)">+</b></div></div>`; }).join('') + '</div>'
                 + `<div class="glass-card"><div style="font-size:11px;color:var(--gold-color);font-weight:700;margin-bottom:8px">CHEGIRMA KODI</div>
                 ${PROMO ? `<div class="hrow"><span style="flex:1;font-weight:800">${esc(PROMO.code)} · ${PROMO.pct}%</span><b onclick="clearPromo()" style="color:var(--primary-color);padding:6px">×</b></div>` : `<div style="display:flex;gap:8px;margin-bottom:12px"><input id="promo-in" class="form-control" placeholder="XB2-ABC123" value="${esc(pv)}" style="margin:0"><button class="btn btn-outline" style="width:auto;padding:0 18px" onclick="applyPromo()">Qo'llash</button></div>`}
                 ${sh ? `<div style="font-size:11px;color:var(--gold-color);font-weight:700;margin:6px 0">YETKAZISH USULI</div><div style="margin-bottom:10px"><span class="opt ${DELIVERY === 'bts' ? 'sel' : ''}" onclick="setDelivery('bts')">📦 BTS pochta</span>${sh.pickup ? `<span class="opt ${DELIVERY === 'pickup' ? 'sel' : ''}" onclick="setDelivery('pickup')">🏢 Farg'ona ofisidan olish</span>` : ''}</div>
@@ -1453,13 +1514,14 @@
                 <div style="display:flex;justify-content:space-between;font-weight:800;margin-bottom:6px"><span>Mahsulotlar:</span><span>${fmt(total)} so'm</span></div>${(() => { const sv = CART.reduce((t, x) => { const p = PRODUCTS.find(y => y.id === x.id); return t + (p && p.old_price ? (p.old_price - p.price) * x.qty : 0); }, 0); return sv > 0 ? `<div style="display:flex;justify-content:space-between;font-size:12.5px;color:#a855f7;font-weight:700;margin-bottom:6px"><span>🏷 Aksiya bo'yicha tejadingiz:</span><span>${fmt(sv)} so'm</span></div>` : ''; })()}
                 ${disc ? `<div style="display:flex;justify-content:space-between;font-size:13px;color:#2ecc71;margin-bottom:6px"><span>Chegirma:</span><span>−${fmt(disc)} so'm</span></div>` : ''}
                 <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span>${DELIVERY === 'pickup' ? 'Ofisdan olish' : 'BTS pochta'}:</span><span style="color:${fee || ps !== 'ok' ? 'inherit' : '#2ecc71'};text-align:right">${bv}</span></div>
-                ${saved > 0 ? `<div style="font-size:12px;color:#2ecc71;margin:-2px 0 8px;text-align:right"><i class="fas fa-gift"></i> BTS tarifidan <b>${fmt(saved)} so'm</b>ni buyurtmangiz hisobidan biz to'laymiz</div>` : ''}
+                ${ps === 'ok' && QUOTE.cost ? `<div style="font-size:11.5px;color:var(--text-muted);margin:-2px 0 8px;line-height:1.6;background:var(--surface-color);border-radius:10px;padding:8px 10px">📦 Taxminiy og'irlik: <b>${QUOTE.kg} kg</b> · BTS tarifi: <b>${fmt(QUOTE.cost)} so'm</b><br>${saved > 0 ? `<span style="color:#2ecc71"><i class="fas fa-gift"></i> Shundan <b>${fmt(saved)} so'm</b>ni biz to'laymiz</span><br>` : ''}Sizdan: <b>${fee ? fmt(fee) + " so'm" : 'Bepul'}</b><br><span style="font-size:10.5px">Mahsulot qo'shilganda og'irlik ham oshadi, shuning uchun BTS tarifi o'zgarishi mumkin.</span></div>` : ''}
                 ${DELIVERY === 'bts' ? `<div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;line-height:1.5">BTS haqi viloyatingiz va buyurtma summasiga qarab hisoblanadi: summa yetarli bo'lsa bepul. Shu yerda ko'ringan BTS haqi yakuniy — og'irlik uchun keyin qo'shimcha BTS haqi olinmaydi.</div>${winterNote()}` : ''}
                 <div style="display:flex;justify-content:space-between;font-weight:800;margin-bottom:15px"><span>To'lanadi:</span><span style="color:var(--gold-color)">${fmt(total - disc + fee)} so'm${ps === 'wait' ? ' + BTS' : ''}</span></div>
                 <div style="background:rgba(255,183,0,0.1);border:1px solid var(--gold-color);border-radius:12px;padding:12px;font-size:11.5px;line-height:1.55;margin-bottom:14px">⚠️ <b>Kargo haqi narxga kirmagan.</b> Mahsulot O'zbekistonga kelganda chiqqan og'irlik (kg) bo'yicha alohida to'lanadi${cg ? `: ✈️ Avia $${cg.avia.usd}/kg (${esc(cg.avia.days)} kun), 🚛 Avto $${cg.avto.usd}/kg (${esc(cg.avto.days)} kun)` : ''}. Og'irlik va summa Buyurtmalarim bo'limida ko'rinadi. To'lov tasdiqlangach BTS pochta orqali jo'natamiz. Xitoy omboridan chiqqan mahsulotni bekor qilib bo'lmaydi.<br>⏰ <b>Kargo haqi mahsulot kelganidan keyin ${ME ? ME.cfg.cargo_days : 10} kun ichida to'lanishi shart.</b> Aks holda mahsulot musodara qilinadi va to'langan mahsulot puli qaytarilmaydi.</div>
                 <button class="btn btn-gold" onclick="checkout()"><i class="fas fa-check"></i> Buyurtma berish</button><button class="btn btn-outline" style="margin-top:10px" onclick="CART=[];saveCart()">Savatni tozalash</button></div>`;
         }
         function checkout() {   // avval eng so'nggi narx va BTS haqini olamiz, keyin tasdiqlash oynasi
+            if (!needAuth('Buyurtma berish uchun', () => switchTab('cart'))) return;
             if (busy) return; let ready = false;
             call(async () => { await loadProducts(); if (DELIVERY === 'bts') { QUOTE = null; await quoteAwait(); } ready = true; }).then(() => { if (ready) checkout2(); });
         }
@@ -1603,7 +1665,7 @@
 
         // ===== TOPIB BERISH (rasm / video yuborish) =====
         let REQ_MEDIA = [];
-        function openReq() { REQ_MEDIA = []; $('req-text').value = ''; reqRender(); $('req-modal').classList.add('show'); }
+        function openReq() { if (!needAuth('Mahsulot topib berish so\'rovini yuborish uchun', openReq)) return; REQ_MEDIA = []; $('req-text').value = ''; reqRender(); $('req-modal').classList.add('show'); }
         function reqRender() {
             $('req-media').innerHTML = REQ_MEDIA.map((m, i) => `<div class="th">${m.kind === 'video' ? `<video src="${m.data}" muted playsinline style="width:100%;height:100%;object-fit:cover"></video><i class="fas fa-play" style="position:absolute;color:#fff;font-size:16px"></i>` : `<img src="${m.data}">`}<b onclick="reqDel(${i})">×</b></div>`).join('')
                 + (REQ_MEDIA.length < 5 ? `<div class="th add" onclick="reqPick()">+</div>` : '');
@@ -1724,7 +1786,7 @@
             });
         }
 
-        // ===== OTZIVLAR =====
+        // ===== SHARHLAR =====
         const REV_CACHE = {};
         const stars = (n, size = 13) => `<span style="color:var(--gold-color);font-size:${size}px;letter-spacing:1px">${'★'.repeat(Math.round(n))}<span style="color:var(--surface-border)">${'★'.repeat(5 - Math.round(n))}</span></span>`;
         function revCard(v, admin) {
@@ -1745,25 +1807,25 @@
         }
         function renderRevStrip() {
             const s = ME && ME.cfg.reviews, el = $('rev-sub'); if (!el) return;   // Sozlamalar → Xaridorlar fikrlari
-            el.innerText = s && s.count ? `⭐ ${s.avg.toFixed(1)} · ${s.count} ta otziv · faqat haqiqiy xaridorlar` : "Hozircha otziv yo'q";
+            el.innerText = s && s.count ? `⭐ ${s.avg.toFixed(1)} · ${s.count} ta sharh · faqat haqiqiy xaridorlar` : "Hozircha sharh yo'q";
         }
         async function openReviews() {
-            $('revs-body').innerHTML = '<h3 style="margin-bottom:12px">⭐ Mijozlar otzivlari</h3><p style="font-size:12px;color:var(--text-muted)">Yuklanmoqda…</p>'; $('revs-modal').classList.add('show');
-            try { const r = await loadReviews(); $('revs-body').innerHTML = `<h3 style="margin-bottom:4px">⭐ Mijozlar otzivlari</h3><div style="margin-bottom:12px">${stars(r.summary.avg, 16)} <b>${r.summary.avg.toFixed(1)}</b> <span style="font-size:12px;color:var(--text-muted)">· ${r.summary.count} ta otziv · faqat mahsulotni olgan xaridorlar yoza oladi</span></div>` + (r.items.map(v => revCard(v)).join('') || '<p style="font-size:12px;color:var(--text-muted)">Hozircha otzivlar yo\'q</p>'); }
+            $('revs-body').innerHTML = '<h3 style="margin-bottom:12px">⭐ Mijozlar sharhlari</h3><p style="font-size:12px;color:var(--text-muted)">Yuklanmoqda…</p>'; $('revs-modal').classList.add('show');
+            try { const r = await loadReviews(); $('revs-body').innerHTML = `<h3 style="margin-bottom:4px">⭐ Mijozlar sharhlari</h3><div style="margin-bottom:12px">${stars(r.summary.avg, 16)} <b>${r.summary.avg.toFixed(1)}</b> <span style="font-size:12px;color:var(--text-muted)">· ${r.summary.count} ta sharh · faqat mahsulotni olgan xaridorlar yoza oladi</span></div>` + (r.items.map(v => revCard(v)).join('') || '<p style="font-size:12px;color:var(--text-muted)">Hozircha sharhlar yo\'q</p>'); }
             catch (e) { $('revs-body').innerHTML = '<p>' + esc(e.message) + '</p>'; }
         }
         async function sheetReviews(pid) {
             const box = $('prod-rev'); if (!box) return;
             try {
                 const r = await loadReviews(pid); if (!curP || curP.id !== pid || !$('prod-rev')) return;
-                $('prod-rev-sum').innerHTML = r.summary.count ? `${stars(r.summary.avg)} <b style="font-size:13px">${r.summary.avg.toFixed(1)}</b> <span style="font-size:12px;color:var(--text-muted)">(${r.summary.count} ta otziv)</span>` : '';
+                $('prod-rev-sum').innerHTML = r.summary.count ? `${stars(r.summary.avg)} <b style="font-size:13px">${r.summary.avg.toFixed(1)}</b> <span style="font-size:12px;color:var(--text-muted)">· ${r.summary.count} ta sharh${curP && curP.orders ? ' · ' + curP.orders + ' ta buyurtma' : ''}</span>` : (curP && curP.orders ? `<span style="font-size:12px;color:var(--text-muted)">${curP.orders} ta buyurtma</span>` : '');
                 const pick3 = [...r.items].sort(() => Math.random() - .5).slice(0, 3);
-                $('prod-rev').innerHTML = r.items.length ? `<div style="display:flex;justify-content:space-between;align-items:center;margin:18px 0 10px"><b style="font-size:14px">Otzivlar (${r.summary.count})</b>${stars(r.summary.avg, 12)}</div>` + pick3.map(revBubble).join('')
+                $('prod-rev').innerHTML = r.items.length ? `<div style="display:flex;justify-content:space-between;align-items:center;margin:18px 0 10px"><b style="font-size:14px">Sharhlar (${r.summary.count})</b>${stars(r.summary.avg, 12)}</div>` + pick3.map(revBubble).join('')
                     + (r.summary.count > 0 ? `<button class="btn btn-outline" style="padding:11px;font-size:13px" onclick="openProdReviews(${ja(pid)})">Barchasini ko'rish (${r.summary.count}) ›</button>` : '') : '';
             } catch (e) {}
         }
         function viewPublic(u) { $('mv-body').innerHTML = `<img src="${esc(API + u)}" style="width:100%;border-radius:14px">`; $('mv-modal').classList.add('show'); }
-        // -- otziv yozish --
+        // -- sharh yozish --
         let RV_ORDER = null, RV_STARS = 5, RV_PH = [];
         function openReview(oid) {
             const o = ME.orders.find(x => x.id === oid); if (!o) return;
@@ -1786,31 +1848,31 @@
                 const text = $('rv-text').value.trim(); if (text.length < 5) throw new Error('Fikringizni yozing (kamida 5 ta belgi)');
                 await api('/api/review', { order_id: RV_ORDER, rating: RV_STARS, text, photos: RV_PH });
                 closeModal('rv-modal'); await refreshMe(); hap('success');
-                tg.showAlert("Rahmat! Otzivingiz tekshirilgach ilovada chop etiladi.");
+                tg.showAlert("Rahmat! Sharhingiz tekshirilgach ilovada chop etiladi.");
             });
         }
         function revBtn(o) {
             if (o.status !== 'Yetkazildi') return '';
-            if (o.review) return `<div style="margin-top:8px;font-size:12px;color:var(--text-muted)">⭐ Otzivingiz: <b>${esc(o.review)}</b></div>`;
-            return `<button class="btn btn-gold" style="margin-top:10px;padding:11px;font-size:13px" onclick="openReview(${Number(o.id)})">⭐ Otziv qoldirish</button>`;
+            if (o.review) return `<div style="margin-top:8px;font-size:12px;color:var(--text-muted)">⭐ Sharhingiz: <b>${esc(o.review)}</b></div>`;
+            return `<button class="btn btn-gold" style="margin-top:10px;padding:11px;font-size:13px" onclick="openReview(${Number(o.id)})">⭐ Sharh qoldirish</button>`;
         }
-        // -- kabinet: otzivlar --
+        // -- kabinet: sharhlar --
         let ADM_RV_ST = 'Kutilmoqda', ADM_RVS = [];
         function admRvTab(st) { ADM_RV_ST = st; document.querySelectorAll('#adm-rv-tabs .cat-chip').forEach(c => c.classList.toggle('active', c.dataset.s === st)); loadAdminReviews(); }
         async function loadAdminReviews() {
             try {
                 const r = await api('/api/admin/reviews?status=' + encodeURIComponent(ADM_RV_ST)); ADM_RVS = r.items;
-                $('adm-rv-sum').innerHTML = r.summary.count ? `${stars(r.summary.avg, 15)} <b>${r.summary.avg.toFixed(1)}</b> · ${r.summary.count} ta chop etilgan` : "Hali chop etilgan otziv yo'q";
+                $('adm-rv-sum').innerHTML = r.summary.count ? `${stars(r.summary.avg, 15)} <b>${r.summary.avg.toFixed(1)}</b> · ${r.summary.count} ta chop etilgan` : "Hali chop etilgan sharh yo'q";
                 $('adm-rvs').innerHTML = r.items.map(v => revCard(v, true) + `<div style="margin:-4px 0 14px">
                     <input class="form-control" id="rvr-${Number(v.id)}" placeholder="Do'kon javobi (ixtiyoriy, hammaga ko'rinadi)" value="${esc(v.reply)}" style="margin:6px 0;padding:10px">
                     <div style="display:flex;gap:8px">${v.status !== 'Chop etildi' ? `<button class="btn btn-gold" style="padding:10px;font-size:12px" onclick="rvAct(${Number(v.id)},'publish')">✅ Chop etish</button>` : `<button class="btn btn-gold" style="padding:10px;font-size:12px" onclick="rvAct(${Number(v.id)},'reply')">💬 Javobni saqlash</button>`}
-                    ${v.status !== 'Rad etildi' ? `<button class="btn btn-outline" style="padding:10px;font-size:12px;width:auto" onclick="rvAct(${Number(v.id)},'reject')">Rad etish</button>` : ''}</div></div>`).join('') || '<p style="font-size:12px;color:var(--text-muted)">Otzivlar yo\'q</p>';
+                    ${v.status !== 'Rad etildi' ? `<button class="btn btn-outline" style="padding:10px;font-size:12px;width:auto" onclick="rvAct(${Number(v.id)},'reject')">Rad etish</button>` : ''}</div></div>`).join('') || '<p style="font-size:12px;color:var(--text-muted)">Sharhlar yo\'q</p>';
                 document.querySelectorAll('#adm-rvs .th[data-rv]').forEach(async el => { try { el.innerHTML = `<img src="${await authBlob(el.dataset.rv, 'rvmedia')}">`; } catch (e) {} });
             } catch (e) { tg.showAlert(e.message); }
         }
         function rvAct(id, action) {
             const go = () => call(async () => { await api('/api/admin/review', { id, action, reply: $('rvr-' + id).value }); toast('Bajarildi ✓'); Object.keys(REV_CACHE).forEach(k => delete REV_CACHE[k]); loadAdminReviews(); refreshMe().catch(() => {}); });
-            if (action === 'reject') tg.showConfirm("Otziv rad etilsinmi? Faqat haqorat, spam yoki xaridga aloqasiz otzivlarni rad eting — salbiy, lekin halol otzivlar ham ishonchni oshiradi.", ok => { if (ok) go(); }); else go();
+            if (action === 'reject') tg.showConfirm("Sharh rad etilsinmi? Faqat haqorat, spam yoki xaridga aloqasiz sharhlarni rad eting — salbiy, lekin halol sharhlar ham ishonchni oshiradi.", ok => { if (ok) go(); }); else go();
         }
         async function viewRvMedia(n) { try { $('mv-body').innerHTML = `<img src="${await authBlob(n, 'rvmedia')}" style="width:100%;border-radius:14px">`; $('mv-modal').classList.add('show'); } catch (e) { tg.showAlert(e.message); } }
 
@@ -1887,7 +1949,7 @@
         function admTab(t) {
             ADM_SECS.forEach(x => $('adm-' + x).style.display = x === t ? 'block' : 'none');
             document.querySelectorAll('#adm-tabs .cat-chip').forEach(c => c.classList.toggle('active', c.dataset.t === t));
-            ({ dash: () => loadDash('today'), settings: () => { SET_CUR = ''; loadSettings(); }, ads: () => { adReset(); loadAds(); }, products: () => { pfRender(true); pfPresets(); specRows(); if (ME.is_admin || staffCan('products_edit')) loadAdminProducts(); }, ord: loadAdminOrders, req: loadAdminReqs, rev: loadAdminReviews, users: () => loadAdminUsers(), staff: () => { stfPage('home'); loadStaff(); } })[t]?.();
+            ({ dash: () => loadDash('today'), settings: () => { SET_CUR = ''; loadSettings(); }, ads: () => { adReset(); loadAds(); }, products: () => { pfRender(true); pfPresets(); specRows(); if (ME.is_admin || staffCan('products_edit')) loadAdminProducts(); }, ord: loadAdminOrders, msg: loadNotices, req: loadAdminReqs, rev: loadAdminReviews, users: () => loadAdminUsers(), staff: () => { stfPage('home'); loadStaff(); } })[t]?.();
         }
         function dashRange(el) {
             el.parentNode.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active')); el.classList.add('active');
@@ -1906,7 +1968,7 @@
                 const d2 = t => new Date(t * 1000).toLocaleDateString('ru-RU'), span = s.from ? `${d2(s.from)} — ${d2(Math.min(s.to, Date.now() / 1000 + 86400) - 1)}` : 'Butun davr';
                 const row = (l, v, st = '') => `<div class="hrow"><span style="flex:1;font-size:13px">${l}</span><b style="${st}">${v}</b></div>`;
                 const neg = v => v < 0 ? 'color:var(--primary-color)' : 'color:#2ecc71';
-                $('dash-body').innerHTML = `<div class="glass-card" style="padding:16px 18px;border-color:#2ecc71"><div style="font-size:11.5px;color:var(--text-muted)">📅 ${span}</div><div style="font-size:12px;margin-top:6px">Umumiy sof foyda</div><div style="font-size:26px;font-weight:800;${neg(s.total_net)}">${so(s.total_net)}</div><div style="font-size:11.5px;color:var(--text-muted)">tovar ${so(s.net)} ${s.cargo_profit < 0 ? '−' : '+'} kargo ${so(Math.abs(s.cargo_profit))}</div></div>
+                $('dash-body').innerHTML = `<div class="hrow" style="margin-bottom:10px;font-size:12px"><span style="flex:1;color:var(--text-muted)">${s.reset_at ? '🔄 Hisobot ' + dtt(s.reset_at) + ' dan boshlab' : 'Hisobot boshidan'}</span>${s.reset_at ? `<b style="color:var(--gold-color);cursor:pointer;padding:4px" onclick="statsReset(1)">Qaytarish</b>` : ''}<b style="color:var(--primary-color);cursor:pointer;padding:4px" onclick="statsReset(0)">Noldan boshlash</b></div><div class="glass-card" style="padding:16px 18px;border-color:#2ecc71"><div style="font-size:11.5px;color:var(--text-muted)">📅 ${span}</div><div style="font-size:12px;margin-top:6px">Umumiy sof foyda</div><div style="font-size:26px;font-weight:800;${neg(s.total_net)}">${so(s.total_net)}</div><div style="font-size:11.5px;color:var(--text-muted)">tovar ${so(s.net)} ${s.cargo_profit < 0 ? '−' : '+'} kargo ${so(Math.abs(s.cargo_profit))}</div></div>
                     <div class="glass-card"><h3 style="margin-bottom:8px">💰 Savdo</h3>${row('Buyurtmalar', s.orders + ' ta')}${row('Tushum', so(s.revenue))}${row('Tannarx', so(s.cost))}${row('Tovar foydasi + mijozdan olingan BTS haqi', so(s.profit))}${row("BTS xarajati (tarif bo'yicha)", so(s.bts_cost))}${row('Tovar sof foydasi (BTS dan keyin)', so(s.net), neg(s.net))}${row('Berilgan chegirmalar', so(s.discount))}${row('Bekor qilingan', s.cancelled + ' ta')}${row("Bekor so'rovlari (kutilmoqda)", s.cancel_req + ' ta', 'color:var(--gold-color)')}</div>
                     <div class="glass-card"><h3 style="margin-bottom:8px">🚚 Kargo</h3>${row("Og'irlik", `✈️ ${s.cargo_kg_avia} kg · 🚛 ${s.cargo_kg_avto} kg`)}${row("Mijozlardan olingan (to'langan)", so(s.cargo_in))}${row("Kargo kompaniyasiga to'lanadi", '−' + so(s.cargo_cost), 'color:var(--primary-color)')}${row('Kargo foydasi', so(s.cargo_profit), neg(s.cargo_profit))}${row("Mijozlardan kutilmoqda (to'lanmagan)", so(s.cargo_wait), 'color:var(--gold-color)')}
                         <p style="font-size:11px;color:var(--text-muted);margin-top:8px">Xarajat: Avia $${s.cost_avia}/kg, Avto $${s.cost_avto}/kg — Sozlamalarda o'zgartiriladi.</p></div>
@@ -2100,7 +2162,7 @@
             tg.showConfirm("Profildan chiqasizmi?\n\nMa'lumotlaringiz o'chmaydi. Login va parol bilan istalgan Telegram akkauntdan qayta kirishingiz mumkin.", ok => { if (ok) call(async () => {
                 await api('/api/logout', {}); try { localStorage.removeItem(CART_KEY); } catch (e) {}
                 CART = []; PROMO = null; FIRST = true; closeAdminPanel(); await refreshMe();
-                $('main-app').style.display = 'none'; $('auth-flow').style.display = 'block'; toggleAuthView('login'); hap('success'); }); });
+                enterApp(); hap('success'); toast('Chiqdingiz. Katalog ochiq qoladi'); }); });
         }
         function netBar(off) { $('net-bar').style.display = off ? 'block' : 'none'; }
 
@@ -2145,7 +2207,7 @@
         }
 
         // ===== MIJOZ SOZLAMALARI: XAVFSIZLIK =====
-        function setPage(v) { ['home', 'security'].forEach(x => $('sv-' + x).style.display = x === v ? 'block' : 'none'); if (v === 'security') renderSecurity(); window.scrollTo(0, 0); }
+        function setPage(v) { if (v === 'security' && !needAuth('Xavfsizlik sozlamalari uchun', () => { switchTab('settings'); setPage('security'); })) return; ['home', 'security'].forEach(x => $('sv-' + x).style.display = x === v ? 'block' : 'none'); if (v === 'security') renderSecurity(); window.scrollTo(0, 0); }
         const BMgr = () => (tg.BiometricManager && tg.isVersionAtLeast && tg.isVersionAtLeast('7.2')) ? tg.BiometricManager : null;
         let BM_P = null;
         function bmInit() {
@@ -2161,15 +2223,55 @@
             if (!s.pin) $('pin-form').style.display = 'block';
             $('pin-btns').innerHTML = s.pin ? `<button class="btn btn-outline" style="padding:12px;font-size:13px" onclick="$('pin-form').style.display='block'">PIN-ni o'zgartirish</button><button class="btn btn-outline" style="padding:12px;font-size:13px;color:var(--primary-color)" onclick="pinOff()">O'chirish</button>` : '';
             $('bio-card').style.display = s.pin ? 'block' : 'none';
+            $('wlock-row').style.display = s.pin ? 'flex' : 'none'; $('pin-forgot2').style.display = s.pin ? 'block' : 'none'; $('wlock-tog').checked = s.wlock !== false;
             $('sec-sub').innerText = s.pin ? (s.bio ? 'PIN + barmoq izi yoqilgan ✓' : 'PIN yoqilgan ✓') : "Parol, to'lov PIN-kodi, barmoq izi";
             const b = await bmInit(), av = !!(b && b.isBiometricAvailable), on = !!(s.bio && av && b.isBiometricTokenSaved);
             $('bio-toggle').disabled = !av; $('bio-toggle').checked = on;
             $('bio-status').innerText = !av ? 'Bu qurilmada mavjud emas' : (on ? 'Yoqilgan ✓' : "O'chiq");
         }
+        // ===== HAMYON QULFI: kirishda PIN yoki barmoq izi / Face ID =====
+        let WAL_UNTIL = 0;
+        const walletOk = () => !ME || !ME.registered || (ME.security && ME.security.wlock === false) || Date.now() < WAL_UNTIL;
+        document.addEventListener('visibilitychange', () => {   // ilova yopilsa / boshqa ilovaga o'tilsa hamyon yana qulflanadi
+            if (!document.hidden) return; WAL_UNTIL = 0;
+            if ($('tab-wallet') && $('tab-wallet').classList.contains('active') && !walletOk()) switchTab('catalog');
+        });
+        async function walletGate() {
+            if (!ME.security || !ME.security.pin) {
+                tg.showConfirm("🔒 Hamyoningiz xavfsizligi uchun avval PIN-kod o'rnating. Keyin hamyon faqat PIN yoki barmoq izi / Face ID bilan ochiladi.", ok => { if (ok) { switchTab('settings'); setPage('security'); } });
+                return false;
+            }
+            try {
+                const done = await withPay('Hamyonni ochish uchun', a => api('/api/security', { action: 'pin_check', ...a }));
+                if (done === false) return false;
+                WAL_UNTIL = Date.now() + 5 * 60 * 1000; hap('success'); return true;
+            } catch (e) { tg.showAlert(e.message); return false; }
+        }
+        function wlockToggle(on) {
+            call(async () => {
+                try {
+                    if (on) await api('/api/security', { action: 'wlock', on: true });
+                    else { const ok = await withPay("Hamyon qulfini o'chirish uchun", a => api('/api/security', { action: 'wlock', on: false, ...a })); if (ok === false) return; }
+                    toast(on ? 'Hamyon qulfi yoqildi ✓' : "Hamyon qulfi o'chirildi");
+                } finally { try { await refreshMe(); } catch (e) {} renderSecurity(); }
+            });
+        }
+        async function pinForgot() {   // PIN unutilsa: hisob paroli bilan yangi PIN o'rnatiladi (Telegram'ga xabar boradi)
+            pinDone(null); await new Promise(r => setTimeout(r, 250));
+            const pw = await pinAsk("PIN-ni tiklash uchun hisobingiz parolini kiriting. Parolni ham unutgan bo'lsangiz: Profildan chiqish → kirish oynasida «Parolni unutdingizmi?».", 'Hisob paroli', true); if (pw === null) return;
+            const a = await pinAsk('Yangi PIN-kod (4–6 raqam)', 'Yangi PIN'); if (a === null) return;
+            const b = await pinAsk('Yangi PIN-ni qayta kiriting', 'PIN qayta'); if (b === null) return;
+            if (a !== b) return tg.showAlert('PIN-lar bir xil emas, qayta urinib ko\'ring');
+            call(async () => {
+                await api('/api/security', { action: 'pin_set', password: pw, pin: a });
+                await bmClear(); await refreshMe(); renderSecurity(); hap('success');
+                tg.showAlert("Yangi PIN o'rnatildi ✓ Xavfsizlik uchun barmoq izi qayta yoqilishi kerak (Xavfsizlik bo'limida).");
+            });
+        }
         let PIN_RES = null;
         function pinAsk(why, title = 'PIN-kodni kiriting', pw = false) {
             return new Promise(res => {
-                PIN_RES = res; const i = $('pin-ask');
+                PIN_RES = res; const i = $('pin-ask'); $('pin-forgot').style.display = pw ? 'none' : 'block';
                 i.value = ''; i.className = 'form-control' + (pw ? '' : ' pin-in'); i.inputMode = pw ? 'text' : 'numeric'; i.maxLength = pw ? 64 : 6; i.placeholder = pw ? '••••••••' : '••••';
                 $('pin-title').innerText = title; $('pin-why').innerText = why; $('pin-modal').classList.add('show'); setTimeout(() => i.focus(), 250);
             });
@@ -2412,7 +2514,7 @@
             let s = null;
             document.addEventListener('touchstart', e => {
                 const sh = e.target.closest && e.target.closest('.modal.show .sheet'); if (!sh || e.touches.length > 1) { s = null; return; }
-                if (e.target.closest('input,textarea,select,.qty,[style*="overflow-x"]')) { s = null; return; }
+                if (e.target.closest('input,textarea,select,.qty,#bts-map,[style*="overflow-x"]')) { s = null; return; }
                 for (let el = e.target; el && el !== sh; el = el.parentElement) { if (el.scrollHeight > el.clientHeight + 2 && /auto|scroll/.test(getComputedStyle(el).overflowY)) { s = null; return; } }   // ichki aylantiriladigan matn (qoidalar va h.k.)
                 s = { sh, y0: e.touches[0].clientY, x0: e.touches[0].clientX, top: sh.scrollTop <= 0, dy: 0 };
             }, { passive: true });
@@ -2435,6 +2537,7 @@
             if (ms.length) { const m = ms[ms.length - 1]; return () => m.dispatchEvent(new MouseEvent('click', { bubbles: true })); }
             const ap = $('admin-panel-fullscreen');
             if (ap && ap.style.display === 'block') return ($('set-page') && $('set-page').style.display === 'block') ? () => setGroup('') : ($('adm-staff').style.display === 'block' && $('stf-home').style.display === 'none') ? () => stfPage('home') : closeAdminPanel;
+            if ($('auth-guest-bar') && $('auth-guest-bar').style.display === 'block' && $('auth-flow').style.display === 'block') return closeAuth;
             const act = document.querySelector('.view-section.active');
             if (act && act.id === 'tab-profile' && $('pv-home').style.display === 'none') return () => profView('home');
             if (act && act.id === 'tab-wallet' && $('wv-home').style.display === 'none') return () => walView('home');
@@ -2760,7 +2863,7 @@
         // ===== KARGO KALKULYATORI =====
         const calcPref = () => { try { return localStorage.getItem('xb_calc_fab') !== '0'; } catch (e) { return true; } };
         function calcVisible() {
-            const on = !!(ME && ME.registered && ME.cfg.calc), f = $('calc-fab');
+            const on = !!(ME && ME.cfg.calc) && $('main-app').style.display !== 'none', f = $('calc-fab');
             if ($('calc-item')) $('calc-item').style.display = on ? '' : 'none';
             if ($('calc-tog')) $('calc-tog').checked = calcPref();
             const show = on && calcPref() && $('main-app').style.display === 'block' && $('admin-panel-fullscreen').style.display !== 'block';
@@ -2781,25 +2884,186 @@
         }
         (() => {   // tugmani barmoq bilan istalgan joyga surish; joyi eslab qolinadi
             const f = $('calc-fab'); let s = null;
-            try { const p = JSON.parse(localStorage.getItem('xb_calc_pos') || 'null'); if (p) { f.style.left = p.x + 'px'; f.style.top = p.y + 'px'; f.style.right = 'auto'; f.style.bottom = 'auto'; } } catch (e) {}
-            const clamp = (x, y) => [Math.max(6, Math.min(innerWidth - 58, x)), Math.max(6, Math.min(innerHeight - 140, y))];
+            const clamp = (x, y) => [Math.max(14, Math.min(innerWidth - 66, x)), Math.max(70, Math.min(innerHeight - 150, y))];
+            let H0 = innerHeight;   // klaviatura ochilganda ekran qisqaradi — tugma joyini o'zgartirmaymiz
+            const place = () => { try { const p = JSON.parse(localStorage.getItem('xb_calc_pos') || 'null'); if (!p) return; const side = p.side ?? (p.x < innerWidth / 2 ? 0 : 1), ry = p.ry ?? (p.y / innerHeight); const [x, y] = clamp(side ? innerWidth - 66 : 14, ry * H0); f.style.left = x + 'px'; f.style.top = y + 'px'; f.style.right = 'auto'; f.style.bottom = 'auto'; } catch (e) {} };
+            place();
             f.addEventListener('dragstart', e => e.preventDefault());
             f.addEventListener('pointerdown', e => { e.preventDefault(); const r = f.getBoundingClientRect(); s = { dx: e.clientX - r.left, dy: e.clientY - r.top, x0: e.clientX, y0: e.clientY, moved: false }; f.setPointerCapture(e.pointerId); });
             f.addEventListener('pointermove', e => {
-                if (!s) return; if (Math.hypot(e.clientX - s.x0, e.clientY - s.y0) > 6) { s.moved = true; f.classList.add('drag'); }
+                if (!s) return; if (Math.hypot(e.clientX - s.x0, e.clientY - s.y0) > 14) { s.moved = true; f.classList.add('drag'); }
                 if (!s.moved) return; const [x, y] = clamp(e.clientX - s.dx, e.clientY - s.dy);
                 f.style.left = x + 'px'; f.style.top = y + 'px'; f.style.right = 'auto'; f.style.bottom = 'auto';
             });
             const end = open => {
                 if (!s) return; const moved = s.moved; s = null; f.classList.remove('drag');
                 if (!moved) { if (open) calcOpen(); return; }
-                const r = f.getBoundingClientRect(), x = r.left + 26 < innerWidth / 2 ? 10 : innerWidth - 62, [cx, cy] = clamp(x, r.top);   // chetga yopishadi
-                f.style.transition = 'left .2s'; f.style.left = cx + 'px'; setTimeout(() => f.style.transition = '', 250);
-                try { localStorage.setItem('xb_calc_pos', JSON.stringify({ x: cx, y: cy })); } catch (e) {}
+                const r = f.getBoundingClientRect(), side = r.left + 26 < innerWidth / 2 ? 0 : 1, [cx, cy] = clamp(side ? innerWidth - 66 : 14, r.top);   // chetga yopishadi
+                f.style.transition = 'left .2s, top .2s'; f.style.left = cx + 'px'; f.style.top = cy + 'px'; setTimeout(() => f.style.transition = '', 250);
+                try { localStorage.setItem('xb_calc_pos', JSON.stringify({ side, ry: cy / H0 })); } catch (e) {}
             };
             f.addEventListener('pointerup', () => end(true)); f.addEventListener('pointercancel', () => end(false));
-            addEventListener('resize', () => { const r = f.getBoundingClientRect(); if (f.style.left) { const [x, y] = clamp(r.left, r.top); f.style.left = x + 'px'; f.style.top = y + 'px'; } });
+            addEventListener('resize', () => { if (innerHeight > H0 * 0.8 || Math.abs(innerWidth - (f._w || innerWidth)) > 50) H0 = innerHeight; f._w = innerWidth; if (!s) place(); });
         })();
+
+        // ===== OYNALAR TARTIBI: oxirgi ochilgan oyna doim eng ustida =====
+        (() => {
+            let z = 10600;
+            const obs = new MutationObserver(ms => ms.forEach(m => { const el = m.target; if (!document.querySelector('.modal.show')) z = 10600; if (el.classList.contains('show') && !el.dataset.zOn) { el.dataset.zOn = '1'; el.style.zIndex = ++z; } else if (!el.classList.contains('show')) delete el.dataset.zOn; }));
+            document.querySelectorAll('.modal').forEach(m => obs.observe(m, { attributes: true, attributeFilter: ['class'] }));
+        })();
+        // ===== AQLLI QIDIRUV: imlo xatosi, lotin/kirill, sinonimlar =====
+        const CYR = { 'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo', 'ж': 'j', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u', 'ф': 'f', 'х': 'h', 'ц': 's', 'ч': 'ch', 'ш': 'sh', 'щ': 'sh', 'ъ': '', 'ы': 'i', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya', 'ў': 'o', 'қ': 'k', 'ғ': 'g', 'ҳ': 'h' };
+        const SYN = [['gilof', 'chehol', 'chexol', 'chexl', 'cheh', 'case', 'kейс', 'keys', 'qopqoq', 'kopkok', 'nakladka'], ['silikon', 'selekon', 'silikonli', 'silicone', 'selikon'],
+            ['telefon', 'phone', 'iphone', 'ayfon', 'smartfon'], ['krossovka', 'krasovka', 'krosovka', 'sneaker', 'snikers', 'kedi', 'ked'], ['futbolka', 'tshirt', 't-shirt', 'mayka', 'footbolka'],
+            ['sumka', 'bag', 'ryukzak', 'rukzak', 'portfel'], ['soat', 'chasi', 'watch', 'chasy'], ['quloqchin', 'kulokchin', 'naushnik', 'airpods', 'earphone', 'headphone'],
+            ['zaryadka', 'zaryadnik', 'charger', 'quvvatlagich', 'kuvvatlagich', 'kabel', 'provod'], ['kurtka', 'kurtqa', 'jacket', 'kurtkalar'], ['shim', 'bruki', 'jinsi', 'djinsi', 'jeans'],
+            ['koylak', 'platye', 'plate', 'dress'], ['poyabzal', 'oyoq kiyim', 'obuv', 'tufli', 'shoes'], ['kozoynak', 'ochki', 'glasses'], ['oyinchoq', 'igrushka', 'toy']];
+        const normS = s => String(s || '').toLowerCase().replace(/[а-яёўқғҳ]/g, ch => CYR[ch] ?? ch).replace(/[ʻʼ‘’`'"]/g, '').replace(/kh|x/g, 'h').replace(/q/g, 'k').replace(/ye/g, 'e').replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
+        const SYN_MAP = {}; SYN.forEach(g => { const n = g.map(normS); n.forEach(w => SYN_MAP[w] = n); });
+        function lev(a, b, max) {   // ikki so'z orasidagi farq (imlo xatosi uchun)
+            if (Math.abs(a.length - b.length) > max) return max + 1;
+            let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+            for (let i = 1; i <= a.length; i++) { const cur = [i]; let mn = i; for (let j = 1; j <= b.length; j++) { cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); mn = Math.min(mn, cur[j]); } if (mn > max) return max + 1; prev = cur; }
+            return prev[b.length];
+        }
+        function wordHit(q, words) {
+            const alts = SYN_MAP[q] || [q], tol = q.length >= 8 ? 2 : q.length >= 4 ? 1 : 0;
+            for (const a of alts) for (const w of words) { if (w.startsWith(a) || (a.length >= 3 && w.includes(a))) return 3; if (tol && a[0] === w[0] && lev(a, w.slice(0, a.length + tol), tol) <= tol) return 2; }
+            return 0;
+        }
+        function searchScore(p, q) {
+            if (!q) return 1;
+            if (!p.__sw) p.__sw = normS([p.name, p.cat, ...(p.colors || []), ...(p.sizes || []), ...((p.specs || []).flat())].join(' ')).split(' ').filter(Boolean);
+            let sc = 0; for (const w of q.split(' ')) { if (!w) continue; const h = wordHit(w, p.__sw); if (!h) return 0; sc += h; }
+            return sc;
+        }
+        // ===== O'XSHASH MAHSULOTLAR (mahsulot oxirida) =====
+        function similarBlock(p) {
+            const w = new Set(normS(p.name).split(' ').filter(x => x.length >= 3));
+            const l = PRODUCTS.filter(x => x.id !== p.id && !(x.tracked && totalStock(x) <= 0)).map(x => {
+                let sc = x.cat === p.cat ? 5 : 0; normS(x.name).split(' ').forEach(t => { if (w.has(t) || (SYN_MAP[t] || []).some(a => w.has(a))) sc += 3; });
+                if (x.old_price) sc += 1; sc += Math.min(2, (x.sold || 0) / 20); return [x, sc + Math.random() * 0.5];
+            }).filter(x => x[1] >= 3).sort((a, b) => b[1] - a[1]).slice(0, 6).map(x => x[0]);
+            if (!l.length) return '';
+            const hot = hotLimit();
+            return `<div style="margin:22px 0 10px;font-weight:800;font-size:15px">🛍 O'xshash mahsulotlar</div><div class="pgrid">${l.map(x => pcard(x, hot)).join('')}</div>`;
+        }
+        // ===== MAHSULOTNI ULASHISH =====
+        function shareProduct() {
+            const p = curP; if (!p || !ME) return;
+            const link = `https://t.me/${ME.bot}?start=p_${p.id}`;
+            tg.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent(`🛍 ${p.name} — ${fmt(p.price)} so'm\nXitoydan Buyumlar ilovasida ko'ring:`));
+        }
+        let DEEP_DONE = false;
+        function openDeepProduct() {   // ulashilgan havola orqali kirilsa — mahsulot o'zi ochiladi
+            if (DEEP_DONE || !PRODUCTS.length) return; DEEP_DONE = true;
+            let id = ''; try { id = new URLSearchParams(location.search).get('p') || ''; } catch (e) {}
+            const sp = tg.initDataUnsafe?.start_param || ''; if (!id && sp.startsWith('p_')) id = sp.slice(2);
+            if (id && PRODUCTS.some(p => p.id === id)) setTimeout(() => openProduct(id), 300);
+        }
+        // ===== BTS PUNKTLARI XARITASI =====
+        let BTS_MAP = null, BTS_PTS = [], BTS_ME = null;
+        const REG_C = [['Toshkent shahri', 41.311, 69.279], ['Toshkent viloyati', 41.47, 69.58], ['Toshkent viloyati', 41.02, 70.14], ['Toshkent viloyati', 40.85, 69.6], ['Toshkent viloyati', 41.11, 69.05], ['Toshkent viloyati', 41.04, 69.36],
+            ['Andijon', 40.78, 72.34], ['Buxoro', 39.77, 64.42], ["Farg'ona", 40.39, 71.78], ["Farg'ona", 40.53, 70.94], ['Jizzax', 40.12, 67.84], ['Xorazm', 41.55, 60.63], ['Namangan', 41.0, 71.67], ['Navoiy', 40.1, 65.38], ['Navoiy', 41.6, 64.2],
+            ['Qashqadaryo', 38.86, 65.79], ['Qashqadaryo', 39.06, 66.83], ['Samarqand', 39.65, 66.96], ['Sirdaryo', 40.49, 68.78], ['Surxondaryo', 37.22, 67.28], ['Surxondaryo', 38.27, 67.9], ["Qoraqalpog'iston", 42.46, 59.6], ["Qoraqalpog'iston", 43.77, 59.0]];
+        const geoD = (a, b, c, d) => { const r = Math.PI / 180, x = (d - b) * r * Math.cos((a + c) / 2 * r), y = (c - a) * r; return Math.sqrt(x * x + y * y) * 6371; };
+        function regionOf(lat, lng) { if (geoD(lat, lng, 41.311, 69.279) < 14) return 'Toshkent shahri'; let best = null, bd = 1e9; REG_C.forEach(([n, a, b]) => { const d = geoD(lat, lng, a, b); if (d < bd) { bd = d; best = n; } }); return best; }
+        function loadAsset(tag, attrs) { return new Promise((ok, no) => { const e = document.createElement(tag); Object.assign(e, attrs); e.onload = ok; e.onerror = no; document.head.appendChild(e); }); }
+        async function btsMapOpen() {
+            $('bts-modal').classList.add('show'); $('bts-info').innerText = 'Xarita yuklanmoqda…';
+            try {
+                if (!window.L) { await Promise.all([loadAsset('link', { rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css' }), loadAsset('script', { src: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js' })]); }
+                if (!BTS_MAP) {
+                    BTS_MAP = L.map('bts-map', { zoomControl: true, attributionControl: true }).setView([41.0, 66.5], 6);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(BTS_MAP);
+                    BTS_MAP.on('click', e => btsPickHere(e.latlng.lat, e.latlng.lng));
+                    const r = await api('/api/bts_points'); BTS_PTS = r.items || [];
+                    BTS_PTS.forEach((p, i) => L.circleMarker([p.lat, p.lng], { radius: 8, color: '#fff', weight: 2, fillColor: '#e60000', fillOpacity: 1 }).addTo(BTS_MAP)
+                        .bindPopup(`<b>${esc(p.n)}</b>${p.a ? '<br>' + esc(p.a) : ''}${p.h ? '<br>🕘 ' + esc(p.h) : ''}<br><button class="btn btn-gold" style="margin-top:8px;padding:8px 12px;font-size:12px" onclick="btsPick(${i})">✓ Shu punktni tanlash</button>`));
+                }
+                setTimeout(() => BTS_MAP.invalidateSize(), 250);
+                $('bts-info').innerHTML = BTS_PTS.length ? `🔴 Qizil nuqtalar — BTS punktlari (${BTS_PTS.length} ta). Nuqtani bosing va «Shu punktni tanlash» ni bosing. Ro'yxatda bo'lmasa, xaritada kerakli joyni bosing.`
+                    : "BTS punktlari ro'yxati hali yuklanmadi. «Mening joyim» ni bosing yoki xaritada BTS filiali joylashgan joyni bosib belgilang.";
+            } catch (e) { $('bts-info').innerText = "Xaritani yuklab bo'lmadi. Internetni tekshiring yoki manzilni qo'lda yozing."; }
+        }
+        function btsSet(text, lat, lng) {
+            $('prof-bts-point').value = text.slice(0, 150);
+            const rg = regionOf(lat, lng); if (rg && [...$('prof-bts-region').options].some(o => o.value === rg)) $('prof-bts-region').value = rg;
+            closeModal('bts-modal'); toast('Tanlandi ✓ Endi «Saqlash» ni bosing'); hap('success');
+        }
+        function btsPick(i) { const p = BTS_PTS[i]; if (p) btsSet(`${p.n}${p.a ? ', ' + p.a : ''} (${p.lat.toFixed(5)},${p.lng.toFixed(5)})`, p.lat, p.lng); }
+        function btsPickHere(lat, lng) {
+            const near = BTS_PTS.map((p, i) => [i, geoD(lat, lng, p.lat, p.lng)]).sort((a, b) => a[1] - b[1])[0];
+            if (near && near[1] < 0.15) return btsPick(near[0]);
+            L.popup().setLatLng([lat, lng]).setContent(`<div style="font-size:12px">Shu joy belgilansinmi?</div><button class="btn btn-gold" style="margin-top:8px;padding:8px 12px;font-size:12px" onclick="btsSet('📍 Xaritada belgilangan joy (${lat.toFixed(5)},${lng.toFixed(5)})',${lat},${lng})">✓ Belgilash</button>`).openOn(BTS_MAP);
+        }
+        function btsShowNear(lat, lng) {
+            BTS_ME = [lat, lng]; BTS_MAP.setView([lat, lng], 13); L.circleMarker([lat, lng], { radius: 7, color: '#fff', weight: 2, fillColor: '#2f80ff', fillOpacity: 1 }).addTo(BTS_MAP);
+            const l = BTS_PTS.map((p, i) => [i, geoD(lat, lng, p.lat, p.lng)]).sort((a, b) => a[1] - b[1]).slice(0, 5);
+            $('bts-near').innerHTML = l.length ? '<div style="font-size:11px;color:var(--gold-color);font-weight:700;margin:12px 0 6px">ENG YAQIN PUNKTLAR</div>' + l.map(([i, d]) => `<div class="hrow" style="cursor:pointer" onclick="btsPick(${i})"><span style="flex:1;font-size:13px"><b>${esc(BTS_PTS[i].n)}</b><br><span style="font-size:11.5px;color:var(--text-muted)">${esc(BTS_PTS[i].a || '')}</span></span><b style="font-size:12px;white-space:nowrap">${d < 1 ? Math.round(d * 1000) + ' m' : d.toFixed(1) + ' km'}</b></div>`).join('') : '';
+        }
+        function btsLocate() {
+            const ok = p => btsShowNear(p.latitude, p.longitude), no = () => tg.showAlert("Joylashuvni aniqlab bo'lmadi. Telefon sozlamalarida joylashuvga ruxsat bering yoki xaritada o'zingiz belgilang.");
+            const lm = tg.LocationManager;
+            if (lm && tg.isVersionAtLeast && tg.isVersionAtLeast('8.0')) {
+                try { return lm.init(() => { if (!lm.isLocationAvailable) return navGeo(); lm.getLocation(d => d ? ok(d) : navGeo()); }); } catch (e) {}
+            }
+            navGeo();
+            function navGeo() { if (!navigator.geolocation) return no(); navigator.geolocation.getCurrentPosition(p => ok(p.coords), no, { enableHighAccuracy: true, timeout: 12000 }); }
+        }
+        // ===== SAVATDAGI MAHSULOTNI O'ZGARTIRISH =====
+        let EDIT_CI = null;
+        function saveCartEdit() {
+            const x = CART[EDIT_CI]; if (!x) return closeModal('prod-modal');
+            if (!selCargo) return tg.showAlert("Kargo turini (Avia yoki Avto) tanlang!");
+            const k = [curP.id, selC, selS, selCargo].join('|'), other = CART.findIndex((y, i) => i !== EDIT_CI && cartKey(y) === k);
+            const qty = x.qty + (other >= 0 ? CART[other].qty : 0);
+            if (qty > stockOf(curP, selC, selS)) return tg.showAlert(`Omborda bu variantdan yetarli emas (qoldi: ${stockOf(curP, selC, selS)})`);
+            Object.assign(x, { color: selC, size: selS, cargo: selCargo, qty: Math.min(50, qty) });
+            if (other >= 0) CART.splice(other, 1);
+            EDIT_CI = null; saveCart(); closeModal('prod-modal'); toast("O'zgartirildi ✓"); hap('success');
+        }
+        // ===== 🔔 BILDIRISHNOMALAR =====
+        function renderBell() {
+            const l = (ME && ME.notices) || [], seen = (ME && ME.notice_seen) || (isGuest() ? (() => { try { return +localStorage.getItem('xb_nseen') || 0; } catch (e) { return 0; } })() : 0), n = l.filter(x => x.id > seen).length;
+            if (!$('bell-n')) return; $('bell-n').style.display = n ? 'flex' : 'none'; $('bell-n').innerText = n > 9 ? '9+' : n;
+        }
+        function openNotices() {
+            const l = (ME && ME.notices) || [], seen = ME.notice_seen || (isGuest() ? (() => { try { return +localStorage.getItem('xb_nseen') || 0; } catch (e) { return 0; } })() : 0);
+            $('notice-body').innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3 style="font-size:18px">🔔 Bildirishnomalar</h3><b class="sheet-x" style="float:none;margin:0" onclick="closeModal('notice-modal')"><i class="fas fa-xmark"></i></b></div>`
+                + (l.map(x => `<div class="glass-card" style="padding:14px 16px;margin-bottom:10px;${x.id > seen ? 'border-color:var(--gold-color)' : ''}">
+                    ${x.img ? `<img src="${esc(API + x.img)}" style="width:100%;border-radius:12px;margin-bottom:10px" onclick="ivOpen([${ja(API + x.img)}],0)">` : ''}
+                    <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start">${x.title ? `<b style="font-size:14.5px">${x.id > seen ? '🟡 ' : ''}${esc(x.title)}</b>` : '<span></span>'}<span style="font-size:10.5px;color:var(--text-muted);white-space:nowrap">${dt(x.date)}</span></div>
+                    ${x.text ? `<div style="font-size:13px;line-height:1.55;margin-top:6px;white-space:pre-wrap;word-break:break-word">${esc(x.text)}</div>` : ''}</div>`).join('')
+                    || '<div class="empty-state" style="padding-top:10px"><i class="far fa-bell"></i><p style="font-size:13px">Hozircha bildirishnoma yo\'q</p></div>');
+            $('notice-modal').classList.add('show');
+            const mx = Math.max(0, ...l.map(x => x.id));
+            if (mx > seen) { ME.notice_seen = mx; renderBell(); if (isGuest()) { try { localStorage.setItem('xb_nseen', mx); } catch (e) {} } else api('/api/notice_seen', { id: mx }).catch(() => {}); }
+        }
+        // ---- ega: bildirishnoma yuborish
+        let NT_IMG = null;
+        function ntPick() { const inp = fileInput('image/*'); inp.onchange = async () => { try { NT_IMG = await readImg(inp.files[0], 1200); $('nt-img-l').innerText = '🖼 Rasm tanlandi ✓ (olib tashlash: bosing)'; } catch (e) { tg.showAlert(e.message); } }; inp.click(); }
+        async function loadNotices() {
+            try {
+                const l = await api('/api/admin/notice');
+                $('nt-list').innerHTML = l.map(x => `<div class="hrow" style="align-items:flex-start"><div style="flex:1;min-width:0"><b style="font-size:13px">${esc(x.title || '(sarlavhasiz)')}</b><div style="font-size:11.5px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${dt(x.date)} · ${esc(x.text.slice(0, 80))}</div></div><b onclick="ntDel(${Number(x.id)})" style="color:var(--primary-color);padding:6px;cursor:pointer"><i class="fas fa-trash"></i></b></div>`).join('') || '<p style="font-size:12px;color:var(--text-muted)">Hali yo\'q</p>';
+            } catch (e) { tg.showAlert(e.message); }
+        }
+        function ntSend() {
+            const title = $('nt-title').value.trim(), text = $('nt-text').value.trim(), tgOn = $('nt-tg').checked;
+            if (!title && text.length < 3) return tg.showAlert('Sarlavha yoki matn yozing');
+            tg.showConfirm(`Bildirishnoma hamma mijozlarning ilovasida 🔔 da chiqadi${tgOn ? ' va Telegram orqali ham yuboriladi' : ''}. Yuborilsinmi?`, ok => {
+                if (ok) call(async () => { await api('/api/admin/notice', { title, text, image: NT_IMG || '', tg: tgOn }); $('nt-title').value = ''; $('nt-text').value = ''; NT_IMG = null; $('nt-img-l').innerText = '🖼 Rasm qo\'shish (ixtiyoriy)'; toast('Yuborildi ✓'); await loadNotices(); await refreshMe(); });
+            });
+        }
+        function ntDel(id) { tg.showConfirm("Bildirishnoma o'chirilsinmi?", ok => { if (ok) call(async () => { await api('/api/admin/notice', { action: 'del', id }); await loadNotices(); await refreshMe(); }); }); }
+        // ---- hisobotni noldan boshlash
+        function statsReset(undo) {
+            tg.showConfirm(undo ? "Hisobot yana boshidan (barcha savdolar bilan) ko'rsatilsinmi?" : "Hisobot HOZIRDAN boshlab sanalsinmi?\n\nOldingi (test) savdolar hisobotga kirmaydi. Ma'lumotlar o'chmaydi — xohlasangiz qaytarish mumkin.", ok => {
+                if (ok) call(async () => { await api('/api/admin/stats_reset', { action: undo ? 'undo' : 'reset' }); toast('Bajarildi ✓'); loadDash('all'); });
+            });
+        }
 
         // ===== TOIFAGA QARAB RAZMER / MODEL ANDOZALARI =====
         const IPHONES = ['iPhone X', 'iPhone XR', 'iPhone XS Max', 'iPhone 11', 'iPhone 11 Pro', 'iPhone 11 Pro Max', 'iPhone 12 mini', 'iPhone 12', 'iPhone 12 Pro', 'iPhone 12 Pro Max',
@@ -2850,7 +3114,7 @@
         const isFav = id => !!(ME && ME.favs && ME.favs.includes(id));
         function favBtn(id, big) { return `<b class="fav ${isFav(id) ? 'on' : ''}${big ? ' big' : ''}" data-fav="${esc(id)}" onclick="event.stopPropagation();toggleFav(${ja(id)})"><i class="${isFav(id) ? 'fas' : 'far'} fa-heart"></i></b>`; }
         function toggleFav(id) {
-            if (!ME || !ME.registered) return;
+            if (!needAuth('Mahsulotni saqlab qo\'yish uchun', () => toggleFav(id))) return;
             const on = !isFav(id); ME.favs = on ? [id, ...ME.favs.filter(x => x !== id)] : ME.favs.filter(x => x !== id);
             document.querySelectorAll(`[data-fav="${CSS.escape(id)}"]`).forEach(b => { b.classList.toggle('on', on); b.innerHTML = `<i class="${on ? 'fas' : 'far'} fa-heart"></i>`; });
             try { tg.HapticFeedback.selectionChanged(); } catch (e) {} toast(on ? 'Saqlanganlarga qo\'shildi ❤️' : 'Saqlanganlardan olindi');
@@ -2862,7 +3126,7 @@
             $('fav-grid').innerHTML = l.map(p => pcard(p, hot)).join('');
             $('fav-empty').style.display = l.length ? 'none' : 'block';
         }
-        // ===== MAHSULOT: tafsilotlar, 3 ta otziv =====
+        // ===== MAHSULOT: tafsilotlar, 3 ta sharh =====
         function specsBlock(p) {
             if (!p.specs || !p.specs.length) return '';
             return `<div class="specs-box" onclick="openSpecs()"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b style="font-size:14px">Mahsulot tafsilotlari</b><span style="font-size:12px;color:var(--text-muted)">Barchasi ›</span></div>
@@ -2887,8 +3151,8 @@
             $('revs-body').innerHTML = '<p style="font-size:12px;color:var(--text-muted)">Yuklanmoqda…</p>'; $('revs-modal').classList.add('show');
             try {
                 const r = await api('/api/reviews?limit=50&pid=' + encodeURIComponent(pid));
-                $('revs-body').innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px"><h3 style="font-size:17px">⭐ Otzivlar (${r.summary.count})</h3><b class="sheet-x" style="float:none;margin:0" onclick="closeModal('revs-modal')"><i class="fas fa-xmark"></i></b></div>
-                    <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">${p ? esc(p.name) + ' · ' : ''}${stars(r.summary.avg, 13)} <b>${r.summary.avg.toFixed(1)}</b></div>` + (r.items.map(revBubble).join('') || '<p>Hozircha otzivlar yo\'q</p>');
+                $('revs-body').innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px"><h3 style="font-size:17px">⭐ Sharhlar (${r.summary.count})</h3><b class="sheet-x" style="float:none;margin:0" onclick="closeModal('revs-modal')"><i class="fas fa-xmark"></i></b></div>
+                    <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">${p ? esc(p.name) + ' · ' : ''}${stars(r.summary.avg, 13)} <b>${r.summary.avg.toFixed(1)}</b></div>` + (r.items.map(revBubble).join('') || '<p>Hozircha sharhlar yo\'q</p>');
             } catch (e) { $('revs-body').innerHTML = '<p>' + esc(e.message) + '</p>'; }
         }
         // ---- uzun variant nomlari: «…», bosilsa to'liq; ko'p bo'lsa «Yana N ta»
@@ -2902,6 +3166,9 @@
 
         // ===== UMUMIY =====
         function switchTab(tabId) {
+            const AUTH_TABS = { profile: "Profilingizni ko'rish uchun", wallet: 'Hamyonni ochish uchun', track: 'Buyurtmalaringizni kuzatish uchun' };
+            if (AUTH_TABS[tabId] && !needAuth(AUTH_TABS[tabId], () => switchTab(tabId))) return;
+            if (tabId === 'wallet' && !walletOk()) { walletGate().then(ok => { if (ok) switchTab('wallet'); }); return; }
             document.querySelectorAll('.view-section').forEach(el => { if (el.id.startsWith('tab-')) el.classList.remove('active'); });
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             if (tabId === 'profile' && $('pv-home')) profView('home');
