@@ -259,10 +259,11 @@
         .iv-dots i { width: 6px; height: 6px; border-radius: 3px; background: rgba(255,255,255,.35); transition: all .3s; } .iv-dots i.on { width: 20px; background: #fff; }
         .iv-hint { position: absolute; bottom: 44px; left: 0; right: 0; text-align: center; color: rgba(255,255,255,.55); font-size: 11px; }
         .gal-wrap { position: relative; margin-bottom: 12px; }
-        #prod-modal .sheet { padding-top: 0; }
+        #prod-modal .sheet { padding-top: 0; max-height: 96vh; }   /* deyarli butun ekran — rasm to'liq sig'adi */
         #prod-modal .sheet::before { display: none; }
         .ps-gal { position: sticky; top: 0; z-index: 1; margin: 0 -20px; }
-        .ps-gal .gal-wrap { margin: 0; } .ps-gal .pimg { border-radius: 0; height: 330px !important; }
+        .ps-gal .gal-wrap { margin: 0; } .ps-gal .pimg { border-radius: 0; height: calc(min(100vw, 600px, 64vh) + 20px) !important; padding-bottom: 20px; box-sizing: border-box; background: var(--input-bg); }
+        .ps-gal .pimg img { object-fit: contain; }   /* rasm kesilmaydi — to'liq ko'rinadi */
         .ps-gal .gal-n { bottom: 30px; }
         .ps-body { position: relative; z-index: 2; background: var(--bg-color); border-radius: 22px 22px 0 0; margin: -20px -20px 0; padding: 10px 20px 0; box-shadow: 0 -8px 24px rgba(0,0,0,.18); min-height: 60vh; }
         .ps-body::before { content: ''; display: block; width: 42px; height: 5px; border-radius: 3px; background: var(--surface-border); margin: 0 auto 12px; }
