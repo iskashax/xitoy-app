@@ -665,8 +665,8 @@
           <div id="sv-security" style="display:none">
             <div class="subhead"><b onclick="setPage('home')"><i class="fas fa-arrow-left"></i></b><h2><i class="fas fa-shield-halved" style="color:#2ecc71;font-size:18px"></i> Xavfsizlik</h2></div>
             <div class="glass-card sec-card">
-                <div class="sec-h"><div class="settings-icon" style="background:rgba(255,183,0,0.12);color:var(--gold-color)"><i class="fas fa-key"></i></div><div><b>To'lov PIN-kodi</b><div class="pm-sub" id="pin-status">O'rnatilmagan</div></div></div>
-                <p class="sec-p">PIN o'rnatilsa, har bir xarid va kargo to'lovi PIN yoki barmoq izi bilan tasdiqlanadi. Telefoningiz boshqa odam qo'liga tushsa ham balansingizdan pul yechib bo'lmaydi.</p>
+                <div class="sec-h"><div class="settings-icon" style="background:rgba(255,183,0,0.12);color:var(--gold-color)"><i class="fas fa-key"></i></div><div><b>Hamyon PIN-kodi</b><div class="pm-sub" id="pin-status">O'rnatilmagan</div></div></div>
+                <p class="sec-p">Hamyon faqat PIN yoki barmoq izi / Face ID bilan ochiladi — bu majburiy. Telefoningiz boshqa odam qo'liga tushsa ham hamyoningizga kira olmaydi. Xohlasangiz, xarid va kargo to'lovlarini ham PIN bilan tasdiqlashni yoqishingiz mumkin.</p>
                 <div id="pin-form" style="display:none">
                     <div class="form-group"><label>Hisob paroli</label><input type="password" id="pin-pw" class="form-control" placeholder="••••••••" autocomplete="current-password"></div>
                     <div style="display:flex;gap:10px"><div class="form-group" style="flex:1"><label>Yangi PIN (4–6 raqam)</label><input type="password" id="pin-new" class="form-control pin-in" inputmode="numeric" maxlength="6" placeholder="••••"></div>
@@ -674,13 +674,13 @@
                     <button class="btn btn-gold" onclick="pinSave()"><i class="fas fa-check"></i> PIN-ni saqlash</button>
                 </div>
                 <div id="pin-btns" style="display:flex;gap:10px"></div>
-                <div id="wlock-row" class="hrow" style="display:none;margin-top:12px"><span style="flex:1;font-size:13px">🔒 Hamyonga kirishda PIN / barmoq izi so'rash</span><label class="toggle-switch"><input type="checkbox" id="wlock-tog" onchange="wlockToggle(this.checked)"><span class="slider"></span></label></div>
+                <div id="wlock-row" class="hrow" style="display:none;margin-top:12px"><span style="flex:1;font-size:13px">🛒 Xarid va kargo to'lovlarini ham PIN bilan tasdiqlash <span style="color:var(--text-muted);font-size:11.5px">(ixtiyoriy)</span></span><label class="toggle-switch"><input type="checkbox" id="wlock-tog" onchange="payLockToggle(this.checked)"><span class="slider"></span></label></div>
                 <div id="pin-forgot2" style="display:none;margin-top:12px;font-size:12.5px;color:var(--gold-color);cursor:pointer;font-weight:700" onclick="pinForgot()">PIN-kodni unutdingizmi? — yangisini o'rnatish</div>
             </div>
             <div class="glass-card sec-card" id="bio-card">
                 <div class="sec-h" style="justify-content:space-between"><div style="display:flex;gap:12px;align-items:center"><div class="settings-icon" style="background:rgba(46,204,113,0.12);color:#2ecc71"><i class="fas fa-fingerprint"></i></div><div><b>Barmoq izi / Face ID</b><div class="pm-sub" id="bio-status"></div></div></div>
                     <label class="toggle-switch"><input type="checkbox" id="bio-toggle" onchange="bioToggle(this.checked)"><span class="slider"></span></label></div>
-                <p class="sec-p">Xaridni PIN o'rniga barmoq izi yoki yuz bilan tasdiqlaysiz. Ishlamasa, PIN so'raladi.</p>
+                <p class="sec-p">Hamyonni (va yoqilgan bo'lsa xaridlarni) PIN o'rniga barmoq izi yoki yuz bilan ochasiz. Ishlamasa, PIN so'raladi.</p>
             </div>
             <div class="glass-card sec-card">
                 <div class="sec-h"><div class="settings-icon" style="background:rgba(80,160,255,0.12);color:#5aa9ff"><i class="fas fa-lock"></i></div><div><b>Hisob paroli</b><div class="pm-sub">Login: <span id="sec-login" data-noi18n></span></div></div></div>
@@ -1127,7 +1127,7 @@
             "Og'irlikni kiriting": ["Введите вес", "Enter weight"], "Yopish": ["Закрыть", "Close"], "AKSIYA": ["АКЦИЯ", "SALE"], "YANGI": ["НОВИНКА", "NEW"], "🔥 Ko'p sotilgan": ["🔥 Хит продаж", "🔥 Bestseller"], "Aksiya": ["Акция", "Sale"],
             "🏷 Aksiya bo'yicha tejadingiz:": ["🏷 Экономия по акции:", "🏷 You save:"], "✨ Yangi": ["✨ Новинка", "✨ New"], "Hozircha aksiya yo'q": ["Пока нет акций", "No sales yet"], "TUGADI": ["НЕТ В НАЛИЧИИ", "SOLD OUT"], "MENING SO'ROVLARIM": ["МОИ ЗАПРОСЫ", "MY REQUESTS"], "yopish": ["закрыть", "close"],
             "XARIDORLAR SHARHLARI": ["ОТЗЫВЫ ПОКУПАТЕЛЕЙ", "CUSTOMER REVIEWS"], "Ko'rish ›": ["Смотреть ›", "View ›"], "⭐ Mijozlar sharhlari": ["⭐ Отзывы покупателей", "⭐ Customer reviews"],
-            "Hozircha sharhlar yo'q": ["Пока нет отзывов", "No reviews yet"], "Xaridorlar fikrlari": ["Отзывы покупателей", "Customer reviews"], "🔔 Bildirishnomalar": ["🔔 Уведомления", "🔔 Notifications"], "Hozircha bildirishnoma yo'q": ["Пока нет уведомлений", "No notifications yet"], "O'zgarishni saqlash": ["Сохранить изменения", "Save changes"], "✎ o'zgartirish": ["✎ изменить", "✎ edit"], "Bu variant tugadi": ["Этот вариант закончился", "This variant is sold out"], "Sizdan: ": ["С вас: ", "You pay: "], "Ulashish": ["Поделиться", "Share"], "Katalogga qaytish": ["Вернуться в каталог", "Back to catalog"], "Kirish / Ro'yxatdan o'tish": ["Вход / Регистрация", "Log in / Sign up"], "Ro'yxatdan o'tgach hisoblanadi": ["Рассчитается после регистрации", "Calculated after sign-up"], "🗺 BTS punktini tanlang": ["🗺 Выберите пункт BTS", "🗺 Choose a BTS point"], "Mening joyim": ["Моё местоположение", "My location"], "Xaritadan BTS punktini tanlash": ["Выбрать пункт BTS на карте", "Pick BTS point on map"], "ENG YAQIN PUNKTLAR": ["БЛИЖАЙШИЕ ПУНКТЫ", "NEAREST POINTS"], "PIN-kodni unutdingizmi?": ["Забыли PIN-код?", "Forgot PIN?"], "🔒 Hamyonga kirishda PIN / barmoq izi so'rash": ["🔒 Запрашивать PIN / отпечаток при входе в кошелёк", "🔒 Ask PIN / fingerprint to open wallet"], "PIN-kodni unutdingizmi? — yangisini o'rnatish": ["Забыли PIN? — установить новый", "Forgot PIN? — set a new one"], "🛍 O'xshash mahsulotlar": ["🛍 Похожие товары", "🛍 Similar products"],
+            "Hozircha sharhlar yo'q": ["Пока нет отзывов", "No reviews yet"], "Xaridorlar fikrlari": ["Отзывы покупателей", "Customer reviews"], "🔔 Bildirishnomalar": ["🔔 Уведомления", "🔔 Notifications"], "Hozircha bildirishnoma yo'q": ["Пока нет уведомлений", "No notifications yet"], "O'zgarishni saqlash": ["Сохранить изменения", "Save changes"], "✎ o'zgartirish": ["✎ изменить", "✎ edit"], "Bu variant tugadi": ["Этот вариант закончился", "This variant is sold out"], "Sizdan: ": ["С вас: ", "You pay: "], "Ulashish": ["Поделиться", "Share"], "Katalogga qaytish": ["Вернуться в каталог", "Back to catalog"], "Kirish / Ro'yxatdan o'tish": ["Вход / Регистрация", "Log in / Sign up"], "Ro'yxatdan o'tgach hisoblanadi": ["Рассчитается после регистрации", "Calculated after sign-up"], "🗺 BTS punktini tanlang": ["🗺 Выберите пункт BTS", "🗺 Choose a BTS point"], "Mening joyim": ["Моё местоположение", "My location"], "Xaritadan BTS punktini tanlash": ["Выбрать пункт BTS на карте", "Pick BTS point on map"], "ENG YAQIN PUNKTLAR": ["БЛИЖАЙШИЕ ПУНКТЫ", "NEAREST POINTS"], "PIN-kodni unutdingizmi?": ["Забыли PIN-код?", "Forgot PIN?"], "🛒 Xarid va kargo to'lovlarini ham PIN bilan tasdiqlash": ["🛒 Подтверждать покупки и оплату карго PIN-кодом", "🛒 Confirm purchases and cargo payments with PIN"], "(ixtiyoriy)": ["(по желанию)", "(optional)"], "Hamyon PIN-kodi": ["PIN-код кошелька", "Wallet PIN"], "Hamyon faqat PIN yoki barmoq izi / Face ID bilan ochiladi — bu majburiy. Telefoningiz boshqa odam qo'liga tushsa ham hamyoningizga kira olmaydi. Xohlasangiz, xarid va kargo to'lovlarini ham PIN bilan tasdiqlashni yoqishingiz mumkin.": ["Кошелёк открывается только по PIN или отпечатку / Face ID — это обязательно. Даже если телефон попадёт в чужие руки, в кошелёк не войти. По желанию можно включить подтверждение PIN-кодом и для покупок и оплаты карго.", "The wallet opens only with PIN or fingerprint / Face ID — this is mandatory. Even if someone else gets your phone, they cannot open your wallet. Optionally, you can also require PIN for purchases and cargo payments."], "Hamyonni (va yoqilgan bo'lsa xaridlarni) PIN o'rniga barmoq izi yoki yuz bilan ochasiz. Ishlamasa, PIN so'raladi.": ["Открывайте кошелёк (и подтверждайте покупки, если включено) отпечатком или лицом вместо PIN. Если не сработает — будет запрошен PIN.", "Open the wallet (and confirm purchases, if enabled) with fingerprint or face instead of PIN. If it fails, PIN is requested."], "PIN-kodni unutdingizmi? — yangisini o'rnatish": ["Забыли PIN? — установить новый", "Forgot PIN? — set a new one"], "🛍 O'xshash mahsulotlar": ["🛍 Похожие товары", "🛍 Similar products"],
             "Hozircha sharh yo'q": ["Пока нет отзывов", "No reviews yet"], "Haqiqiy xaridorlar sharhlari": ["Отзывы реальных покупателей", "Reviews from real buyers"], "Do'kon javobi:": ["Ответ магазина:", "Shop reply:"],
             // so'rov holatlari
             "Yangi": ["Новый", "New"], "Narx berildi": ["Цена указана", "Price offered"], "Buyurtma qilindi": ["Заказано", "Ordered"], "Topilmadi": ["Не найдено", "Not found"], "Yopildi": ["Закрыт", "Closed"],
@@ -2221,9 +2221,9 @@
             $('sec-login').innerText = '@' + ME.username;
             $('pin-status').innerText = s.pin ? "O'rnatilgan ✓" : "O'rnatilmagan"; $('pin-status').style.color = s.pin ? '#2ecc71' : '';
             if (!s.pin) $('pin-form').style.display = 'block';
-            $('pin-btns').innerHTML = s.pin ? `<button class="btn btn-outline" style="padding:12px;font-size:13px" onclick="$('pin-form').style.display='block'">PIN-ni o'zgartirish</button><button class="btn btn-outline" style="padding:12px;font-size:13px;color:var(--primary-color)" onclick="pinOff()">O'chirish</button>` : '';
+            $('pin-btns').innerHTML = s.pin ? `<button class="btn btn-outline" style="padding:12px;font-size:13px" onclick="$('pin-form').style.display='block'">PIN-ni o'zgartirish</button>` : '';
             $('bio-card').style.display = s.pin ? 'block' : 'none';
-            $('wlock-row').style.display = s.pin ? 'flex' : 'none'; $('pin-forgot2').style.display = s.pin ? 'block' : 'none'; $('wlock-tog').checked = s.wlock !== false;
+            $('wlock-row').style.display = s.pin ? 'flex' : 'none'; $('pin-forgot2').style.display = s.pin ? 'block' : 'none'; $('wlock-tog').checked = s.paylock !== false;
             $('sec-sub').innerText = s.pin ? (s.bio ? 'PIN + barmoq izi yoqilgan ✓' : 'PIN yoqilgan ✓') : "Parol, to'lov PIN-kodi, barmoq izi";
             const b = await bmInit(), av = !!(b && b.isBiometricAvailable), on = !!(s.bio && av && b.isBiometricTokenSaved);
             $('bio-toggle').disabled = !av; $('bio-toggle').checked = on;
@@ -2231,7 +2231,7 @@
         }
         // ===== HAMYON QULFI: kirishda PIN yoki barmoq izi / Face ID =====
         let WAL_UNTIL = 0;
-        const walletOk = () => !ME || !ME.registered || (ME.security && ME.security.wlock === false) || Date.now() < WAL_UNTIL;
+        const walletOk = () => !ME || !ME.registered || Date.now() < WAL_UNTIL;   // hamyon PIN-i majburiy
         document.addEventListener('visibilitychange', () => {   // ilova yopilsa / boshqa ilovaga o'tilsa hamyon yana qulflanadi
             if (!document.hidden) return; WAL_UNTIL = 0;
             if ($('tab-wallet') && $('tab-wallet').classList.contains('active') && !walletOk()) switchTab('catalog');
@@ -2242,17 +2242,17 @@
                 return false;
             }
             try {
-                const done = await withPay('Hamyonni ochish uchun', a => api('/api/security', { action: 'pin_check', ...a }));
+                const done = await withPay('Hamyonni ochish uchun', a => api('/api/security', { action: 'pin_check', ...a }), true);
                 if (done === false) return false;
                 WAL_UNTIL = Date.now() + 5 * 60 * 1000; hap('success'); return true;
             } catch (e) { tg.showAlert(e.message); return false; }
         }
-        function wlockToggle(on) {
+        function payLockToggle(on) {
             call(async () => {
                 try {
-                    if (on) await api('/api/security', { action: 'wlock', on: true });
-                    else { const ok = await withPay("Hamyon qulfini o'chirish uchun", a => api('/api/security', { action: 'wlock', on: false, ...a })); if (ok === false) return; }
-                    toast(on ? 'Hamyon qulfi yoqildi ✓' : "Hamyon qulfi o'chirildi");
+                    if (on) await api('/api/security', { action: 'paylock', on: true });
+                    else { const ok = await withPay("Xarid tasdig'ini o'chirish uchun", a => api('/api/security', { action: 'paylock', on: false, ...a }), true); if (ok === false) return; }
+                    toast(on ? 'Xaridlar PIN bilan tasdiqlanadi ✓' : "Xaridlar PIN-siz o'tadi");
                 } finally { try { await refreshMe(); } catch (e) {} renderSecurity(); }
             });
         }
@@ -2288,7 +2288,7 @@
                 ['pin-pw', 'pin-new', 'pin-new2'].forEach(i => $(i).value = ''); $('pin-form').style.display = 'none';
                 await bmClear(); await refreshMe(); hap('success');
                 const bm = await bmInit();
-                tg.showAlert("PIN o'rnatildi ✓ Endi xaridlar PIN bilan tasdiqlanadi." + (bm && bm.isBiometricAvailable ? " Xohlasangiz, barmoq izini ham yoqing." : ''));
+                tg.showAlert("PIN o'rnatildi ✓ Endi hamyon PIN bilan ochiladi." + (bm && bm.isBiometricAvailable ? " Xohlasangiz, barmoq izini ham yoqing." : ''));
             });
         }
         function pinOff() {
@@ -2327,8 +2327,9 @@
                 } finally { try { await refreshMe(); } catch (e) {} renderSecurity(); }
             });
         }
-        async function payAuth(why) {   // PIN o'rnatilgan bo'lsa: avval barmoq izi, bo'lmasa PIN
+        async function payAuth(why, force) {   // PIN o'rnatilgan bo'lsa: avval barmoq izi, bo'lmasa PIN. Xaridlar — faqat mijoz yoqqan bo'lsa
             if (!ME.security || !ME.security.pin) return {};
+            if (!force && ME.security.paylock === false) return {};
             if (ME.security.bio) {
                 const b = await bmInit();
                 if (b && b.isBiometricAvailable && b.isAccessGranted && b.isBiometricTokenSaved) {
@@ -2338,8 +2339,8 @@
             }
             const pin = await pinAsk(why); return pin === null ? null : { pin };
         }
-        async function withPay(why, fn) {   // false = mijoz bekor qildi
-            const a = await payAuth(why); if (a === null) return false;
+        async function withPay(why, fn, force) {   // false = mijoz bekor qildi
+            const a = await payAuth(why, force); if (a === null) return false;
             try { await fn(a); }
             catch (e) {
                 if (!/PIN_REQUIRED|Biometrik/.test(e.message)) throw e;
