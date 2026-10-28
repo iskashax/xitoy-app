@@ -2463,7 +2463,7 @@
                     return `<div class="glass-card" style="padding:14px">${adHTML(a, true)}
                     <div style="display:flex;gap:8px;align-items:center;margin:12px 0 10px;flex-wrap:wrap;font-size:12px">
                         <span class="pill ${live ? 'ok' : 'no'}">${live ? 'Faol' : exp ? "Muddati o'tgan" : "To'xtatilgan"}</span>
-                        <span>👁 ${fmt(a.views)} ko'rish</span><span>👆 ${fmt(a.clicks)} bosish</span><b style="color:var(--gold-color);cursor:pointer;padding:2px 4px" onclick="adViewers(${Number(a.id)})">👥 Kim ko'rdi ›</b><span style="color:var(--text-muted)">${a.views ? (a.clicks / a.views * 100).toFixed(1) + '%' : '—'}</span>
+                        <span>👁 ${fmt(a.views)} kishi ko'rdi</span><span>👆 ${fmt(a.clicks)} kishi bosdi</span><b style="color:var(--gold-color);cursor:pointer;padding:2px 4px" onclick="adViewers(${Number(a.id)})">👥 Kim ko'rdi ›</b><span style="color:var(--text-muted)">${a.views ? (a.clicks / a.views * 100).toFixed(1) + '%' : '—'}</span>
                         ${a.until ? `<span style="color:var(--text-muted)">· ${new Date(a.until * 1000).toLocaleDateString('ru-RU')} gacha</span>` : ''}</div>
                     <div style="display:flex;gap:8px"><button class="btn btn-outline" style="padding:10px;font-size:12px" onclick="adEdit(${Number(a.id)})">✏️ Tahrirlash</button>
                     <button class="btn btn-outline" style="padding:10px;font-size:12px" onclick="adAct(${Number(a.id)},'toggle')">${a.active ? '⏸ To\'xtatish' : '▶️ Yoqish'}</button>
@@ -2990,7 +2990,7 @@
                         ${p.phone ? kv('Telefon', esc(p.phone)) : ''}${p.region ? kv('Viloyat', esc(p.region)) : ''}${p.guest ? '' : kv('Buyurtmalar', p.orders + ' ta')}${p.username ? kv('Telegram', '@' + esc(p.username)) : ''}
                         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${b('✈️ Telegram', `openTg(${Number(p.tg_id) || 0},${ja(p.username)},${ja(p.code)})`)}${p.phone ? b('📞 Qo\'ng\'iroq', `callPhone(${ja(p.phone)})`) : ''}${p.code ? b('✉️ Xabar', `closeModal('adv-modal');dmTo(${ja(p.code)})`) : ''}</div></div></div>`; }).join('')
                     || '<p style="font-size:12px;color:var(--text-muted);padding:10px 0">Hozircha hech kim yo\'q</p>')
-                    + '<p style="font-size:10.5px;color:var(--text-muted);margin-top:10px">Ko\'rish bir kishi uchun 6 soatda 1 marta, bosish 1 soatda 1 marta hisoblanadi.</p>';
+                    + '<p style="font-size:10.5px;color:var(--text-muted);margin-top:10px">Umumiy sonda har bir kishi bir marta sanaladi — qayta ko\'rsa yoki bossa qo\'shilmaydi. Ega va adminlar hisobga olinmaydi. Tafsilotdagi «marta» — o\'sha kishining o\'zi necha marta ko\'rgani (6 soatda 1 marta hisoblanadi).</p>';
             } catch (e) { tg.showAlert(e.message); }
         }
         // ===== MAHSULOTNI ULASHISH =====
