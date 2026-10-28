@@ -210,6 +210,20 @@
         .cart-row .cvar { font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .cart-row .cimg { width: 64px; height: 64px; }
         .cat-top { justify-content: space-between; align-items: center; }
+        .pr-wrap { border-bottom: 1px solid var(--surface-border); }
+        .pr { display: flex; align-items: center; gap: 10px; padding: 10px 0; cursor: pointer; }
+        .pr .avatar { width: 38px; height: 38px; font-size: 15px; flex: none; }
+        .pr-main { flex: 1; min-width: 0; }
+        .pr-name { font-size: 13.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .pr-sub { font-size: 11.5px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .pr-right { text-align: right; font-size: 11px; color: var(--text-muted); flex: none; }
+        .pr-chev { color: var(--text-muted); font-size: 12px; transition: transform .2s; flex: none; }
+        .pr-wrap.open .pr-chev { transform: rotate(90deg); }
+        .pr-det { display: none; padding: 2px 0 12px 48px; }
+        .pr-wrap.open .pr-det { display: block; }
+        .pr-kv { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; padding: 3px 0; } .pr-kv span:first-child { color: var(--text-muted); }
+        .tag-ok { background: rgba(46,204,113,.15); color: #2ecc71; border-radius: 8px; padding: 2px 7px; font-size: 10.5px; font-weight: 800; white-space: nowrap; }
+        .tag-mute { background: var(--surface-color); color: var(--text-muted); border-radius: 8px; padding: 2px 7px; font-size: 10.5px; white-space: nowrap; }
         .bell { position: relative; width: 38px; height: 38px; border-radius: 12px; background: var(--surface-color); border: 1px solid var(--surface-border); display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; color: var(--text-main); }
         .bell span { position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--primary-color); color: #fff; font-size: 10px; font-weight: 800; align-items: center; justify-content: center; }
 
@@ -1001,6 +1015,7 @@
         <div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-outline" style="margin:0;padding:11px;font-size:13px" onclick="btsLocate()"><i class="fas fa-location-crosshairs"></i> Mening joyim</button></div>
         <div id="bts-info" style="font-size:12px;color:var(--text-muted);margin-top:10px;line-height:1.5"></div><div id="bts-near"></div>
     </div></div>
+    <div class="modal" id="adv-modal" onclick="if(event.target===this)closeModal('adv-modal')"><div class="sheet" id="adv-body"></div></div>
     <div class="modal" id="notice-modal" onclick="if(event.target===this)closeModal('notice-modal')"><div class="sheet" id="notice-body"></div></div>
     <div class="modal" id="revs-modal" onclick="if(event.target===this)closeModal('revs-modal')"><div class="sheet" id="revs-body"></div></div>
     <div class="modal" id="rv-modal" onclick="if(event.target===this)closeModal('rv-modal')"><div class="sheet">
@@ -1128,7 +1143,7 @@
             "Og'irlikni kiriting": ["Введите вес", "Enter weight"], "Yopish": ["Закрыть", "Close"], "AKSIYA": ["АКЦИЯ", "SALE"], "YANGI": ["НОВИНКА", "NEW"], "🔥 Ko'p sotilgan": ["🔥 Хит продаж", "🔥 Bestseller"], "Aksiya": ["Акция", "Sale"],
             "🏷 Aksiya bo'yicha tejadingiz:": ["🏷 Экономия по акции:", "🏷 You save:"], "✨ Yangi": ["✨ Новинка", "✨ New"], "Hozircha aksiya yo'q": ["Пока нет акций", "No sales yet"], "TUGADI": ["НЕТ В НАЛИЧИИ", "SOLD OUT"], "MENING SO'ROVLARIM": ["МОИ ЗАПРОСЫ", "MY REQUESTS"], "yopish": ["закрыть", "close"],
             "XARIDORLAR SHARHLARI": ["ОТЗЫВЫ ПОКУПАТЕЛЕЙ", "CUSTOMER REVIEWS"], "Ko'rish ›": ["Смотреть ›", "View ›"], "⭐ Mijozlar sharhlari": ["⭐ Отзывы покупателей", "⭐ Customer reviews"],
-            "Hozircha sharhlar yo'q": ["Пока нет отзывов", "No reviews yet"], "Xaridorlar fikrlari": ["Отзывы покупателей", "Customer reviews"], "🔔 Bildirishnomalar": ["🔔 Уведомления", "🔔 Notifications"], "Hozircha bildirishnoma yo'q": ["Пока нет уведомлений", "No notifications yet"], "O'zgarishni saqlash": ["Сохранить изменения", "Save changes"], "✎ o'zgartirish": ["✎ изменить", "✎ edit"], "Bu variant tugadi": ["Этот вариант закончился", "This variant is sold out"], "Sizdan: ": ["С вас: ", "You pay: "], "Ulashish": ["Поделиться", "Share"], "Katalogga qaytish": ["Вернуться в каталог", "Back to catalog"], "Kirish / Ro'yxatdan o'tish": ["Вход / Регистрация", "Log in / Sign up"], "Ro'yxatdan o'tgach hisoblanadi": ["Рассчитается после регистрации", "Calculated after sign-up"], "🗺 BTS punktini tanlang": ["🗺 Выберите пункт BTS", "🗺 Choose a BTS point"], "Mening joyim": ["Моё местоположение", "My location"], "Xaritadan BTS punktini tanlash": ["Выбрать пункт BTS на карте", "Pick BTS point on map"], "ENG YAQIN PUNKTLAR": ["БЛИЖАЙШИЕ ПУНКТЫ", "NEAREST POINTS"], "PIN-kodni unutdingizmi?": ["Забыли PIN-код?", "Forgot PIN?"], "🛒 Xarid va kargo to'lovlarini ham PIN bilan tasdiqlash": ["🛒 Подтверждать покупки и оплату карго PIN-кодом", "🛒 Confirm purchases and cargo payments with PIN"], "(ixtiyoriy)": ["(по желанию)", "(optional)"], "Hamyon PIN-kodi": ["PIN-код кошелька", "Wallet PIN"], "Hamyon faqat PIN yoki barmoq izi / Face ID bilan ochiladi — bu majburiy. Telefoningiz boshqa odam qo'liga tushsa ham hamyoningizga kira olmaydi. Xohlasangiz, xarid va kargo to'lovlarini ham PIN bilan tasdiqlashni yoqishingiz mumkin.": ["Кошелёк открывается только по PIN или отпечатку / Face ID — это обязательно. Даже если телефон попадёт в чужие руки, в кошелёк не войти. По желанию можно включить подтверждение PIN-кодом и для покупок и оплаты карго.", "The wallet opens only with PIN or fingerprint / Face ID — this is mandatory. Even if someone else gets your phone, they cannot open your wallet. Optionally, you can also require PIN for purchases and cargo payments."], "Hamyonni (va yoqilgan bo'lsa xaridlarni) PIN o'rniga barmoq izi yoki yuz bilan ochasiz. Ishlamasa, PIN so'raladi.": ["Открывайте кошелёк (и подтверждайте покупки, если включено) отпечатком или лицом вместо PIN. Если не сработает — будет запрошен PIN.", "Open the wallet (and confirm purchases, if enabled) with fingerprint or face instead of PIN. If it fails, PIN is requested."], "PIN-kodni unutdingizmi? — yangisini o'rnatish": ["Забыли PIN? — установить новый", "Forgot PIN? — set a new one"], "🛍 O'xshash mahsulotlar": ["🛍 Похожие товары", "🛍 Similar products"],
+            "Hozircha sharhlar yo'q": ["Пока нет отзывов", "No reviews yet"], "Xaridorlar fikrlari": ["Отзывы покупателей", "Customer reviews"], "🔔 Bildirishnomalar": ["🔔 Уведомления", "🔔 Notifications"], "Hozircha bildirishnoma yo'q": ["Пока нет уведомлений", "No notifications yet"], "O'zgarishni saqlash": ["Сохранить изменения", "Save changes"], "✎ o'zgartirish": ["✎ изменить", "✎ edit"], "Bu variant tugadi": ["Этот вариант закончился", "This variant is sold out"], "Sizdan: ": ["С вас: ", "You pay: "], "Ulashish": ["Поделиться", "Share"], "👥 Kim ko'rdi ›": ["👥 Кто видел ›", "👥 Who saw ›"], "👥 Kim ko'rdi": ["👥 Кто видел", "👥 Who saw"], "👆 Bosganlar": ["👆 Нажавшие", "👆 Clicked"], "👁 Faqat ko'rganlar": ["👁 Только видели", "👁 Viewed only"], "👆 Bosgan": ["👆 Нажал", "👆 Clicked"], "👁 Ko'rgan": ["👁 Видел", "👁 Viewed"], "Katalogga qaytish": ["Вернуться в каталог", "Back to catalog"], "Kirish / Ro'yxatdan o'tish": ["Вход / Регистрация", "Log in / Sign up"], "Ro'yxatdan o'tgach hisoblanadi": ["Рассчитается после регистрации", "Calculated after sign-up"], "🗺 BTS punktini tanlang": ["🗺 Выберите пункт BTS", "🗺 Choose a BTS point"], "Mening joyim": ["Моё местоположение", "My location"], "Xaritadan BTS punktini tanlash": ["Выбрать пункт BTS на карте", "Pick BTS point on map"], "ENG YAQIN PUNKTLAR": ["БЛИЖАЙШИЕ ПУНКТЫ", "NEAREST POINTS"], "PIN-kodni unutdingizmi?": ["Забыли PIN-код?", "Forgot PIN?"], "🛒 Xarid va kargo to'lovlarini ham PIN bilan tasdiqlash": ["🛒 Подтверждать покупки и оплату карго PIN-кодом", "🛒 Confirm purchases and cargo payments with PIN"], "(ixtiyoriy)": ["(по желанию)", "(optional)"], "Hamyon PIN-kodi": ["PIN-код кошелька", "Wallet PIN"], "Hamyon faqat PIN yoki barmoq izi / Face ID bilan ochiladi — bu majburiy. Telefoningiz boshqa odam qo'liga tushsa ham hamyoningizga kira olmaydi. Xohlasangiz, xarid va kargo to'lovlarini ham PIN bilan tasdiqlashni yoqishingiz mumkin.": ["Кошелёк открывается только по PIN или отпечатку / Face ID — это обязательно. Даже если телефон попадёт в чужие руки, в кошелёк не войти. По желанию можно включить подтверждение PIN-кодом и для покупок и оплаты карго.", "The wallet opens only with PIN or fingerprint / Face ID — this is mandatory. Even if someone else gets your phone, they cannot open your wallet. Optionally, you can also require PIN for purchases and cargo payments."], "Hamyonni (va yoqilgan bo'lsa xaridlarni) PIN o'rniga barmoq izi yoki yuz bilan ochasiz. Ishlamasa, PIN so'raladi.": ["Открывайте кошелёк (и подтверждайте покупки, если включено) отпечатком или лицом вместо PIN. Если не сработает — будет запрошен PIN.", "Open the wallet (and confirm purchases, if enabled) with fingerprint or face instead of PIN. If it fails, PIN is requested."], "PIN-kodni unutdingizmi? — yangisini o'rnatish": ["Забыли PIN? — установить новый", "Forgot PIN? — set a new one"], "🛍 O'xshash mahsulotlar": ["🛍 Похожие товары", "🛍 Similar products"],
             "Hozircha sharh yo'q": ["Пока нет отзывов", "No reviews yet"], "Haqiqiy xaridorlar sharhlari": ["Отзывы реальных покупателей", "Reviews from real buyers"], "Do'kon javobi:": ["Ответ магазина:", "Shop reply:"],
             // so'rov holatlari
             "Yangi": ["Новый", "New"], "Narx berildi": ["Цена указана", "Price offered"], "Buyurtma qilindi": ["Заказано", "Ordered"], "Topilmadi": ["Не найдено", "Not found"], "Yopildi": ["Закрыт", "Closed"],
@@ -1307,7 +1322,7 @@
             fillSelects(); workNote(); renderBell();
             if ($('logout-item')) { $('logout-item').style.display = ME.registered ? '' : 'none'; $('login-item').style.display = ME.registered ? 'none' : ''; }
             $('admin-entry-card').style.display = ME.is_staff ? 'block' : 'none';
-            if (!ME.registered) return;
+            if (!ME.registered) { renderAds(); renderCats(); langSync(); calcVisible(); return; }   // mehmon ham reklama va bo'limlarni ko'radi
             $('prof-id').innerText = 'ID: ' + ME.code; $('prof-login').innerText = '@' + ME.username;
             $('prof-tgid').innerHTML = `Telegram ID: ${UID} <i class="fas fa-copy"></i>`; $('prof-tgid').style.cursor = 'pointer'; $('prof-tgid').onclick = () => copyText(String(UID), 'Telegram ID nusxalandi ✓');
             if (FIRST) { $('prof-name').value = ME.name; $('prof-phone').value = ME.phone; $('prof-region').value = ME.region; $('prof-address').value = ME.address; $('prof-bts-region').value = ME.bts_region; $('prof-bts-point').value = ME.bts_point; FIRST = false; }
@@ -2094,7 +2109,8 @@
                 const r = await api('/api/admin/topup', { client_code: code, amount }); $('adm-topup-sum').value = '';
                 hap('success'); toast(`${r.name}: +${fmt(amount)} so'm ✓`); loadAdminUsers(); }); });
         }
-        let USR_F = 'all', USR_SORT = 'new', USR_ITEMS = [], USR_TOTAL = 0, USR_T = null;
+        let USR_F = 'all', USR_SORT = 'new', USR_ITEMS = [], USR_TOTAL = 0, USR_T = null; const USR_OPEN = new Set();
+        function prToggle(el, set, key) { const w = el.parentNode, on = !w.classList.contains('open'); w.classList.toggle('open', on); if (set) on ? set.add(key) : set.delete(key); }
         const USR_FILTERS = [['all', 'Hammasi'], ['active', 'Faol buyurtma'], ['cargo', "Kargo to'lanmagan"], ['buyers', 'Xaridorlar'], ['balance', 'Balansi bor'], ['noorders', "Xarid qilmagan"], ['new', 'Yangi (7 kun)'], ['ref', 'Taklif qilganlar'], ['blocked', 'Bloklangan']];
         function usrFilter(f) { USR_F = f; loadAdminUsers(); }
         function usrSearch() { clearTimeout(USR_T); USR_T = setTimeout(() => loadAdminUsers(), 300); }
@@ -2108,17 +2124,19 @@
                 USR_ITEMS = off ? USR_ITEMS.concat(r.items) : r.items; USR_TOTAL = r.total;
                 const b = (t, a) => `<button class="btn btn-outline" style="padding:8px 10px;font-size:11px;width:auto" onclick="${a}">${t}</button>`;
                 $('usr-count').innerText = `${USR_TOTAL} ta mijoz`;
-                $('adm-user-list').innerHTML = USR_ITEMS.map(u => `<div class="cart-row" style="display:block">
-                    <div style="display:flex;gap:12px;align-items:center"><div class="avatar" style="width:42px;height:42px;font-size:16px">${esc((u.name || '?').charAt(0).toUpperCase())}</div>
-                        <div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:700">${esc(u.name)} ${u.blocked ? '<span class="pill no">bloklangan</span>' : ''}</div>
-                        <div style="font-size:11.5px;color:var(--text-muted)">${esc(u.code)} · ${esc(u.phone)}${u.username ? ' · @' + esc(u.username) : ''}${u.region ? ' · ' + esc(u.region) : ''}</div></div></div>
+                $('adm-user-list').innerHTML = USR_ITEMS.map(u => `<div class="pr-wrap ${USR_OPEN.has(u.code) ? 'open' : ''}">
+                    <div class="pr" onclick="prToggle(this, USR_OPEN, ${ja(u.code)})"><div class="avatar">${esc((u.name || '?').charAt(0).toUpperCase())}</div>
+                        <div class="pr-main"><div class="pr-name">${esc(u.name)} ${u.blocked ? '<span class="pill no">bloklangan</span>' : ''}</div>
+                        <div class="pr-sub">${esc(u.code)} · ${esc(u.phone)}</div></div>
+                        <div class="pr-right">${u.active ? `<span class="tag-ok" style="color:var(--gold-color);background:rgba(255,183,0,.14)">${u.active} faol</span>` : u.orders ? `<span class="tag-mute">${u.orders} xarid</span>` : ''}${u.balance ? `<div style="margin-top:3px">${fmt(u.balance)}</div>` : ''}</div><i class="fas fa-chevron-right pr-chev"></i></div>
+                    <div class="pr-det"><div style="font-size:11.5px;color:var(--text-muted);margin-bottom:6px">${u.username ? '@' + esc(u.username) + ' · ' : ''}${u.region ? esc(u.region) + ' · ' : ''}Telegram ID: ${Number(u.tg_id) || '—'}</div>
                     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0;text-align:center;font-size:11px;color:var(--text-muted)">
                         <div><b style="display:block;font-size:13px;color:var(--text-main)">${u.orders}</b>buyurtma</div>
                         <div><b style="display:block;font-size:13px;color:var(--gold-color)">${u.active}</b>faol</div>
                         <div><b style="display:block;font-size:13px;color:var(--text-main)">${fmt(Math.round(u.spent / 1000))}k</b>xarid</div>
                         <div><b style="display:block;font-size:13px;color:var(--text-main)">${fmt(Math.round(u.balance / 1000))}k</b>balans</div></div>
                     <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px">Ro'yxat: ${u.reg_date ? dt(u.reg_date) : '—'}${u.last_order ? ' · oxirgi xarid: ' + dt(u.last_order) : ''} · token: ${u.tokens} · taklif: ${u.invited}</div>
-                    <div style="display:flex;gap:6px;flex-wrap:wrap">${b('✈️ Telegram', `openTg(${Number(u.tg_id) || 0},${ja(u.username)},${ja(u.code)})`)}${b('📞 Qo\'ng\'iroq', `callPhone(${ja(u.phone)})`)}${b('✉️ Xabar', `dmTo(${ja(u.code)})`)}${b('🔑 Parol', `userResetPw(${ja(u.code)},${ja(u.name)})`)}${b('Balans ±', `userAsk(${ja(u.code)},'balance','Balans summasi (+ yoki −)')`)}${b('Token ±', `userAsk(${ja(u.code)},'tokens','Token (+ yoki −)')`)}${b(u.blocked ? 'Ochish' : 'Bloklash', `userAct(${ja(u.code)},'${u.blocked ? 'unblock' : 'block'}')`)}</div></div>`).join('')
+                    <div style="display:flex;gap:6px;flex-wrap:wrap">${b('✈️ Telegram', `openTg(${Number(u.tg_id) || 0},${ja(u.username)},${ja(u.code)})`)}${b('📞 Qo\'ng\'iroq', `callPhone(${ja(u.phone)})`)}${b('✉️ Xabar', `dmTo(${ja(u.code)})`)}${b('🔑 Parol', `userResetPw(${ja(u.code)},${ja(u.name)})`)}${b('Balans ±', `userAsk(${ja(u.code)},'balance','Balans summasi (+ yoki −)')`)}${b('Token ±', `userAsk(${ja(u.code)},'tokens','Token (+ yoki −)')`)}${b(u.blocked ? 'Ochish' : 'Bloklash', `userAct(${ja(u.code)},'${u.blocked ? 'unblock' : 'block'}')`)}</div></div></div>`).join('')
                     + (USR_ITEMS.length < USR_TOTAL ? `<button class="more-btn" onclick="loadAdminUsers(true)">Yana yuklash (${USR_TOTAL - USR_ITEMS.length} ta qoldi)</button>` : '')
                     || '<p style="font-size:12px;color:var(--text-muted)">Topilmadi</p>';
             } catch (e) { tg.showAlert(e.message); }
@@ -2445,7 +2463,7 @@
                     return `<div class="glass-card" style="padding:14px">${adHTML(a, true)}
                     <div style="display:flex;gap:8px;align-items:center;margin:12px 0 10px;flex-wrap:wrap;font-size:12px">
                         <span class="pill ${live ? 'ok' : 'no'}">${live ? 'Faol' : exp ? "Muddati o'tgan" : "To'xtatilgan"}</span>
-                        <span>👁 ${fmt(a.views)} ko'rish</span><span>👆 ${fmt(a.clicks)} bosish</span><span style="color:var(--text-muted)">${a.views ? (a.clicks / a.views * 100).toFixed(1) + '%' : '—'}</span>
+                        <span>👁 ${fmt(a.views)} ko'rish</span><span>👆 ${fmt(a.clicks)} bosish</span><b style="color:var(--gold-color);cursor:pointer;padding:2px 4px" onclick="adViewers(${Number(a.id)})">👥 Kim ko'rdi ›</b><span style="color:var(--text-muted)">${a.views ? (a.clicks / a.views * 100).toFixed(1) + '%' : '—'}</span>
                         ${a.until ? `<span style="color:var(--text-muted)">· ${new Date(a.until * 1000).toLocaleDateString('ru-RU')} gacha</span>` : ''}</div>
                     <div style="display:flex;gap:8px"><button class="btn btn-outline" style="padding:10px;font-size:12px" onclick="adEdit(${Number(a.id)})">✏️ Tahrirlash</button>
                     <button class="btn btn-outline" style="padding:10px;font-size:12px" onclick="adAct(${Number(a.id)},'toggle')">${a.active ? '⏸ To\'xtatish' : '▶️ Yoqish'}</button>
@@ -2950,6 +2968,30 @@
             if (!l.length) return '';
             const hot = hotLimit();
             return `<div style="margin:22px 0 10px;font-weight:800;font-size:15px">🛍 O'xshash mahsulotlar</div><div class="pgrid">${l.map(x => pcard(x, hot)).join('')}</div>`;
+        }
+        // ===== REKLAMANI KIM KO'RDI / BOSDI =====
+        let ADV_ID = 0, ADV_F = 'all'; const ADV_OPEN = new Set();
+        async function adViewers(id, f) {
+            if (id) { ADV_ID = id; ADV_F = 'all'; ADV_OPEN.clear(); } if (f) ADV_F = f;
+            $('adv-modal').classList.add('show');
+            try {
+                const r = await api(`/api/admin/ad_viewers?id=${ADV_ID}&f=${ADV_F}`);
+                const kv = (k, v) => `<div class="pr-kv"><span>${k}</span><b>${v}</b></div>`;
+                const b = (t, a) => `<button class="btn btn-outline" style="padding:8px 10px;font-size:11px;width:auto;margin:0" onclick="${a}">${t}</button>`;
+                $('adv-body').innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px"><h3 style="font-size:17px">👥 Kim ko'rdi</h3><b class="sheet-x" style="float:none;margin:0" onclick="closeModal('adv-modal')"><i class="fas fa-xmark"></i></b></div>
+                    <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">${esc(r.title)} · <b style="color:var(--text-main)">${r.people}</b> kishi ko'rdi · <b style="color:#2ecc71">${r.clickers}</b> kishi bosdi</div>
+                    <div class="categories-scroll" style="margin-bottom:6px">${[['all', 'Hammasi'], ['click', '👆 Bosganlar'], ['view', "👁 Faqat ko'rganlar"]].map(([k, t]) => `<div class="cat-chip ${ADV_F === k ? 'active' : ''}" onclick="adViewers(0,'${k}')">${t}</div>`).join('')}</div>`
+                    + (r.items.map(p => { const key = String(p.tg_id); return `<div class="pr-wrap ${ADV_OPEN.has(key) ? 'open' : ''}">
+                        <div class="pr" onclick="prToggle(this, ADV_OPEN, ${ja(key)})"><div class="avatar">${esc((p.name || '?').charAt(0).toUpperCase())}</div>
+                        <div class="pr-main"><div class="pr-name">${esc(p.name || 'Nomsiz')}</div><div class="pr-sub">${p.guest ? "ro'yxatdan o'tmagan" : esc(p.code)} · ${dtt(p.clicks ? p.last_click : p.last_view)}</div></div>
+                        <div class="pr-right">${p.clicks ? `<span class="tag-ok">👆 Bosgan</span>` : `<span class="tag-mute">👁 Ko'rgan</span>`}</div><i class="fas fa-chevron-right pr-chev"></i></div>
+                        <div class="pr-det">${kv("Birinchi ko'rgan", dtt(p.first_view))}${kv("Oxirgi ko'rgan", dtt(p.last_view))}${kv("Ko'rgan", p.views + ' marta')}
+                        ${p.clicks ? kv('Birinchi bosgan', dtt(p.first_click)) + kv('Oxirgi bosgan', dtt(p.last_click)) + kv('Bosgan', p.clicks + ' marta') : kv('Bosgan', "yo'q")}
+                        ${p.phone ? kv('Telefon', esc(p.phone)) : ''}${p.region ? kv('Viloyat', esc(p.region)) : ''}${p.guest ? '' : kv('Buyurtmalar', p.orders + ' ta')}${p.username ? kv('Telegram', '@' + esc(p.username)) : ''}
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${b('✈️ Telegram', `openTg(${Number(p.tg_id) || 0},${ja(p.username)},${ja(p.code)})`)}${p.phone ? b('📞 Qo\'ng\'iroq', `callPhone(${ja(p.phone)})`) : ''}${p.code ? b('✉️ Xabar', `closeModal('adv-modal');dmTo(${ja(p.code)})`) : ''}</div></div></div>`; }).join('')
+                    || '<p style="font-size:12px;color:var(--text-muted);padding:10px 0">Hozircha hech kim yo\'q</p>')
+                    + '<p style="font-size:10.5px;color:var(--text-muted);margin-top:10px">Ko\'rish bir kishi uchun 6 soatda 1 marta, bosish 1 soatda 1 marta hisoblanadi.</p>';
+            } catch (e) { tg.showAlert(e.message); }
         }
         // ===== MAHSULOTNI ULASHISH =====
         function shareProduct() {
