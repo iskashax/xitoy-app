@@ -1482,7 +1482,8 @@
                 l = PRODUCTS.map(p => { if (!p.__sw) searchScore(p, 'x'); return [p, q.split(' ').reduce((t, w) => t + (w ? wordHit(w, p.__sw) : 0), 0)]; }).filter(x => x[1] > 0);
                 if (l.length) note = "Aynan shunday mahsulot topilmadi — o'xshashlari:";
             }
-            if (q) l.sort((a, b) => b[1] - a[1]); l = l.map(x => x[0]);
+            if (q) l.sort((a, b) => b[1] - a[1]); else l.sort((a, b) => (b[0].old_price ? 1 : 0) - (a[0].old_price ? 1 : 0));   // aksiyadagilar eng tepada (qolgan tartib o'zgarmaydi)
+            l = l.map(x => x[0]);
             if ($('search-note')) { $('search-note').innerText = note; $('search-note').style.display = note ? 'block' : 'none'; }
             const hot = hotLimit();
             $('product-grid').innerHTML = l.map(p => pcard(p, hot)).join('');
