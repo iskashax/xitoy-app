@@ -846,6 +846,7 @@
         <div class="categories-scroll" id="adm-tabs">
             <div class="cat-chip active" data-t="dash" onclick="admTab('dash')">📊 Hisobot</div>
             <div class="cat-chip" data-t="settings" onclick="admTab('settings')">⚙️ Sozlamalar</div>
+            <div class="cat-chip" data-t="calc" onclick="admTab('calc')">🧮 Foyda hisobi</div>
             <div class="cat-chip" data-t="products" onclick="admTab('products')">📦 Mahsulot</div>
             <div class="cat-chip" data-t="ord" onclick="admTab('ord')">🚚 Buyurtma</div>
             <div class="cat-chip" data-t="req" onclick="admTab('req')">🔍 So'rovlar</div>
@@ -883,6 +884,18 @@
                     <button class="btn btn-gold" onclick="cardAct('add')"><i class="fas fa-plus"></i> Karta qo'shish</button>
                 </div>
             </div>
+        </div>
+        <div id="adm-calc" class="adm-sec" style="display:none">
+            <div class="glass-card">
+                <h3 style="margin-bottom:4px">🧮 Foyda hisobi</h3>
+                <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Mahsulotlarni kiriting — tushum, tannarx, BTS, kargo va qo'lingizda qoladigan sof foyda chiqadi. Pul qayerga ketishi ham ko'rsatiladi. Buyurtma bermaydi, faqat hisoblaydi.</p>
+                <input type="search" id="cl-q" class="form-control" placeholder="🔍 Katalogdan mahsulot qidiring..." oninput="pcSearch()" style="margin-bottom:6px">
+                <div id="cl-res"></div>
+                <button class="btn btn-outline" style="padding:10px;font-size:12.5px;margin:4px 0 12px" onclick="pcManual()">✍️ Katalogda yo'q mahsulotni qo'lda kiritish</button>
+                <div id="cl-rows"></div>
+                <div style="display:flex;gap:8px;margin-top:10px"><select id="cl-reg" class="form-control" onchange="pcRun()" style="flex:1.3;margin:0"></select><select id="cl-del" class="form-control" onchange="pcRun()" style="flex:1;margin:0"><option value="bts">📦 BTS</option><option value="pickup">🏢 Ofisdan olish</option></select></div>
+            </div>
+            <div id="cl-out"></div>
         </div>
         <div id="adm-ads" class="adm-sec" style="display:none">
             <div class="glass-card" style="padding:14px 18px">
@@ -2054,7 +2067,7 @@
 
         // ===== EGA / ADMIN KABINETI =====
         let ADM_CFG = {}, VAL_CB = null, ADM_ARCH = 0, ADM_PRODS = [], CARGO_ID = null, PF = { id: null, imgs: { __g: [] }, stock: {} }, PF_KEYS = [];
-        const ADM_SECS = ['dash', 'settings', 'products', 'ord', 'req', 'rev', 'users', 'staff', 'msg', 'ads'];
+        const ADM_SECS = ['dash', 'calc', 'settings', 'products', 'ord', 'req', 'rev', 'users', 'staff', 'msg', 'ads'];
         async function admCfg() { if (!ADM_CFG.cny_rate) (await api('/api/admin/settings')).items.forEach(i => ADM_CFG[i.key] = i.value); }
         let ADM_CUR = '', ADM_HIST = [];
         function admScrollEl() { const ap = $('admin-panel-fullscreen'); return ap && ap.scrollHeight > ap.clientHeight ? ap : document.scrollingElement; }
@@ -2063,7 +2076,7 @@
             ADM_CUR = t;
             ADM_SECS.forEach(x => $('adm-' + x).style.display = x === t ? 'block' : 'none');
             document.querySelectorAll('#adm-tabs .cat-chip').forEach(c => c.classList.toggle('active', c.dataset.t === t));
-            ({ dash: () => loadDash('today'), settings: () => { SET_CUR = ''; loadSettings(); }, ads: () => { adReset(); loadAds(); }, products: () => { pfRender(true); pfPresets(); specRows(); if (ME.is_admin || staffCan('products_edit')) loadAdminProducts(); }, ord: loadAdminOrders, msg: loadNotices, req: loadAdminReqs, rev: loadAdminReviews, users: () => loadAdminUsers(), staff: () => { stfPage('home'); loadStaff(); } })[t]?.();
+            ({ dash: () => loadDash('today'), settings: () => { SET_CUR = ''; loadSettings(); }, ads: () => { adReset(); loadAds(); }, calc: pcOpen, products: () => { pfRender(true); pfPresets(); specRows(); if (ME.is_admin || staffCan('products_edit')) loadAdminProducts(); }, ord: loadAdminOrders, msg: loadNotices, req: loadAdminReqs, rev: loadAdminReviews, users: () => loadAdminUsers(), staff: () => { stfPage('home'); loadStaff(); } })[t]?.();
         }
         function dashRange(el) {
             el.parentNode.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active')); el.classList.add('active');
@@ -2224,6 +2237,68 @@
             $('plist-n').innerText = l.length === ADM_PRODS.length ? `(${l.length})` : `(${l.length} / ${ADM_PRODS.length})`;
             $('adm-plist').innerHTML = l.map(([p]) => { const t = tot(p);
                     return `<div class="hrow">${thumb(firstImg(p), 'cimg pl-img')}<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">${esc(p.name)} <span style="font-size:10px;color:var(--text-muted)">${esc(p.cat)}</span></div><div style="font-size:11px;color:var(--text-muted)">${ME.is_admin ? (p.fixed ? "qat'iy narx" : 'tannarx ' + fmt(p.cost)) + ' · ' : (p.cny ? p.cny + '¥ · ' : '')}${p.weight || 1} kg · mijozga ${fmt(p.price)} so'm · ${t === null ? 'soni cheksiz' : (t > 0 ? 'qoldi: ' + t : '<span style="color:var(--primary-color)">TUGADI</span>')}</div></div>${ME.is_admin ? `<b onclick="saleOpen(${ja(p.id)})" style="padding:8px;color:${p.sale_set ? '#a855f7' : 'var(--text-muted)'}" title="Aksiya"><i class="fas fa-tag"></i>${p.sale_set ? ` <small>${Number(p.sale_set)}%</small>` : ''}</b>` : ''}<b onclick="editProduct(${ja(p.id)})" style="padding:8px;color:var(--gold-color)"><i class="fas fa-pen"></i></b><b onclick="delProduct(${ja(p.id)})" style="color:var(--primary-color);padding:8px"><i class="fas fa-trash"></i></b></div>`; }).join('') || `<p style="font-size:12px;color:var(--text-muted)">${ADM_PRODS.length ? "Bu filtr bo'yicha mahsulot yo'q" : "Mahsulot yo'q"}</p>`;
+        }
+        // ===== 🧮 FOYDA HISOBI (faqat egalar) =====
+        let CALC = []; try { CALC = JSON.parse(localStorage.getItem('xb_calc') || '[]'); } catch (e) {}
+        const pcSave = () => { try { localStorage.setItem('xb_calc', JSON.stringify(CALC)); } catch (e) {} };
+        async function pcOpen() {
+            if (!$('cl-reg').options.length) $('cl-reg').innerHTML = ME.cfg.regions.map(r => `<option ${r === (ME.bts_region || 'Toshkent shahri') ? 'selected' : ''}>${esc(r)}</option>`).join('');
+            if (!ADM_PRODS.length) { try { ADM_PRODS = await api('/api/admin/products'); } catch (e) {} }
+            pcRows(); pcRun();
+        }
+        function pcSearch() {
+            const q = normS($('cl-q').value); if (q.length < 2) { $('cl-res').innerHTML = ''; return; }
+            const l = ADM_PRODS.filter(p => q.split(' ').every(w => normS(p.name + ' ' + p.cat).includes(w))).slice(0, 8);
+            $('cl-res').innerHTML = l.map(p => `<div class="hrow" style="cursor:pointer;padding:6px 0" onclick="pcAdd(${ja(p.id)})">${thumb(firstImg(p), 'cimg pl-img')}<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.name)}</div><div style="font-size:11px;color:var(--text-muted)">${fmt(p.price)} so'm · ${p.weight || 1} kg</div></div><b style="color:var(--gold-color);font-size:20px;padding:0 6px">+</b></div>`).join('') || '<p style="font-size:12px;color:var(--text-muted);padding:4px 0">Topilmadi</p>';
+        }
+        function pcAdd(id) {
+            const ex = CALC.find(x => x.id === id && !x.price); if (ex) ex.qty++; else CALC.push({ id, qty: 1, cargo: 'avia' });
+            $('cl-q').value = ''; $('cl-res').innerHTML = ''; pcSave(); pcRows(); pcRun(); hap('success');
+        }
+        function pcManual() { CALC.push({ name: '', cny: '', weight: '', qty: 1, cargo: 'avia' }); pcSave(); pcRows(); }
+        function pcSet(i, k, v) { const x = CALC[i]; if (!x) return; x[k] = k === 'qty' ? Math.max(1, Math.min(1000, parseInt(v, 10) || 1)) : v; pcSave(); if (k === 'qty' || k === 'cargo') pcRows(); pcRun(); }
+        function pcDel(i) { CALC.splice(i, 1); pcSave(); pcRows(); pcRun(); }
+        function pcClear() { CALC = []; pcSave(); pcRows(); pcRun(); }
+        function pcRows() {
+            const inp = (i, k, v, ph, st, t = 'number') => `<input type="${t}" class="form-control" style="margin:0;padding:8px;font-size:12.5px;${st || ''}" placeholder="${ph}" value="${esc(v ?? '')}" onchange="pcSet(${i},'${k}',this.value)">`;
+            $('cl-rows').innerHTML = CALC.map((x, i) => {
+                const p = x.id ? ADM_PRODS.find(y => y.id === x.id) : null;
+                const head = p ? `<div style="display:flex;gap:8px;align-items:center">${thumb(firstImg(p), 'cimg pl-img')}<div style="flex:1;min-width:0;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.name)}</div><b onclick="pcDel(${i})" style="color:var(--primary-color);padding:6px;cursor:pointer">×</b></div>`
+                    : `<div style="display:flex;gap:6px;align-items:center">${inp(i, 'name', x.name, 'Nomi (ixtiyoriy)', 'flex:1.4', 'text')}${inp(i, 'cny', x.cny, '¥ narxi', 'flex:.8')}${inp(i, 'weight', x.weight, 'kg', 'flex:.6')}<b onclick="pcDel(${i})" style="color:var(--primary-color);padding:6px;cursor:pointer">×</b></div>`;
+                return `<div style="padding:10px;border-radius:12px;background:var(--input-bg);margin-bottom:8px">${head}
+                    <div style="display:flex;gap:6px;align-items:center;margin-top:8px"><div class="qty"><b onclick="pcSet(${i},'qty',${x.qty - 1})">−</b><input type="number" value="${x.qty}" onchange="pcSet(${i},'qty',this.value)" style="width:44px;text-align:center;background:transparent;border:0;color:var(--text-main);font-weight:800;font-size:15px"><b onclick="pcSet(${i},'qty',${x.qty + 1})">+</b></div>
+                    ${inp(i, 'price', x.price, p ? 'Narx: ' + fmt(p.price) : 'Narx: avto', 'flex:1')}
+                    <select class="form-control" style="margin:0;padding:8px;font-size:12px;width:auto" onchange="pcSet(${i},'cargo',this.value)"><option value="avia" ${x.cargo !== 'avto' ? 'selected' : ''}>✈️ Avia</option><option value="avto" ${x.cargo === 'avto' ? 'selected' : ''}>🚛 Avto</option></select></div></div>`;
+            }).join('') + (CALC.length ? `<div style="text-align:right"><span onclick="pcClear()" style="font-size:12px;color:var(--text-muted);cursor:pointer">🗑 Hammasini tozalash</span></div>` : '<p style="font-size:12px;color:var(--text-muted)">Hali mahsulot qo\'shilmagan. Yuqoridan qidiring yoki qo\'lda kiriting.</p>');
+        }
+        let CL_T = null, CL_N = 0;
+        function pcRun() {
+            clearTimeout(CL_T);
+            CL_T = setTimeout(async () => {
+                const items = CALC.map(x => ({ id: x.id, name: x.name, cny: x.cny, weight: x.weight, qty: x.qty, cargo: x.cargo, price: x.price })), n = ++CL_N;
+                if (!items.length) { $('cl-out').innerHTML = ''; return; }
+                let d; try { d = await api('/api/admin/profit_calc', { items, region: $('cl-reg').value, delivery: $('cl-del').value }); } catch (e) { return; }
+                if (n !== CL_N || !d.lines.length) { if (!d.lines.length) $('cl-out').innerHTML = ''; return; }
+                const L = (a, b, st) => `<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;${st || ''}"><span style="color:var(--text-muted)">${a}</span><b style="white-space:nowrap">${b}</b></div>`;
+                const so = v => (v < 0 ? '−' : '') + fmt(Math.abs(v)) + " so'm", col = v => v < 0 ? 'color:#e74c3c' : 'color:#2ecc71', hr = 'border-top:1px dashed rgba(255,255,255,.15);margin-top:4px;padding-top:8px;';
+                const per = d.units ? Math.round(d.net / d.units) : 0, perAll = d.units ? Math.round(d.all_net / d.units) : 0;
+                const bt = d.pickup ? L('BTS', "yo'q (ofisdan oladi)") : d.fee >= d.bts ? L(`− BTS (${d.kg} kg, ${esc(d.region)})`, `${fmt(d.bts)} — mijoz to'laydi`) : L(`− BTS (${d.kg} kg, ${esc(d.region)})`, '−' + fmt(d.bts - d.fee) + (d.fee ? ` (mijoz ${fmt(d.fee)})` : ' (mijozga bepul)'));
+                const cg = ['avia', 'avto'].filter(m => d.cargo[m].kg).map(m => L(`${m === 'avia' ? '✈️ Avia' : '🚛 Avto'} ${d.cargo[m].kg} kg: mijoz ${fmt(d.cargo[m].in)}, kargoga ${fmt(d.cargo[m].out)}`, (d.cargo[m].in - d.cargo[m].out < 0 ? '−' : '+') + fmt(Math.abs(d.cargo[m].in - d.cargo[m].out)))).join('');
+                const rg = d.regions.length ? `<details style="margin-top:10px"><summary style="cursor:pointer;font-weight:700;font-size:13px">🗺 Boshqa viloyatlarga yuborilsa</summary><div style="margin-top:6px">${d.regions.map(x => L(esc(x.r) + ` <small>(BTS ${fmt(x.bts)}${x.fee ? ', mijoz ' + fmt(x.fee) : ''})</small>`, `<span style="${col(x.net)}">${so(x.net)}</span>`)).join('')}</div></details>` : '';
+                $('cl-out').innerHTML = `<div class="glass-card" style="font-size:13px">
+                    <h3 style="margin-bottom:8px">📊 Natija (${d.units} dona)</h3>
+                    ${d.lines.map(l => L(`${esc(l.name)} × ${l.qty}`, `${fmt(l.sum)} <small style="color:var(--text-muted);font-weight:500">(foyda ${l.known ? fmt(l.gross) : '?'})</small>`)).join('')}
+                    ${L('Mahsulotlar summasi', so(d.total), hr)}${L('− Tannarx (Pinduoduo)', '−' + fmt(d.tcost))}
+                    ${L('= Yalpi foyda', so(d.gross), hr)}${bt}
+                    ${L('= SOF FOYDA (mahsulotdan)', `<span style="${col(d.net)}">${so(d.net)}</span>`, hr + 'font-size:14.5px')}
+                    ${L('Bitta donaga', so(per))}
+                    ${cg ? `<div style="margin-top:8px;font-weight:700">Kargo (mijoz alohida to'laydi)</div>${cg}` : ''}
+                    ${L('= JAMI qo\'lingizda', `<span style="${col(d.all_net)}">${so(d.all_net)}</span>`, hr + 'font-size:15px')}${L('Bitta donaga (kargo bilan)', so(perAll))}
+                    <div style="margin-top:12px;font-weight:800">💸 Pul qayerga ketadi</div>
+                    ${L('Mijoz jami to\'laydi', so(d.client_pays))}${L('→ Pinduoduo\'ga (mahsulot)', so(d.tcost))}${d.pickup ? '' : L('→ BTS\'ga', so(d.bts))}${L('→ Kargoga', so(d.c_out))}${L('→ Sizda qoladi', `<span style="${col(d.all_net)}">${so(d.all_net)}</span>`)}
+                    ${rg}
+                    <p style="font-size:11px;color:var(--text-muted);margin-top:8px">Minimal foyda: ${fmt(d.min_profit)} so'm — yalpi foyda BTS bilan birga shundan kam bo'lsa, BTSning bir qismini mijoz to'laydi. Narx katagiga boshqa narx yozib «shu narxda sotsam-chi?» deb ko'rishingiz mumkin.</p></div>`;
+            }, 350);
         }
         function delProduct(id) { tg.showConfirm("Mahsulot katalogdan olib tashlansinmi? (Tarixda saqlanadi)", ok => { if (ok) call(async () => { await api('/api/admin/product_del', { id }); await loadAdminProducts(); await loadProducts(); }); }); }
         // -- buyurtmalar (faol / arxiv) --
