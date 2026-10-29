@@ -908,7 +908,7 @@
                 <div class="form-group"><label>Pinduoduo narxi (yuan ¥)</label><input type="number" id="adm-p-cny" oninput="prevPrice()" class="form-control" placeholder="100"></div>
                 <div class="form-group"><label>Mahsulot og'irligi (kg, taxminiy) — BTS xarajatini ichki hisoblash uchun</label><input type="number" step="0.01" min="0.01" id="adm-p-weight" oninput="prevPrice()" class="form-control" placeholder="1"></div>
                 <div class="form-group owner-only"><label>Qo'shimcha xarajat ($, ixtiyoriy)</label><input type="number" id="adm-p-usd" oninput="prevPrice()" class="form-control" placeholder="0"></div>
-                <p id="adm-p-prev" class="owner-only" style="font-size:12px;color:var(--gold-color);margin:-8px 0 14px"></p>
+                <p id="adm-p-prev" class="owner-only" style="font-size:12px;color:var(--gold-color);margin:-8px 0 6px"></p><div id="adm-p-rep" class="owner-only"></div>
                 <div class="form-group owner-only"><label>Qat'iy narx (so'm, faqat tannarx bo'lmasa)</label><input type="number" id="adm-p-price" class="form-control" placeholder="250000"></div>
                 <div class="form-group"><label>Ranglar (vergul bilan)</label><input type="text" id="adm-p-colors" oninput="pfSoon()" onchange="pfRender()" class="form-control" placeholder="Oq, Qora, Qizil"></div>
                 <div class="form-group"><label id="adm-p-sizes-l">Razmerlar (vergul bilan)</label><div id="pf-presets" style="margin-bottom:8px"></div><input type="text" id="adm-p-sizes" oninput="pfSoon();clearTimeout(window.__pp);window.__pp=setTimeout(pfPresets,400)" onchange="pfRender();pfPresets()" class="form-control" placeholder="S, M, L, XL"></div>
@@ -1068,8 +1068,8 @@
         <div class="form-group"><label>Mahsulot nomi</label><input id="of-name" class="form-control" placeholder="Masalan: Qora krossovka"></div>
         <div class="form-group"><label>Toifa</label><select id="of-cat" class="form-control"></select></div>
         <div class="form-group"><label>Pinduoduo narxi (yuan ¥)</label><input id="of-cny" type="number" oninput="ofPrev()" class="form-control" placeholder="120"></div>
-        <p id="of-prev" style="font-size:12px;color:var(--gold-color);margin:-8px 0 14px"></p>
-        <div class="form-group"><label>Og'irligi (kg, taxminiy)</label><input id="of-weight" type="number" step="0.01" class="form-control" placeholder="1"></div>
+        <p id="of-prev" style="font-size:12px;color:var(--gold-color);margin:-8px 0 6px"></p><div id="of-rep"></div>
+        <div class="form-group"><label>Og'irligi (kg, taxminiy)</label><input id="of-weight" type="number" step="0.01" oninput="ofPrev()" class="form-control" placeholder="1"></div>
         <div class="form-group"><label>Ranglar (vergul bilan, ixtiyoriy)</label><input id="of-colors" class="form-control" placeholder="Qora, Oq"></div>
         <div class="form-group"><label>Razmerlar (vergul bilan, ixtiyoriy)</label><input id="of-sizes" class="form-control" placeholder="41, 42, 43"></div>
         <div class="form-group"><label>Mijozga izoh (ixtiyoriy)</label><input id="of-note" class="form-control" placeholder="Masalan: aynan shu model, sifati yaxshi"></div>
@@ -1820,9 +1820,10 @@
         }
         function ofPrev() {
             const C = ADM_CFG, cny = +$('of-cny').value || 0;
-            if (!ME.is_admin || !C.cny_rate || !cny) { $('of-prev').innerText = "Mijoz narxi kurs va foyda sozlamalari bo'yicha avtomatik hisoblanadi"; return; }
+            if (!ME.is_admin || !C.cny_rate || !cny) { if ($('of-rep')) $('of-rep').innerHTML = ''; $('of-prev').innerText = "Mijoz narxi kurs va foyda sozlamalari bo'yicha avtomatik hisoblanadi"; return; }
             const cost = cny * C.cny_rate, mg = cost <= C.m1_upto ? C.m1_pct : cost <= C.m2_upto ? C.m2_pct : cost <= C.m3_upto ? C.m3_pct : C.m4_pct, r = Math.max(1, C.round_to);
             $('of-prev').innerHTML = `Tannarx: ${fmt(cost)} · foyda ${mg}% · Mijozga narx: <b>${fmt(Math.ceil((cost * (1 + mg / 100) + (C.bts_in_price || 0)) / r) * r)}</b> so'm`;
+            priceRep('of-rep', cny, 0, +$('of-weight').value || 1);
         }
         function offerOk() {
             call(async () => {
@@ -2055,9 +2056,39 @@
         const pfCount = () => Object.values(PF.imgs).reduce((t, a) => t + a.length, 0);
         function prevPrice() {
             const C = ADM_CFG, cny = +$('adm-p-cny').value || 0, usd = +$('adm-p-usd').value || 0;
-            if (!ME.is_admin || !C.cny_rate || (!cny && !usd)) { $('adm-p-prev').innerText = ''; return; }
+            if (!ME.is_admin || !C.cny_rate || (!cny && !usd)) { $('adm-p-prev').innerText = ''; $('adm-p-rep').innerHTML = ''; return; }
             const cost = cny * C.cny_rate + usd * C.usd_rate, mg = cost <= C.m1_upto ? C.m1_pct : cost <= C.m2_upto ? C.m2_pct : cost <= C.m3_upto ? C.m3_pct : C.m4_pct, p = cost * (1 + mg / 100) + (C.bts_in_price || 0), r = Math.max(1, C.round_to);
             $('adm-p-prev').innerHTML = `Tannarx: ${fmt(cost)} · foyda ${mg}% · BTS ulushi ${fmt(C.bts_in_price || 0)} · Mijozga narx: <b>${fmt(Math.ceil(p / r) * r)}</b> so'm`;
+            priceRep('adm-p-rep', cny, usd, +$('adm-p-weight').value || 1);
+        }
+        // Narxning to'liq hisoboti: hamma xarajat ayirilib qo'lda qoladigan sof foyda (server hisoblaydi — buyurtmadagi bilan bir xil formula)
+        const PREP_T = {}, PREP_N = {};
+        function priceRep(el, cny, usd, kg) {
+            clearTimeout(PREP_T[el]); const box = $(el); if (!box) return;
+            if (!ME.is_admin || (!cny && !usd)) { box.innerHTML = ''; return; }
+            PREP_T[el] = setTimeout(async () => {
+                const n = PREP_N[el] = (PREP_N[el] || 0) + 1;
+                try {
+                    const d = await api('/api/admin/price_calc', { cny, usd, weight: kg });
+                    if (n !== PREP_N[el]) return;
+                    const L = (a, b, st) => `<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;${st || ''}"><span style="color:var(--text-muted)">${a}</span><b style="white-space:nowrap">${b}</b></div>`;
+                    const sgn = v => (v < 0 ? '−' : '') + fmt(Math.abs(v)) + " so'm", col = v => v < 0 ? 'color:#e74c3c' : v < d.min_profit ? 'color:var(--gold-color)' : 'color:#2ecc71';
+                    const bts = (t, x) => x.fee >= x.bts ? `${t}: BTS ${fmt(x.bts)} — <b>mijoz o'zi to'laydi</b>` : x.fee > 0 ? `${t}: BTS ${fmt(x.bts)}, mijoz ${fmt(x.fee)} to'laydi, ${fmt(x.bts - x.fee)} bizdan` : `${t}: BTS ${fmt(x.bts)} — <b>bizdan (mijozga bepul)</b>`;
+                    const cg = d.cargo, cl = (t, c) => `${t}: mijoz ${fmt(c.in)} to'laydi, kargoga ${fmt(c.out)} → <b style="${c.net < 0 ? 'color:#e74c3c' : 'color:#2ecc71'}">${c.net < 0 ? '−' : '+'}${fmt(Math.abs(c.net))}</b>`;
+                    box.innerHTML = `<div style="background:rgba(255,255,255,.04);border:1px solid rgba(212,175,55,.25);border-radius:12px;padding:10px 12px;margin:0 0 14px;font-size:12px">
+                        <div style="font-weight:800;margin-bottom:6px">📊 Sof foyda hisoboti (1 dona)</div>
+                        ${L('Mijozga narx', fmt(d.price) + " so'm")}
+                        ${L('− Tannarx (Pinduoduo' + (usd ? ' + qo\'shimcha $' : '') + ')', fmt(d.cost) + " so'm")}
+                        ${L('Foyda ' + d.pct + '%', '+' + fmt(d.markup))}${L('BTS ulushi (narx ichida)', '+' + fmt(d.bts_in))}${d.round ? L('Yaxlitlashdan', '+' + fmt(d.round)) : ''}
+                        ${L('= Yalpi foyda', sgn(d.gross), 'border-top:1px dashed rgba(255,255,255,.15);margin-top:4px;padding-top:6px;' + col(d.gross))}
+                        <div style="margin-top:8px;font-weight:700">🚚 BTS (${esc(d.origin)}dan, ${d.kg} kg, faqat shu mahsulot buyurtma qilinsa)</div>
+                        <div style="color:var(--text-muted);line-height:1.5">${bts('Eng yaqin viloyat', d.near)}<br>${bts('Eng uzoq viloyat', d.far)}</div>
+                        ${L('= Qo\'lda qoladigan SOF foyda', d.near.net === d.far.net ? sgn(d.near.net) : sgn(d.far.net) + ' … ' + sgn(d.near.net), 'border-top:1px dashed rgba(255,255,255,.15);margin-top:6px;padding-top:6px;font-size:13px;' + col(d.far.net))}
+                        <div style="margin-top:8px;font-weight:700">✈️ Kargo (alohida olinadi, ${d.kg} kg)</div>
+                        <div style="color:var(--text-muted);line-height:1.5">${cl('Avia', cg.avia)}<br>${cl('Avto', cg.avto)}</div>
+                        <div style="color:var(--text-muted);font-size:11px;margin-top:6px">Sof foyda + kargodan qolgan = jami daromad. Bir buyurtmada bir nechta mahsulot bo'lsa, BTS bitta bo'ladi va foyda ko'proq qoladi. Minimal foyda: ${fmt(d.min_profit)} so'm — undan kam bo'lsa, BTSning bir qismini mijoz to'laydi.</div></div>`;
+                } catch (e) { if (n === PREP_N[el]) box.innerHTML = ''; }
+            }, 400);
         }
         let PF_SIG = '', PF_T = null;
         function pfSoon() { clearTimeout(PF_T); PF_T = setTimeout(() => pfRender(), 250); }   // yozayotganda yangilanadi, "+" bosilganda qayta chizilmaydi
