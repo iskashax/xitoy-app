@@ -133,6 +133,7 @@
         .opt.sel { background: var(--gold-color); color: #000; border-color: var(--gold-color); }
         .cart-row { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--surface-border); }
         .qty { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+        .qty.sq b { width: 40px; height: 40px; font-size: 20px; background: var(--bg-color); border-radius: 10px; }
         .qty b { width: 28px; height: 28px; border-radius: 8px; background: var(--input-bg); display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .badge { position: absolute; top: 0; right: 22%; background: var(--primary-color); color: #fff; font-size: 9px; font-weight: 800; border-radius: 10px; padding: 1px 5px; }
         .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--gold-color); color: #000; padding: 10px 18px; border-radius: 14px; font-size: 13px; font-weight: 700; z-index: 20000; display: none; }
@@ -1536,8 +1537,24 @@
                 <label class="lbl">KARGO TURI (majburiy)</label><div style="margin:8px 0">${['avia', 'avto'].map(k => `<span class="opt ${selCargo === k ? 'sel' : ''}" onclick="pickCargo('${k}')">${CARGO[k]} · $${cg[k].usd}/kg · ${esc(cg[k].days)} kun</span>`).join('')}</div>
                 <p style="font-size:11px;color:var(--text-muted);line-height:1.5;margin-bottom:8px">⚠️ Kargo haqi narxga kirmagan. Mahsulot O'zbekistonga kelganda chiqqan og'irlik (kg) bo'yicha alohida to'lanadi, to'lov tasdiqlangach BTS orqali jo'natamiz. Kargo haqi mahsulot kelganidan keyin ${ME ? ME.cfg.cargo_days : 10} kun ichida to'lanmasa, mahsulot musodara qilinadi va to'langan pul qaytarilmaydi.</p>
                 ${btsNote(p.weight)}
-                <div style="display:flex;gap:10px;margin-top:10px;align-items:center">${EDIT_CI !== null && CART[EDIT_CI] ? `<button class="btn btn-gold" style="margin:0;flex:1;padding-left:8px;padding-right:8px" ${out ? 'disabled' : ''} onclick="saveCartEdit()"><i class="fas fa-check"></i> ${out ? 'Tugadi' : "O'zgarishni saqlash"}</button><button class="btn btn-outline" style="margin:0;flex:1;padding-left:8px;padding-right:8px" ${out ? 'disabled' : ''} onclick="addToCart()"><i class="fas fa-plus"></i> Yangi qo'shish</button>` : `<button class="btn btn-gold" style="margin:0;flex:1" ${out ? 'disabled' : ''} onclick="addToCart()"><i class="fas fa-cart-plus"></i> ${out ? 'Tugadi' : "Savatga qo'shish"}</button>`}</div>`;
+                <div style="display:flex;gap:10px;margin-top:10px;align-items:center">${EDIT_CI !== null && CART[EDIT_CI] ? `<button class="btn btn-gold" style="margin:0;flex:1;padding-left:8px;padding-right:8px" ${out ? 'disabled' : ''} onclick="saveCartEdit()"><i class="fas fa-check"></i> ${out ? 'Tugadi' : "O'zgarishni saqlash"}</button><button class="btn btn-outline" style="margin:0;flex:1;padding-left:8px;padding-right:8px" ${out ? 'disabled' : ''} onclick="addToCart()"><i class="fas fa-plus"></i> Yangi qo'shish</button>` : sheetCartRow(out)}</div>`;
         }
+        const sheetItem = () => CART.find(x => x.id === curP.id && x.color === selC && x.size === selS && (!selCargo || x.cargo === selCargo));
+        function sheetCartRow(out) {   // savatga qo'shilgach: sonini o'zgartirish (yozish ham mumkin) va «Savatga o'tish» — mahsulotdan chiqmaguncha turadi
+            const it = sheetItem(), n = CART.filter(x => x.id === curP.id).reduce((t, x) => t + x.qty, 0);
+            const go = `<button class="btn btn-outline" style="margin:0;flex:1;padding-left:8px;padding-right:8px" onclick="goCart()"><i class="fas fa-cart-shopping"></i> Savatga o'tish${n ? ` (${n})` : ''}</button>`;
+            if (it) return `<div class="qty sq" style="flex:1;justify-content:center;background:var(--input-bg);border-radius:14px;padding:6px"><b onclick="sheetQty(-1)">−</b><input type="number" inputmode="numeric" min="0" max="50" value="${it.qty}" onchange="sheetQtySet(this.value)" onfocus="this.select()" style="width:52px;text-align:center;background:transparent;border:0;color:var(--text-main);font-size:17px;font-weight:800;outline:none"><b onclick="sheetQty(1)">+</b></div>${go}`;
+            return `<button class="btn btn-gold" style="margin:0;flex:1" ${out ? 'disabled' : ''} onclick="addToCart()"><i class="fas fa-cart-plus"></i> ${out ? 'Tugadi' : "Savatga qo'shish"}</button>${n ? go : ''}`;
+        }
+        function sheetQtySet(v) {
+            const it = sheetItem(); if (!it) return sheetUpd();
+            let q = Math.max(0, Math.min(50, parseInt(v, 10) || 0)); const max = stockOf(curP, it.color, it.size);
+            if (q > max) { q = max; toast(`Omborda faqat ${max} ta bor`); }
+            if (q <= 0) { CART.splice(CART.indexOf(it), 1); toast("Savatdan olindi"); } else it.qty = q;
+            saveCart(); sheetUpd(); hap('success');
+        }
+        function sheetQty(d) { const it = sheetItem(); if (it) sheetQtySet(it.qty + d); }
+        function goCart() { closeModal('prod-modal'); PROD_STACK = []; switchTab('cart'); }
         function sheetUpd() {
             const b = $('prod-body'), y = b.scrollTop, el = $('ps-opts');
             if (!el) return drawSheet();
@@ -1562,8 +1579,7 @@
             if (have + 1 > stockOf(curP, selC, selS)) return tg.showAlert("Omborda yetarli son yo'q");
             if (it) it.qty = Math.min(50, it.qty + 1); else CART.push({ id: curP.id, color: selC, size: selS, cargo: selCargo, qty: 1 });
             saveCart(); hap('success');   // oyna yopilmaydi: mijoz boshqa rang/razmerni ham tanlab qo'shishi mumkin
-            const n = CART.filter(x => x.id === curP.id).reduce((t, x) => t + x.qty, 0);
-            toast(`Savatga qo'shildi ✓ (bu mahsulotdan savatda: ${n} ta)`);
+            toast("Savatga qo'shildi ✓"); if ($('ps-opts')) sheetUpd();
         }
         function chQty(i, d) {
             const x = CART[i]; if (!x) return; const p = PRODUCTS.find(p => p.id === x.id);
@@ -3326,6 +3342,14 @@
             if (isGuest()) { GEO_PEND = d; return; }
             api('/api/geo', d).catch(() => {});
         }
+        let GEO_RETRY = 0;
+        function geoRetry() {   // sozlamalardan qaytganda (ilova yana faollashganda) joylashuvni qayta so'raymiz
+            if (!GEO_RETRY || Date.now() - GEO_RETRY > 10 * 60000 || document.hidden) return;
+            if (!BTS_MAP || !$('bts-modal').classList.contains('show')) { GEO_RETRY = 0; return; }
+            GEO_RETRY = 0; setTimeout(() => btsLocate(), 400);
+        }
+        try { tg.onEvent('activated', geoRetry); tg.onEvent('locationManagerUpdated', geoRetry); } catch (e) {}
+        document.addEventListener('visibilitychange', geoRetry);
         function btsLocate(silent) {
             if (!BTS_MAP) return;
             if (!silent) toast('📍 Joylashuv aniqlanmoqda…');
@@ -3337,12 +3361,18 @@
             const lm = tg.LocationManager;
             if (lm && tg.isVersionAtLeast && tg.isVersionAtLeast('8.0')) {
                 try {
+                    // Holatni har safar Telegram'ning o'zidan so'raymiz (eski "rad etilgan" holatiga ishonmaymiz):
+                    // ruxsat sozlamalarda berilib qaytilsa — ilovani qayta ochmasdan ishlaydi.
                     const go = () => {
                         if (!lm.isLocationAvailable) return navGeo();
-                        if (lm.isAccessRequested && !lm.isAccessGranted) {   // avval rad etilgan — sozlamani ochishni taklif qilamiz
-                            done = true; if (silent) return; return tg.showConfirm("Telegram'ga joylashuvdan foydalanishga ruxsat berilmagan. Sozlamalarni ochib ruxsat berasizmi?", y => { if (y) lm.openSettings(); });
-                        }
-                        lm.getLocation(d => d ? ok(d) : navGeo());
+                        lm.getLocation(d => {
+                            if (d) return ok(d);
+                            if (lm.isAccessRequested && !lm.isAccessGranted) {   // rad etilgan — sozlamani ochishni taklif qilamiz, qaytganda o'zi qayta urinadi
+                                done = true; if (silent) return;
+                                return tg.showConfirm("Telegram'ga joylashuvdan foydalanishga ruxsat berilmagan. Sozlamalarni ochib ruxsat berasizmi?", y => { if (y) { GEO_RETRY = Date.now(); lm.openSettings(); } });
+                            }
+                            navGeo();
+                        });
                     };
                     return lm.isInited ? go() : lm.init(go);
                 } catch (e) {}
