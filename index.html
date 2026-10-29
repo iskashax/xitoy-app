@@ -309,9 +309,15 @@
         .ps-act { position: sticky; top: 0; z-index: 5; height: 0; }
         .ps-act > div { position: absolute; top: 12px; right: -8px; display: flex; gap: 8px; }
         .ps-act > .ps-back { left: -8px; right: auto; align-items: center; max-width: 52%; }
-        .ps-back span { background: rgba(0,0,0,.55); color: #fff; font-size: 11.5px; padding: 5px 10px; border-radius: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; backdrop-filter: blur(6px); min-width: 0; }
-        .ps-act .fav, .ps-act .psb { position: static; width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,.55); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; backdrop-filter: blur(6px); }
+        .ps-back span { background: rgba(0,0,0,.55); color: #fff; font-size: 11.5px; padding: 5px 10px; border-radius: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+        .ps-act .fav, .ps-act .psb { position: static; width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,.55); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; }
         .ps-act .fav.on { color: #ff4d6d; }
+        /* Android WebView: oyna ichida blur (backdrop-filter) miltillashga sabab bo'ladi — oynalarda o'chiramiz */
+        .modal .glass-card, .modal .sheet { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+        .ps-act::before { content: ''; position: absolute; left: -20px; right: -20px; top: 0; height: 62px; background: var(--bg-color); border-bottom: 1px solid var(--surface-border); opacity: 0; transition: opacity .15s; pointer-events: none; }
+        .ps-ttl { position: absolute; top: 12px; left: -4px; height: 38px; display: flex; align-items: center; max-width: calc(100% - 136px); font-weight: 700; font-size: 13.5px; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0; transition: opacity .15s; pointer-events: none; }
+        #prod-body.ps-up .ps-act::before, #prod-body.ps-up .ps-ttl { opacity: 1; }
+        #prod-body.ps-up .ps-back { display: none !important; }
         .gal-n { position: absolute; right: 10px; bottom: 10px; background: rgba(0,0,0,.6); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 9px; border-radius: 12px; pointer-events: none; }
         .sheet::before { content: ''; display: block; width: 42px; height: 5px; border-radius: 3px; background: var(--surface-border); margin: -8px auto 12px; }
         .sheet-x { position: sticky; top: 0; float: right; z-index: 3; width: 34px; height: 34px; margin: -6px -6px 0 8px; border-radius: 50%; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 15px; color: #fff; }
@@ -1098,7 +1104,7 @@
         <button class="btn btn-gold" onclick="cargoOk()">Mijozga yuborish</button></div></div>
     <div class="modal" id="val-modal" onclick="if(event.target===this)closeModal('val-modal')"><div class="sheet"><h3 id="val-title" style="margin-bottom:12px"></h3><input type="number" id="val-input" class="form-control" placeholder="Masalan: 10 yoki -10"><button class="btn btn-gold" style="margin-top:12px" onclick="valOk()">Tasdiqlash</button></div></div>
     <div class="modal" id="orders-modal" onclick="if(event.target===this)closeModal('orders-modal')"><div class="sheet" id="orders-body"></div></div>
-    <div class="modal" id="prod-modal" onclick="if(event.target===this)closeModal('prod-modal')"><div class="sheet" id="prod-body"></div></div>
+    <div class="modal" id="prod-modal" onclick="if(event.target===this)closeModal('prod-modal')"><div class="sheet" id="prod-body" onscroll="psUp()"></div></div>
     <div class="modal" id="forgot-modal" onclick="if(event.target===this)closeModal('forgot-modal')"><div class="sheet">
         <h3 style="margin-bottom:12px;">🔑 Hisobni tiklash</h3>
         <div id="fg-body"></div>
@@ -1497,7 +1503,7 @@
             if (color !== undefined && (!curP.colors.length || curP.colors.includes(color))) selC = color;   // savatdan ochilganda tanlangan variant
             if (size !== undefined && (!curP.sizes.length || curP.sizes.includes(size))) selS = size;
             if (cargo) selCargo = cargo;
-            drawSheet(); $('prod-modal').classList.add('show'); $('prod-body').scrollTop = 0;
+            drawSheet(); $('prod-modal').classList.add('show'); $('prod-body').scrollTop = 0; psUp();
         }
         function drawSheet() {
             const p = curP, sizes = p.sizes.length ? p.sizes : [''];
@@ -1507,11 +1513,15 @@
             const gal = pics.length ? `<div class="gal-wrap"><div class="gal" style="display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory" onscroll="const n=this.nextElementSibling,i=Math.round(this.scrollLeft/(this.firstElementChild.offsetWidth+8));if(n)n.firstChild.nodeValue=(i+1)+' / ${pics.length} '">${pics.map((u, i) => `<div class="pimg" style="height:240px;min-width:100%;scroll-snap-align:start;cursor:zoom-in" onclick="prodView(${i})"><img src="${esc(API + u)}"></div>`).join('')}</div><span class="gal-n">${pics.length > 1 ? `1 / ${pics.length} ` : ''}<i class="fas fa-expand"></i></span></div>` : '<div class="pimg" style="height:140px;margin-bottom:12px"><i class="fas fa-box-open"></i></div>';
             const left = stockOf(p, selC, selS), out = left <= 0;
             const cg = ME.cfg.cargo;
-            $('prod-body').innerHTML = `<div class="ps-act">${PROD_STACK.length ? `<div class="ps-back"><b class="psb" onclick="prodBack()" title="Oldingi mahsulot"><i class="fas fa-arrow-left"></i></b><span>${esc(PRODUCTS.find(x => x.id === PROD_STACK[PROD_STACK.length - 1].id)?.name || '')}</span></div>` : ''}<div><b class="psb" onclick="shareProduct()" title="Ulashish"><i class="fas fa-share-nodes"></i></b>${favBtn(p.id)}<b class="psb" onclick="closeModal('prod-modal')"><i class="fas fa-xmark"></i></b></div></div><div class="ps-gal">${pics.length ? gal : '<div class="pimg" style="height:200px"><i class="fas fa-box-open"></i></div>'}</div><div class="ps-body"><h3 style="margin-bottom:6px">${esc(p.name)}</h3><div class="prow ${p.old_price ? 'sale' : ''}" style="margin-top:0"><span class="pprice" style="font-size:20px">${fmt(p.price)} so'm</span>${p.sale_pct ? `<span class="pdisc" style="font-size:13px">↓${Number(p.sale_pct)}%</span>` : ''}${p.old_price ? cdChip(p.sale_until) : ''}</div>
+            $('prod-body').innerHTML = `<div class="ps-act"><div class="ps-ttl">${esc(p.name.length > 30 ? p.name.slice(0, 30).trim() + '…' : p.name)}</div>${PROD_STACK.length ? `<div class="ps-back"><b class="psb" onclick="prodBack()" title="Oldingi mahsulot"><i class="fas fa-arrow-left"></i></b><span>${esc(PRODUCTS.find(x => x.id === PROD_STACK[PROD_STACK.length - 1].id)?.name || '')}</span></div>` : ''}<div><b class="psb" onclick="shareProduct()" title="Ulashish"><i class="fas fa-share-nodes"></i></b>${favBtn(p.id)}<b class="psb" onclick="closeModal('prod-modal')"><i class="fas fa-xmark"></i></b></div></div><div class="ps-gal">${pics.length ? gal : '<div class="pimg" style="height:200px"><i class="fas fa-box-open"></i></div>'}</div><div class="ps-body"><h3 style="margin-bottom:6px">${esc(p.name)}</h3><div class="prow ${p.old_price ? 'sale' : ''}" style="margin-top:0"><span class="pprice" style="font-size:20px">${fmt(p.price)} so'm</span>${p.sale_pct ? `<span class="pdisc" style="font-size:13px">↓${Number(p.sale_pct)}%</span>` : ''}${p.old_price ? cdChip(p.sale_until) : ''}</div>
                 ${p.old_price ? `<div class="pold" style="font-size:13px">${fmt(p.old_price)} so'm</div>` : ''}<div class="pmeta" style="margin:4px 0">${p.week_buyers ? `<span style="color:#ff7a45">🔥 Bu hafta ${Number(p.week_buyers)} kishi sotib oldi</span>` : ''}${p.sold ? `<span>🛍 ${Number(p.sold)} ta sotildi</span>` : ''}${p.new ? '<span style="color:#10b981">✨ Yangi</span>' : ''}</div><div id="prod-rev-sum" style="margin-bottom:10px;min-height:4px"></div>
                 <div id="ps-opts">${sheetOpts()}</div>
                 ${similarBlock(p)}${specsBlock(p)}<div id="prod-rev"></div><div style="height:20px"></div></div>`;
-            sheetReviews(p.id);
+            sheetReviews(p.id); psUp();
+        }
+        function psUp() {   // nom tepaga chiqib ketganda — qisqa nomi tugmalar qatorida turadi
+            const b = $('prod-body'), h = b.querySelector('.ps-body h3'); if (!h || !b.clientHeight) return b.classList.remove('ps-up');
+            b.classList.toggle('ps-up', h.getBoundingClientRect().bottom < b.getBoundingClientRect().top + 62);
         }
         function sheetOpts() {   // tanlanadigan qism: rang, razmer, kargo, tugmalar — bosilganda faqat shu qayta chiziladi (rasm va sharhlar joyida qoladi)
             const p = curP, sizes = p.sizes.length ? p.sizes : [''], left = stockOf(p, selC, selS), out = left <= 0, cg = ME.cfg.cargo;
@@ -3495,14 +3505,17 @@
         }
         function pfClearStock() { PF.stock = {}; document.querySelectorAll('#pf-body input[data-vk]').forEach(i => i.value = ''); pfColors().forEach(stkSum); toast('Tozalandi — soni cheksiz'); }
         // ---- mahsulot tafsilotlari (forma)
-        const SPEC_TPL = { 'Telefon aksessuarlari': ['Mos brend', 'Mos modellar', 'Material', 'Dizayn', 'Uslub'], 'Kiyimlar': ['Material', 'Mavsum', 'Uslub', 'Kimlar uchun', 'Yoqa turi'],
-            'Poyabzal': ['Material', 'Taglik', 'Mavsum', 'Kimlar uchun'], 'Sumkalar': ['Material', "O'lchami", 'Bo\'limlar soni', 'Yopilishi'], 'Texnika': ['Brend', 'Model', 'Quvvat', 'Batareya', 'Kafolat'] };
+        // Hammasi bir xil tuzilishda: Brand → Mavsum → Uslub → Kimlar uchun → Material (+ toifaga xos qatorlar)
+        const SPEC_BASE = ['Brand', 'Mavsum', 'Uslub', 'Kimlar uchun', 'Material'];
+        const SPEC_TPL = { 'Kiyimlar': SPEC_BASE, 'Poyabzal': [...SPEC_BASE, 'Taglik'], 'Sumkalar': [...SPEC_BASE, "O'lchami", "Bo'limlar soni"], 'Aksessuarlar': SPEC_BASE, 'Sport': SPEC_BASE, 'Bolalar uchun': SPEC_BASE,
+            'Telefon aksessuarlari': ['Brand', 'Mos modellar', 'Uslub', 'Kimlar uchun', 'Material'], 'Texnika': ['Brand', 'Model', 'Quvvat', 'Batareya', 'Kafolat'] };
+        const SPEC_HINT = { 'Brand': 'DEGIWEY', 'Mavsum': 'Bahor, Kuz, Qish', 'Uslub': 'Vintage', 'Kimlar uchun': 'Erkaklar (18-25 yosh)', 'Material': 'Polyester (PET) Fiber', 'Mos modellar': 'iPhone 15, 15 Pro', 'Taglik': 'Rezina', "O'lchami": '30×20×10 sm' };
         function specRows() {
             $('pf-specs').innerHTML = (PF.specs || []).map(([k, v], i) => `<div style="display:flex;gap:6px;margin-bottom:6px"><input class="form-control" style="margin:0;padding:9px;flex:.8;font-size:12.5px" placeholder="Nomi" value="${esc(k)}" oninput="PF.specs[${i}][0]=this.value">
-                <input class="form-control" style="margin:0;padding:9px;flex:1.2;font-size:12.5px" placeholder="Qiymati" value="${esc(v)}" oninput="PF.specs[${i}][1]=this.value"><b onclick="PF.specs.splice(${i},1);specRows()" style="padding:8px;color:var(--primary-color);cursor:pointer">×</b></div>`).join('');
+                <input class="form-control" style="margin:0;padding:9px;flex:1.2;font-size:12.5px" placeholder="${esc(SPEC_HINT[k] ? 'Masalan: ' + SPEC_HINT[k] : 'Qiymati')}" value="${esc(v)}" oninput="PF.specs[${i}][1]=this.value"><b onclick="PF.specs.splice(${i},1);specRows()" style="padding:8px;color:var(--primary-color);cursor:pointer">×</b></div>`).join('');
         }
         function specAdd(k = '') { PF.specs = PF.specs || []; if (PF.specs.length >= 30) return; PF.specs.push([k, '']); specRows(); }
-        function specTpl() { const t = SPEC_TPL[$('adm-p-cat').value] || ['Material', 'Brend', "O'lchami", 'Rang']; const have = new Set((PF.specs || []).map(x => x[0])); t.filter(k => !have.has(k)).forEach(k => specAdd(k)); }
+        function specTpl() { const t = SPEC_TPL[$('adm-p-cat').value] || SPEC_BASE; const have = new Set((PF.specs || []).map(x => x[0])); t.filter(k => !have.has(k)).forEach(k => specAdd(k)); }
         // ===== SAQLANGANLAR =====
         const isFav = id => !!(ME && ME.favs && ME.favs.includes(id));
         function favBtn(id, big) { return `<b class="fav ${isFav(id) ? 'on' : ''}${big ? ' big' : ''}" data-fav="${esc(id)}" onclick="event.stopPropagation();toggleFav(${ja(id)})"><i class="${isFav(id) ? 'fas' : 'far'} fa-heart"></i></b>`; }
