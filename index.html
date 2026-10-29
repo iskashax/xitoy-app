@@ -218,6 +218,9 @@
         .sim-img { width: 128px; height: 128px; border-radius: 14px; overflow: hidden; background: var(--input-bg); display: flex; align-items: center; justify-content: center; color: var(--gold-color); font-size: 28px; }
         .sim-img img { width: 100%; height: 100%; object-fit: cover; }
         .sim-name { font-size: 12px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: var(--text-main); }
+        .bts-res { position: absolute; left: 0; right: 0; top: 100%; z-index: 1000; background: var(--bg-color); border: 1px solid var(--surface-border); border-radius: 12px; margin-top: 4px; max-height: 42vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+        .bts-ri { padding: 10px 12px; border-bottom: 1px solid var(--surface-border); cursor: pointer; font-size: 13px; }
+        .bts-ri span { display: block; font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
         .stk-grp { background: var(--input-bg); border-radius: 12px; margin-top: 8px; overflow: hidden; }
         .stk-h { display: flex; align-items: center; gap: 8px; padding: 9px 10px; cursor: pointer; }
         .stk-chev { color: var(--text-muted); font-size: 11px; transition: transform .2s; }
@@ -628,7 +631,7 @@
                     <div class="form-group"><label>Viloyat</label><select id="prof-region" class="form-control"></select></div>
                     <div class="form-group"><label>Aniq Manzil</label><input type="text" id="prof-address" class="form-control" value="Manzil kiritilmagan"></div>
                     <div class="form-group"><label>BTS pochta — viloyat</label><select id="prof-bts-region" class="form-control"></select></div>
-                    <div class="form-group"><label>BTS pochta manzili (tuman / shahar va filial)</label><input type="text" id="prof-bts-point" class="form-control" placeholder="Masalan: Asaka tumani, BTS filiali"><button class="btn btn-outline" type="button" style="margin-top:8px;padding:11px;font-size:13px" onclick="btsMapOpen()"><i class="fas fa-map-location-dot"></i> Xaritadan BTS punktini tanlash</button></div>
+                    <div class="form-group"><label>BTS pochta manzili (tuman / shahar va filial)</label><input type="text" id="prof-bts-point" class="form-control" placeholder="Masalan: Asaka tumani, BTS filiali" oninput="btsLinkUpd()"><div id="bts-link" style="margin-top:6px"></div><button class="btn btn-outline" type="button" style="margin-top:8px;padding:11px;font-size:13px" onclick="btsMapOpen()"><i class="fas fa-map-location-dot"></i> Xaritadan BTS punktini tanlash</button></div>
                     <button class="btn btn-red" onclick="saveProfileInfo()"><i class="fas fa-save"></i> Saqlash</button>
                 </div>
             </div>
@@ -1033,7 +1036,8 @@
     <div class="modal" id="specs-modal" onclick="if(event.target===this)closeModal('specs-modal')"><div class="sheet" id="specs-body"></div></div>
     <div class="modal" id="bts-modal" onclick="if(event.target===this)closeModal('bts-modal')"><div class="sheet" style="max-height:92vh">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h3 style="font-size:17px">🗺 BTS punktini tanlang</h3><b class="sheet-x" style="float:none;margin:0" onclick="closeModal('bts-modal')"><i class="fas fa-xmark"></i></b></div>
-        <div id="bts-map" data-noi18n style="height:52vh;border-radius:14px;overflow:hidden;background:var(--surface-color)"></div>
+        <div style="position:relative;margin-bottom:8px"><input id="bts-q" class="form-control" style="margin:0;padding:11px 12px" placeholder="🔍 BTS filiali, tuman yoki ko'cha nomi" oninput="btsSearch()" autocomplete="off"><div id="bts-res" class="bts-res" style="display:none"></div></div>
+        <div id="bts-map" data-noi18n style="height:48vh;border-radius:14px;overflow:hidden;background:var(--surface-color)"></div>
         <div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-outline" style="margin:0;padding:11px;font-size:13px" onclick="btsLocate()"><i class="fas fa-location-crosshairs"></i> Mening joyim</button></div>
         <div id="bts-info" style="font-size:12px;color:var(--text-muted);margin-top:10px;line-height:1.5"></div><div id="bts-near"></div>
     </div></div>
@@ -1165,7 +1169,7 @@
             "Og'irlikni kiriting": ["Введите вес", "Enter weight"], "Yopish": ["Закрыть", "Close"], "AKSIYA": ["АКЦИЯ", "SALE"], "YANGI": ["НОВИНКА", "NEW"], "🔥 Ko'p sotilgan": ["🔥 Хит продаж", "🔥 Bestseller"], "Aksiya": ["Акция", "Sale"],
             "🏷 Aksiya bo'yicha tejadingiz:": ["🏷 Экономия по акции:", "🏷 You save:"], "✨ Yangi": ["✨ Новинка", "✨ New"], "Hozircha aksiya yo'q": ["Пока нет акций", "No sales yet"], "TUGADI": ["НЕТ В НАЛИЧИИ", "SOLD OUT"], "MENING SO'ROVLARIM": ["МОИ ЗАПРОСЫ", "MY REQUESTS"], "yopish": ["закрыть", "close"],
             "XARIDORLAR SHARHLARI": ["ОТЗЫВЫ ПОКУПАТЕЛЕЙ", "CUSTOMER REVIEWS"], "Ko'rish ›": ["Смотреть ›", "View ›"], "⭐ Mijozlar sharhlari": ["⭐ Отзывы покупателей", "⭐ Customer reviews"],
-            "Hozircha sharhlar yo'q": ["Пока нет отзывов", "No reviews yet"], "Xaridorlar fikrlari": ["Отзывы покупателей", "Customer reviews"], "🔔 Bildirishnomalar": ["🔔 Уведомления", "🔔 Notifications"], "Hozircha bildirishnoma yo'q": ["Пока нет уведомлений", "No notifications yet"], "O'zgarishni saqlash": ["Сохранить изменения", "Save changes"], "✎ o'zgartirish": ["✎ изменить", "✎ edit"], "Bu variant tugadi": ["Этот вариант закончился", "This variant is sold out"], "Sizdan: ": ["С вас: ", "You pay: "], "Ulashish": ["Поделиться", "Share"], "Oldingi mahsulot": ["Предыдущий товар", "Previous product"], "🔥 Sizga yoqishi mumkin": ["🔥 Вам может понравиться", "🔥 You may like"], "🛍 O'xshash va sizga yoqishi mumkin": ["🛍 Похожие и рекомендуемые", "🛍 Similar and recommended"], "Aynan shunday mahsulot topilmadi — o'xshashlari:": ["Точно такого товара нет — похожие:", "No exact match — similar items:"], "👥 Kim ko'rdi ›": ["👥 Кто видел ›", "👥 Who saw ›"], "👥 Kim ko'rdi": ["👥 Кто видел", "👥 Who saw"], "👆 Bosganlar": ["👆 Нажавшие", "👆 Clicked"], "👁 Faqat ko'rganlar": ["👁 Только видели", "👁 Viewed only"], "👆 Bosgan": ["👆 Нажал", "👆 Clicked"], "👁 Ko'rgan": ["👁 Видел", "👁 Viewed"], "Katalogga qaytish": ["Вернуться в каталог", "Back to catalog"], "Kirish / Ro'yxatdan o'tish": ["Вход / Регистрация", "Log in / Sign up"], "Ro'yxatdan o'tgach hisoblanadi": ["Рассчитается после регистрации", "Calculated after sign-up"], "🗺 BTS punktini tanlang": ["🗺 Выберите пункт BTS", "🗺 Choose a BTS point"], "Mening joyim": ["Моё местоположение", "My location"], "Xaritadan BTS punktini tanlash": ["Выбрать пункт BTS на карте", "Pick BTS point on map"], "ENG YAQIN PUNKTLAR": ["БЛИЖАЙШИЕ ПУНКТЫ", "NEAREST POINTS"], "PIN-kodni unutdingizmi?": ["Забыли PIN-код?", "Forgot PIN?"], "🛒 Xarid va kargo to'lovlarini ham PIN bilan tasdiqlash": ["🛒 Подтверждать покупки и оплату карго PIN-кодом", "🛒 Confirm purchases and cargo payments with PIN"], "(ixtiyoriy)": ["(по желанию)", "(optional)"], "Hamyon PIN-kodi": ["PIN-код кошелька", "Wallet PIN"], "Hamyon faqat PIN yoki barmoq izi / Face ID bilan ochiladi — bu majburiy. Telefoningiz boshqa odam qo'liga tushsa ham hamyoningizga kira olmaydi. Xohlasangiz, xarid va kargo to'lovlarini ham PIN bilan tasdiqlashni yoqishingiz mumkin.": ["Кошелёк открывается только по PIN или отпечатку / Face ID — это обязательно. Даже если телефон попадёт в чужие руки, в кошелёк не войти. По желанию можно включить подтверждение PIN-кодом и для покупок и оплаты карго.", "The wallet opens only with PIN or fingerprint / Face ID — this is mandatory. Even if someone else gets your phone, they cannot open your wallet. Optionally, you can also require PIN for purchases and cargo payments."], "Hamyonni (va yoqilgan bo'lsa xaridlarni) PIN o'rniga barmoq izi yoki yuz bilan ochasiz. Ishlamasa, PIN so'raladi.": ["Открывайте кошелёк (и подтверждайте покупки, если включено) отпечатком или лицом вместо PIN. Если не сработает — будет запрошен PIN.", "Open the wallet (and confirm purchases, if enabled) with fingerprint or face instead of PIN. If it fails, PIN is requested."], "PIN-kodni unutdingizmi? — yangisini o'rnatish": ["Забыли PIN? — установить новый", "Forgot PIN? — set a new one"], "🛍 O'xshash mahsulotlar": ["🛍 Похожие товары", "🛍 Similar products"],
+            "Hozircha sharhlar yo'q": ["Пока нет отзывов", "No reviews yet"], "Xaridorlar fikrlari": ["Отзывы покупателей", "Customer reviews"], "🔔 Bildirishnomalar": ["🔔 Уведомления", "🔔 Notifications"], "Hozircha bildirishnoma yo'q": ["Пока нет уведомлений", "No notifications yet"], "O'zgarishni saqlash": ["Сохранить изменения", "Save changes"], "✎ o'zgartirish": ["✎ изменить", "✎ edit"], "Bu variant tugadi": ["Этот вариант закончился", "This variant is sold out"], "Sizdan: ": ["С вас: ", "You pay: "], "Ulashish": ["Поделиться", "Share"], "Xaritada BTS filiali turgan joyni bosing": ["Нажмите на карте место отделения BTS", "Tap the BTS branch location on the map"], "Barmoq izi sozlamasi eskirgan — bir marta PIN kiriting. Keyin yana barmoq izi bilan ochiladi.": ["Настройка отпечатка устарела — введите PIN один раз. Дальше снова по отпечатку.", "Fingerprint setup is outdated — enter PIN once. Then fingerprint will work again."], "Barmoq izi yangilandi ✓": ["Отпечаток обновлён ✓", "Fingerprint updated ✓"], "Oldingi mahsulot": ["Предыдущий товар", "Previous product"], "🔥 Sizga yoqishi mumkin": ["🔥 Вам может понравиться", "🔥 You may like"], "🛍 O'xshash va sizga yoqishi mumkin": ["🛍 Похожие и рекомендуемые", "🛍 Similar and recommended"], "Aynan shunday mahsulot topilmadi — o'xshashlari:": ["Точно такого товара нет — похожие:", "No exact match — similar items:"], "👥 Kim ko'rdi ›": ["👥 Кто видел ›", "👥 Who saw ›"], "👥 Kim ko'rdi": ["👥 Кто видел", "👥 Who saw"], "👆 Bosganlar": ["👆 Нажавшие", "👆 Clicked"], "👁 Faqat ko'rganlar": ["👁 Только видели", "👁 Viewed only"], "👆 Bosgan": ["👆 Нажал", "👆 Clicked"], "👁 Ko'rgan": ["👁 Видел", "👁 Viewed"], "Katalogga qaytish": ["Вернуться в каталог", "Back to catalog"], "Kirish / Ro'yxatdan o'tish": ["Вход / Регистрация", "Log in / Sign up"], "Ro'yxatdan o'tgach hisoblanadi": ["Рассчитается после регистрации", "Calculated after sign-up"], "🗺 BTS punktini tanlang": ["🗺 Выберите пункт BTS", "🗺 Choose a BTS point"], "Mening joyim": ["Моё местоположение", "My location"], "Xaritadan BTS punktini tanlash": ["Выбрать пункт BTS на карте", "Pick BTS point on map"], "ENG YAQIN PUNKTLAR": ["БЛИЖАЙШИЕ ПУНКТЫ", "NEAREST POINTS"], "PIN-kodni unutdingizmi?": ["Забыли PIN-код?", "Forgot PIN?"], "🛒 Xarid va kargo to'lovlarini ham PIN bilan tasdiqlash": ["🛒 Подтверждать покупки и оплату карго PIN-кодом", "🛒 Confirm purchases and cargo payments with PIN"], "(ixtiyoriy)": ["(по желанию)", "(optional)"], "Hamyon PIN-kodi": ["PIN-код кошелька", "Wallet PIN"], "Hamyon faqat PIN yoki barmoq izi / Face ID bilan ochiladi — bu majburiy. Telefoningiz boshqa odam qo'liga tushsa ham hamyoningizga kira olmaydi. Xohlasangiz, xarid va kargo to'lovlarini ham PIN bilan tasdiqlashni yoqishingiz mumkin.": ["Кошелёк открывается только по PIN или отпечатку / Face ID — это обязательно. Даже если телефон попадёт в чужие руки, в кошелёк не войти. По желанию можно включить подтверждение PIN-кодом и для покупок и оплаты карго.", "The wallet opens only with PIN or fingerprint / Face ID — this is mandatory. Even if someone else gets your phone, they cannot open your wallet. Optionally, you can also require PIN for purchases and cargo payments."], "Hamyonni (va yoqilgan bo'lsa xaridlarni) PIN o'rniga barmoq izi yoki yuz bilan ochasiz. Ishlamasa, PIN so'raladi.": ["Открывайте кошелёк (и подтверждайте покупки, если включено) отпечатком или лицом вместо PIN. Если не сработает — будет запрошен PIN.", "Open the wallet (and confirm purchases, if enabled) with fingerprint or face instead of PIN. If it fails, PIN is requested."], "PIN-kodni unutdingizmi? — yangisini o'rnatish": ["Забыли PIN? — установить новый", "Forgot PIN? — set a new one"], "🛍 O'xshash mahsulotlar": ["🛍 Похожие товары", "🛍 Similar products"],
             "Hozircha sharh yo'q": ["Пока нет отзывов", "No reviews yet"], "Haqiqiy xaridorlar sharhlari": ["Отзывы реальных покупателей", "Reviews from real buyers"], "Do'kon javobi:": ["Ответ магазина:", "Shop reply:"],
             // so'rov holatlari
             "Yangi": ["Новый", "New"], "Narx berildi": ["Цена указана", "Price offered"], "Buyurtma qilindi": ["Заказано", "Ordered"], "Topilmadi": ["Не найдено", "Not found"], "Yopildi": ["Закрыт", "Closed"],
@@ -1347,7 +1351,7 @@
             if (!ME.registered) { renderAds(); renderCats(); langSync(); calcVisible(); return; }   // mehmon ham reklama va bo'limlarni ko'radi
             $('prof-id').innerText = 'ID: ' + ME.code; $('prof-login').innerText = '@' + ME.username;
             $('prof-tgid').innerHTML = `Telegram ID: ${UID} <i class="fas fa-copy"></i>`; $('prof-tgid').style.cursor = 'pointer'; $('prof-tgid').onclick = () => copyText(String(UID), 'Telegram ID nusxalandi ✓');
-            if (FIRST) { $('prof-name').value = ME.name; $('prof-phone').value = ME.phone; $('prof-region').value = ME.region; $('prof-address').value = ME.address; $('prof-bts-region').value = ME.bts_region; $('prof-bts-point').value = ME.bts_point; FIRST = false; }
+            if (FIRST) { $('prof-name').value = ME.name; $('prof-phone').value = ME.phone; $('prof-region').value = ME.region; $('prof-address').value = ME.address; $('prof-bts-region').value = ME.bts_region; $('prof-bts-point').value = ME.bts_point; btsLinkUpd(); FIRST = false; }
             $('prof-balance').innerHTML = `${fmt(ME.balance)} <span style="font-size: 18px;">so'm</span>`;
             const tiers = ME.cfg.tiers, nxt = tiers.find(t => ME.tokens < t[0]);
             $('prof-tokens').innerText = ME.tokens; $('prof-disc').innerText = ME.promos.filter(p => !p.used).length + ' ta kod';
@@ -2121,7 +2125,7 @@
                 $('ord-count').innerText = r.orders.length + ' ta buyurtma' + (r.orders.length >= 100 ? ' (oxirgi 100 ta — aniqroq qidiring)' : '');
                 $('adm-orders').innerHTML = r.orders.map(o => { const kg = o.cargo_kg || {}, has = k => o.items.some(i => i.cargo === k);
                     const ship = o.cargo_paid && o.status === "O'zbekistonga keldi";
-                    return `<div class="cart-row" style="display:block${ship ? ';border:1px solid #2ecc71;border-radius:14px;padding:12px' : ''}">${ship ? `<div style="font-size:12px;font-weight:800;color:#2ecc71;margin-bottom:6px">✅ Kargo to'landi — ${o.delivery === 'pickup' ? 'ofisda tayyorlang' : "BTS orqali jo'nating"}</div>` : ''}<div style="font-size:12px;line-height:1.5"><b onclick="copyText(${ja(o.track)},'Trek nusxalandi ✓')">${esc(o.track)}</b> · ${fmt(o.total)} so'm · ${dt(o.date)} ${o.cancel_req ? '<span class="pill no">bekor so\'raldi</span>' : ''}<br>${esc(o.client)}${o.username ? ' · @' + esc(o.username) : ''}${o.address ? '<br>📍 ' + esc(o.address) : ''}<br>📦 BTS: ${esc(o.bts)}${o.delivery === 'bts' ? ' · mijozdan ' + fmt(o.bts_fee) + ' / xarajat ~' + fmt(o.bts_cost) : ''}<br>${o.items.map(i => esc(i.name + ' ' + (i.color || '') + ' ' + (i.size || '') + ' ×' + i.qty) + ' ' + (CARGO[i.cargo] || '')).join('<br>')}
+                    return `<div class="cart-row" style="display:block${ship ? ';border:1px solid #2ecc71;border-radius:14px;padding:12px' : ''}">${ship ? `<div style="font-size:12px;font-weight:800;color:#2ecc71;margin-bottom:6px">✅ Kargo to'landi — ${o.delivery === 'pickup' ? 'ofisda tayyorlang' : "BTS orqali jo'nating"}</div>` : ''}<div style="font-size:12px;line-height:1.5"><b onclick="copyText(${ja(o.track)},'Trek nusxalandi ✓')">${esc(o.track)}</b> · ${fmt(o.total)} so'm · ${dt(o.date)} ${o.cancel_req ? '<span class="pill no">bekor so\'raldi</span>' : ''}<br>${esc(o.client)}${o.username ? ' · @' + esc(o.username) : ''}${o.address ? '<br>📍 ' + esc(o.address) : ''}<br>📦 BTS: ${geoLinkify(o.bts)}${o.delivery === 'bts' ? ' · mijozdan ' + fmt(o.bts_fee) + ' / xarajat ~' + fmt(o.bts_cost) : ''}<br>${o.items.map(i => esc(i.name + ' ' + (i.color || '') + ' ' + (i.size || '') + ' ×' + i.qty) + ' ' + (CARGO[i.cargo] || '')).join('<br>')}
                         ${o.cargo_sum ? `<br>⚖️ ${kg.avia ? 'Avia ' + esc(kg.avia) + ' kg ' : ''}${kg.avto ? 'Avto ' + esc(kg.avto) + ' kg ' : ''}· ${fmt(o.cargo_sum)} so'm${o.bts_extra ? ' + BTS ' + fmt(o.bts_extra) : ''} ${o.cargo_paid ? '<span class="pill ok">to\'langan</span>' : '<span class="pill">kutilmoqda</span>'}${o.cargo_cost ? `<br><span style="color:var(--text-muted)">🚚 kargoga biz: ${fmt(o.cargo_cost)} · foyda: ${fmt(o.cargo_sum - o.cargo_cost)}</span>` : ''}` : ''}
                         ${[o.china_track && '🇨🇳 ' + esc(o.china_track), o.party && '📦 Partiya ' + esc(o.party), o.bts_track && '📮 BTS ' + esc(o.bts_track)].filter(Boolean).length ? '<br>' + [o.china_track && '🇨🇳 ' + esc(o.china_track), o.party && '📦 Partiya ' + esc(o.party), o.bts_track && '📮 BTS ' + esc(o.bts_track)].filter(Boolean).join(' · ') : ''}
                         ${o.deadline ? (() => { const l = Math.ceil((o.deadline - Date.now() / 1000) / 86400); return `<br><span class="pill ${l <= 0 ? 'no' : ''}">⏰ ${l <= 0 ? "Kargo muddati o'tdi — musodara qilish mumkin" : 'Kargo to\'lovi: ' + l + ' kun qoldi'}</span>`; })() : ''}</div>
@@ -2397,10 +2401,20 @@
             try { await fn(a); }
             catch (e) {
                 if (!/PIN_REQUIRED|Biometrik/.test(e.message)) throw e;
-                const pin = await pinAsk(why); if (pin === null) return false;
+                const bioOld = !!a.bio;   // barmoq izi o'tdi, lekin server tokeni eskirgan (masalan PIN almashgan yoki boshqa qurilmada yoqilgan)
+                const pin = await pinAsk(bioOld ? "Barmoq izi sozlamasi eskirgan — bir marta PIN kiriting. Keyin yana barmoq izi bilan ochiladi." : why); if (pin === null) return false;
                 await fn({ pin });
+                if (bioOld) bioRenew(pin);
             }
             return true;
+        }
+        async function bioRenew(pin) {   // barmoq izini jimgina qayta bog'lash — keyingi safar PIN so'ralmaydi
+            try {
+                const b = await bmInit(); if (!b || !b.isBiometricAvailable || !b.isAccessGranted) return;
+                const r = await api('/api/security', { action: 'bio_on', pin, renew: true });
+                const saved = await new Promise(res => b.updateBiometricToken(r.token, res));
+                if (saved) { toast('Barmoq izi yangilandi ✓'); refreshMe().catch(() => {}); }
+            } catch (e) {}
         }
 
         // ===== EGA: SOZLAMALAR BO'LIMLARI =====
@@ -3131,39 +3145,117 @@
                     BTS_MAP = L.map('bts-map', { zoomControl: true, attributionControl: true }).setView([41.0, 66.5], 6);
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(BTS_MAP);
                     BTS_MAP.on('click', e => btsPickHere(e.latlng.lat, e.latlng.lng));
-                    const r = await api('/api/bts_points'); BTS_PTS = r.items || [];
+                    const r = await api('/api/bts_points'); BTS_PTS = r.items || []; BTS_BR = r.branches || [];
                     BTS_PTS.forEach((p, i) => L.circleMarker([p.lat, p.lng], { radius: 8, color: '#fff', weight: 2, fillColor: '#e60000', fillOpacity: 1 }).addTo(BTS_MAP)
                         .bindPopup(`<b>${esc(p.n)}</b>${p.a ? '<br>' + esc(p.a) : ''}${p.h ? '<br>🕘 ' + esc(p.h) : ''}<br><button class="btn btn-gold" style="margin-top:8px;padding:8px 12px;font-size:12px" onclick="btsPick(${i})">✓ Shu punktni tanlash</button>`));
                 }
                 setTimeout(() => BTS_MAP.invalidateSize(), 250);
-                $('bts-info').innerHTML = BTS_PTS.length ? `🔴 Qizil nuqtalar — BTS punktlari (${BTS_PTS.length} ta). Nuqtani bosing va «Shu punktni tanlash» ni bosing. Ro'yxatda bo'lmasa, xaritada kerakli joyni bosing.`
-                    : "BTS punktlari ro'yxati hali yuklanmadi. «Mening joyim» ni bosing yoki xaritada BTS filiali joylashgan joyni bosib belgilang.";
+                $('bts-info').innerHTML = (BTS_BR.length ? `🔍 Tepada qidiruv: BTS filiali nomi yoki tumaningizni yozing (${BTS_BR.length} ta filial). ` : '') + (BTS_PTS.length ? `🔴 Qizil nuqtalar — BTS punktlari (${BTS_PTS.length} ta). Nuqtani bosing va «Shu punktni tanlash» ni bosing. Ro'yxatda bo'lmasa, xaritada kerakli joyni bosing.`
+                    : "Qidiruvga manzilni yozing yoki «Mening joyim» ni bosing, keyin xaritada BTS filiali joylashgan joyni bosib belgilang.");
             } catch (e) { $('bts-info').innerText = "Xaritani yuklab bo'lmadi. Internetni tekshiring yoki manzilni qo'lda yozing."; }
         }
         function btsSet(text, lat, lng) {
-            $('prof-bts-point').value = text.slice(0, 150);
+            $('prof-bts-point').value = text.slice(0, 150); btsLinkUpd();
             const rg = regionOf(lat, lng); if (rg && [...$('prof-bts-region').options].some(o => o.value === rg)) $('prof-bts-region').value = rg;
             closeModal('bts-modal'); toast('Tanlandi ✓ Endi «Saqlash» ni bosing'); hap('success');
+        }
+        // ---- koordinatalar havola bo'lib ko'rinadi (bosilsa xarita ochiladi)
+        const GEO_RE = /\((-?\d{1,2}\.\d{3,}),\s*(-?\d{1,3}\.\d{3,})\)/;
+        function openMapAt(lat, lng) { try { tg.openLink(`https://maps.google.com/?q=${lat},${lng}`); } catch (e) { window.open(`https://maps.google.com/?q=${lat},${lng}`); } }
+        function geoLinkify(t) {
+            const m = String(t || '').match(GEO_RE); if (!m) return esc(t);
+            return esc(String(t).replace(GEO_RE, '').trim()) + ` <a href="javascript:void 0" onclick="event.stopPropagation();openMapAt(${+m[1]},${+m[2]})" style="color:#5aa9ff;text-decoration:underline;white-space:nowrap">📍 xaritada ochish</a>`;
+        }
+        function btsLinkUpd() {
+            const m = ($('prof-bts-point').value || '').match(GEO_RE);
+            $('bts-link').innerHTML = m ? `<a href="javascript:void 0" onclick="openMapAt(${+m[1]},${+m[2]})" style="font-size:12.5px;color:#5aa9ff;text-decoration:underline">📍 Xaritada ochish (${(+m[1]).toFixed(5)}, ${(+m[2]).toFixed(5)})</a>` : '';
+        }
+        async function revGeo(lat, lng) {   // koordinata → to'liq manzil (ko'cha, uy, mahalla, shahar)
+            try {
+                const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=18&addressdetails=1&accept-language=uz,ru&lat=${lat}&lon=${lng}`);
+                const j = await r.json(), a = j.address || {};
+                const parts = [[a.road, a.house_number].filter(Boolean).join(' '), a.neighbourhood || a.quarter || a.suburb, a.city || a.town || a.village || a.city_district, a.county, a.state];
+                const txt = [...new Set(parts.filter(Boolean))].join(', ');
+                return txt || (j.display_name || '').split(',').slice(0, 4).join(',');
+            } catch (e) { return ''; }
         }
         function btsPick(i) { const p = BTS_PTS[i]; if (p) btsSet(`${p.n}${p.a ? ', ' + p.a : ''} (${p.lat.toFixed(5)},${p.lng.toFixed(5)})`, p.lat, p.lng); }
         function btsPickHere(lat, lng) {
             const near = BTS_PTS.map((p, i) => [i, geoD(lat, lng, p.lat, p.lng)]).sort((a, b) => a[1] - b[1])[0];
             if (near && near[1] < 0.15) return btsPick(near[0]);
-            L.popup().setLatLng([lat, lng]).setContent(`<div style="font-size:12px">Shu joy belgilansinmi?</div><button class="btn btn-gold" style="margin-top:8px;padding:8px 12px;font-size:12px" onclick="btsSet('📍 Xaritada belgilangan joy (${lat.toFixed(5)},${lng.toFixed(5)})',${lat},${lng})">✓ Belgilash</button>`).openOn(BTS_MAP);
+            const pop = L.popup().setLatLng([lat, lng]).setContent(`<div style="font-size:12px" id="rg-txt">Manzil aniqlanmoqda…</div><button class="btn btn-gold" style="margin-top:8px;padding:8px 12px;font-size:12px" onclick="btsSetHere(${lat},${lng})">✓ Shu joyni belgilash</button>`).openOn(BTS_MAP);
+            revGeo(lat, lng).then(t => { BTS_RG = { lat, lng, t }; const el = document.getElementById('rg-txt'); if (el) el.innerText = t || 'Manzil topilmadi — koordinata saqlanadi'; });
         }
-        function btsShowNear(lat, lng) {
-            BTS_ME = [lat, lng]; BTS_MAP.setView([lat, lng], 13); L.circleMarker([lat, lng], { radius: 7, color: '#fff', weight: 2, fillColor: '#2f80ff', fillOpacity: 1 }).addTo(BTS_MAP);
+        function btsShowNear(lat, lng, place) {
+            BTS_ME = [lat, lng]; if (!place) BTS_MAP.setView([lat, lng], 15); if (!place) L.circleMarker([lat, lng], { radius: 7, color: '#fff', weight: 2, fillColor: '#2f80ff', fillOpacity: 1 }).addTo(BTS_MAP);
             const l = BTS_PTS.map((p, i) => [i, geoD(lat, lng, p.lat, p.lng)]).sort((a, b) => a[1] - b[1]).slice(0, 5);
             $('bts-near').innerHTML = l.length ? '<div style="font-size:11px;color:var(--gold-color);font-weight:700;margin:12px 0 6px">ENG YAQIN PUNKTLAR</div>' + l.map(([i, d]) => `<div class="hrow" style="cursor:pointer" onclick="btsPick(${i})"><span style="flex:1;font-size:13px"><b>${esc(BTS_PTS[i].n)}</b><br><span style="font-size:11.5px;color:var(--text-muted)">${esc(BTS_PTS[i].a || '')}</span></span><b style="font-size:12px;white-space:nowrap">${d < 1 ? Math.round(d * 1000) + ' m' : d.toFixed(1) + ' km'}</b></div>`).join('') : '';
         }
         function btsLocate() {
-            const ok = p => btsShowNear(p.latitude, p.longitude), no = () => tg.showAlert("Joylashuvni aniqlab bo'lmadi. Telefon sozlamalarida joylashuvga ruxsat bering yoki xaritada o'zingiz belgilang.");
+            if (!BTS_MAP) return;
+            toast('📍 Joylashuv aniqlanmoqda…');
+            let done = false;
+            const ok = p => { if (done) return; done = true; btsShowNear(p.latitude, p.longitude); };
+            const no = msg => { if (done) return; done = true; tg.showAlert(msg || "Joylashuvni aniqlab bo'lmadi. Telefonda GPS (joylashuv) yoqilganini tekshiring yoki tepadagi qidiruvga manzilingizni yozing."); };
+            setTimeout(() => no(), 20000);
+            const navGeo = () => { if (!navigator.geolocation) return no(); navigator.geolocation.getCurrentPosition(p => ok(p.coords), () => no(), { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }); };
             const lm = tg.LocationManager;
             if (lm && tg.isVersionAtLeast && tg.isVersionAtLeast('8.0')) {
-                try { return lm.init(() => { if (!lm.isLocationAvailable) return navGeo(); lm.getLocation(d => d ? ok(d) : navGeo()); }); } catch (e) {}
+                try {
+                    const go = () => {
+                        if (!lm.isLocationAvailable) return navGeo();
+                        if (lm.isAccessRequested && !lm.isAccessGranted) {   // avval rad etilgan — sozlamani ochishni taklif qilamiz
+                            done = true; return tg.showConfirm("Telegram'ga joylashuvdan foydalanishga ruxsat berilmagan. Sozlamalarni ochib ruxsat berasizmi?", y => { if (y) lm.openSettings(); });
+                        }
+                        lm.getLocation(d => d ? ok(d) : navGeo());
+                    };
+                    return lm.isInited ? go() : lm.init(go);
+                } catch (e) {}
             }
             navGeo();
-            function navGeo() { if (!navigator.geolocation) return no(); navigator.geolocation.getCurrentPosition(p => ok(p.coords), no, { enableHighAccuracy: true, timeout: 12000 }); }
+        }
+        // ---- xaritada qidiruv: BTS filiallari (ro'yxatdan) + istalgan joy (OpenStreetMap)
+        let BTS_BR = [], BTS_ST = null, BTS_MK = null;
+        function btsSearch() {
+            const raw = $('bts-q').value.trim(), q = normS(raw), box = $('bts-res');
+            clearTimeout(BTS_ST);
+            if (q.length < 2) { box.style.display = 'none'; return; }
+            const words = q.split(' ');
+            const br = BTS_BR.map((b, i) => [i, normS(`${b.c} ${b.n} ${b.a} ${b.r}`)]).filter(([, t]) => words.every(w => t.includes(w))).slice(0, 6);
+            const head = br.map(([i]) => { const b = BTS_BR[i]; return `<div class="bts-ri" onclick="btsPickBr(${i})"><b>📮 BTS ${esc(b.c)} ${esc(b.n)}</b><span>${esc(b.a)}${b.r ? ' · ' + esc(b.r) : ''}</span></div>`; }).join('');
+            box.innerHTML = head + '<div class="bts-ri" style="color:var(--text-muted)">🔎 Joy qidirilmoqda…</div>'; box.style.display = 'block';
+            BTS_ST = setTimeout(async () => {
+                let pl = [];
+                try {
+                    const r = await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&countrycodes=uz&accept-language=uz,ru&q=' + encodeURIComponent(raw));
+                    pl = r.ok ? await r.json() : [];
+                } catch (e) {}
+                if ($('bts-q').value.trim() !== raw) return;
+                BTS_PL = pl;
+                box.innerHTML = head + pl.map((p, i) => `<div class="bts-ri" onclick="btsGoPlace(${i})"><b>📍 ${esc(String(p.name || p.display_name).slice(0, 60))}</b><span>${esc(String(p.display_name).slice(0, 110))}</span></div>`).join('')
+                    || '<div class="bts-ri" style="color:var(--text-muted)">Topilmadi — boshqacha yozib ko\'ring</div>';
+            }, 600);
+        }
+        let BTS_PL = [], BTS_RG = null;
+        async function btsSetHere(lat, lng) {
+            let t = BTS_RG && BTS_RG.lat === lat && BTS_RG.lng === lng ? BTS_RG.t : '';
+            if (!t) { toast('Manzil aniqlanmoqda…'); t = await revGeo(lat, lng); }
+            btsSet(`📍 ${t || 'Xaritada belgilangan joy'} (${lat.toFixed(5)},${lng.toFixed(5)})`, lat, lng);
+        }
+        function btsMark(lat, lng) { if (BTS_MK) BTS_MK.remove(); BTS_MK = L.marker([lat, lng]).addTo(BTS_MAP); }
+        function btsGoPlace(i) {
+            const p = BTS_PL[i]; if (!p) return;
+            $('bts-res').style.display = 'none'; document.activeElement && document.activeElement.blur();
+            const lat = +p.lat, lng = +p.lon; BTS_MAP.setView([lat, lng], 16); btsMark(lat, lng);
+            btsShowNear(lat, lng, true);
+            toast('Xaritada BTS filiali turgan joyni bosing');
+        }
+        function btsPickBr(i) {
+            const b = BTS_BR[i]; if (!b) return;
+            $('bts-res').style.display = 'none';
+            if (b.r && [...$('prof-bts-region').options].some(o => o.value === b.r)) $('prof-bts-region').value = b.r;
+            $('prof-bts-point').value = `BTS ${b.c} ${b.n}, ${b.a}`.slice(0, 150) + (b.lat ? ` (${(+b.lat).toFixed(5)},${(+b.lng).toFixed(5)})` : ''); btsLinkUpd();
+            closeModal('bts-modal'); toast('Tanlandi ✓ Endi «Saqlash» ni bosing'); hap('success');
         }
         // ===== SAVATDAGI MAHSULOTNI O'ZGARTIRISH =====
         let EDIT_CI = null;
