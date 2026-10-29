@@ -3162,16 +3162,20 @@
             return sc;
         }
         // ===== O'XSHASH MAHSULOTLAR (mahsulot oxirida) =====
+        // Bir-biriga yaqin toifalar: o'xshash/tavsiyada faqat shular aralashadi (oshxona anjomiga kiyim yoki chexol chiqmasin)
+        const CAT_GROUPS = [["Kiyimlar", "Poyabzal", "Sumkalar", "Aksessuarlar", "Soat va zargarlik"], ["Texnika", "Telefon aksessuarlari"], ["Uy-ro'zg'or", "Sovg'alar"],
+            ["Bolalar uchun", "O'yinchoqlar"], ["Go'zallik"], ["Sport"], ["Anime mahsulotlari", "O'yinchoqlar"], ["Avto tovarlar"], ["Kanselyariya"]];
+        const nearCat = (a, b) => a === b || CAT_GROUPS.some(g => g.includes(a) && g.includes(b));
         function similarBlock(p) {
-            const w = new Set(normS(p.name).split(' ').filter(x => x.length >= 3));
-            let l = PRODUCTS.filter(x => x.id !== p.id && !(x.tracked && totalStock(x) <= 0)).map(x => {
+            const w = new Set(normS(p.name).split(' ').filter(x => x.length >= 3)), ok = x => x.id !== p.id && !(x.tracked && totalStock(x) <= 0);
+            let l = PRODUCTS.filter(x => ok(x) && nearCat(x.cat, p.cat)).map(x => {
                 let sc = x.cat === p.cat ? 5 : 0; normS(x.name).split(' ').forEach(t => { if (w.has(t) || (SYN_MAP[t] || []).some(a => w.has(a))) sc += 3; });
                 if (x.old_price) sc += 1; sc += Math.min(2, (x.sold || 0) / 20); return [x, sc + Math.random() * 0.5];
             }).filter(x => x[1] >= 3).sort((a, b) => b[1] - a[1]).slice(0, 6).map(x => x[0]);
             let title = "🛍 O'xshash mahsulotlar";
-            if (l.length < 3) {   // o'xshashi kam bo'lsa — ommabop mahsulotlar bilan to'ldiramiz
-                const pop = PRODUCTS.filter(x => x.id !== p.id && !l.includes(x) && !(x.tracked && totalStock(x) <= 0)).sort((a, b) => (b.sold || 0) - (a.sold || 0) || (b.new ? 1 : 0) - (a.new ? 1 : 0)).slice(0, 8 - l.length);
-                title = l.length ? "🛍 O'xshash va sizga yoqishi mumkin" : '🔥 Sizga yoqishi mumkin'; l = l.concat(pop);
+            if (l.length < 3) {   // o'xshashi kam bo'lsa — faqat yaqin toifadagi ommabop mahsulotlar bilan to'ldiramiz
+                const pop = PRODUCTS.filter(x => ok(x) && !l.includes(x) && nearCat(x.cat, p.cat)).sort((a, b) => (b.sold || 0) - (a.sold || 0) || (b.new ? 1 : 0) - (a.new ? 1 : 0)).slice(0, 8 - l.length);
+                if (pop.length) { title = l.length ? "🛍 O'xshash va sizga yoqishi mumkin" : '🔥 Sizga yoqishi mumkin'; l = l.concat(pop); }
             }
             if (!l.length) return '';
             return `<div style="margin:18px 0 8px;font-weight:800;font-size:15px">${title}</div><div class="sim-strip" style="overflow-x:auto">${l.map(x => `<div class="sim-card" onclick="openSimilar(${ja(x.id)})"><div class="sim-img">${firstImg(x) ? `<img src="${esc(firstImg(x))}" loading="lazy">` : '<i class="fas fa-box-open"></i>'}</div><div class="prow ${x.old_price ? 'sale' : ''}" style="margin:6px 0 2px"><span class="pprice" style="font-size:13.5px">${fmt(x.price)}</span>${x.sale_pct ? `<span class="pdisc" style="font-size:10px">↓${Number(x.sale_pct)}%</span>` : ''}</div><div class="sim-name">${esc(x.name)}</div></div>`).join('')}</div>`;
