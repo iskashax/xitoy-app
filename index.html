@@ -169,6 +169,7 @@
         .pvt { position: absolute; top: 8px; left: 8px; z-index: 2; background: var(--gold-color); color: #000; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 8px; }
         .cimg { width: 58px; height: 58px; border-radius: 12px; overflow: hidden; background: var(--input-bg); flex: none; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 20px; }
         .cimg img { width: 100%; height: 100%; object-fit: cover; }
+        .pl-img { width: 50px; height: 50px; border-radius: 10px; font-size: 16px; }
         .tdots { display: flex; gap: 4px; margin: 10px 0 2px; } .tdots i { flex: 1; height: 5px; border-radius: 3px; background: var(--surface-border); } .tdots i.on { background: var(--gold-color); } .tdots i.bad { background: var(--primary-color); }
         .more-btn { display: block; width: 100%; margin-top: 10px; padding: 9px; border-radius: 12px; border: 1px solid var(--surface-border); background: transparent; color: var(--gold-color); font-weight: 700; font-size: 12.5px; cursor: pointer; font-family: inherit; }
         .avatar { width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(135deg, var(--gold-color), #e08a00); color: #000; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 800; flex: none; }
@@ -919,7 +920,11 @@
                 <button class="btn btn-red" id="pf-save" onclick="saveProduct()">Katalogga qo'shish</button>
                 <button class="btn btn-outline" id="pf-cancel" style="display:none;margin-top:10px" onclick="pfReset()">Tahrirlashni bekor qilish</button>
             </div>
-            <div class="glass-card" id="plist-card"><h3 style="margin-bottom:10px; color:var(--text-main);" id="plist-title">Katalog</h3><div id="adm-plist"></div></div>
+            <div class="glass-card" id="plist-card"><h3 style="margin-bottom:10px; color:var(--text-main);" ><span id="plist-title">Katalog</span> <span id="plist-n" style="font-size:12px;color:var(--text-muted);font-weight:600"></span></h3>
+                <input type="search" id="pl-q" class="form-control" placeholder="🔍 Nomi bo'yicha qidirish..." oninput="plRender()" style="margin-bottom:8px">
+                <div style="display:flex;gap:8px;margin-bottom:8px"><select id="pl-cat" class="form-control" onchange="plRender()" style="flex:1;margin:0"></select><select id="pl-sort" class="form-control" onchange="plRender()" style="flex:1;margin:0"><option value="new">Avval yangilari</option><option value="old">Avval eskilari</option><option value="sold">Ko'p sotilgan</option><option value="pa">Arzonroq</option><option value="pd">Qimmatroq</option><option value="name">Nomi (A–Z)</option></select></div>
+                <div id="pl-chips" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:4px;scrollbar-width:none"></div>
+                <div id="adm-plist"></div></div>
         </div>
         <div id="adm-ord" class="adm-sec" style="display:none">
             <div class="categories-scroll"><div class="cat-chip active" id="adm-ot-act" onclick="admOrdTab(0)">Faol</div><div class="cat-chip" id="adm-ot-arc" onclick="admOrdTab(1)">Arxiv</div></div>
@@ -2169,9 +2174,25 @@
         async function loadAdminProducts() {
             try {
                 if (ME.is_admin) await admCfg(); ADM_PRODS = await api('/api/admin/products');
-                $('adm-plist').innerHTML = ADM_PRODS.map(p => { const t = p.tracked ? Object.values(p.stock).reduce((a, b) => a + b, 0) : null;
-                    return `<div class="hrow"><div style="flex:1"><div style="font-size:13px;font-weight:600">${esc(p.name)} <span style="font-size:10px;color:var(--text-muted)">${esc(p.cat)}</span></div><div style="font-size:11px;color:var(--text-muted)">${ME.is_admin ? (p.fixed ? "qat'iy narx" : 'tannarx ' + fmt(p.cost)) + ' · ' : (p.cny ? p.cny + '¥ · ' : '')}${p.weight || 1} kg · mijozga ${fmt(p.price)} so'm · ${t === null ? 'soni cheksiz' : (t > 0 ? 'qoldi: ' + t : '<span style="color:var(--primary-color)">TUGADI</span>')}</div></div>${ME.is_admin ? `<b onclick="saleOpen(${ja(p.id)})" style="padding:8px;color:${p.sale_set ? '#a855f7' : 'var(--text-muted)'}" title="Aksiya"><i class="fas fa-tag"></i>${p.sale_set ? ` <small>${Number(p.sale_set)}%</small>` : ''}</b>` : ''}<b onclick="editProduct(${ja(p.id)})" style="padding:8px;color:var(--gold-color)"><i class="fas fa-pen"></i></b><b onclick="delProduct(${ja(p.id)})" style="color:var(--primary-color);padding:8px"><i class="fas fa-trash"></i></b></div>`; }).join('') || '<p style="font-size:12px;color:var(--text-muted)">Mahsulot yo\'q</p>';
+                plRender();
             } catch (e) { tg.showAlert(e.message); }
+        }
+        let PL_F = '';
+        const PL_FILTERS = () => [['', 'Hammasi'], ['out', '❌ Tugagan'], ['low', '⚠️ Kam qolgan (≤5)'], ['sale', '🏷 Aksiyada'], ['new', '✨ Yangi'], ['nosold', '😴 Sotilmagan'], ...(ME.is_admin ? [['nosrc', '🔗 Havolasiz'], ['priv', '👤 Shaxsiy']] : [])];
+        function plFilter(f) { PL_F = f; plRender(); }
+        function plRender() {   // kabinetdagi mahsulotlar ro'yxati: qidiruv, toifa, holat filtri, tartib; har birida rasmi
+            const tot = p => p.tracked ? Object.values(p.stock).reduce((a, b) => a + b, 0) : null;
+            if ($('pl-cat') && !$('pl-cat').options.length) $('pl-cat').innerHTML = '<option value="">Barcha toifalar</option>' + ME.cfg.cats.map(c => `<option>${esc(c)}</option>`).join('');
+            $('pl-chips').innerHTML = PL_FILTERS().map(([k, t]) => `<div class="cat-chip ${PL_F === k ? 'active' : ''}" style="flex:none" onclick="plFilter('${k}')">${t}</div>`).join('');
+            const q = normS($('pl-q').value || ''), cat = $('pl-cat').value, srt = $('pl-sort').value;
+            const okF = p => { const t = tot(p); return !PL_F || (PL_F === 'out' && t !== null && t <= 0) || (PL_F === 'low' && t !== null && t > 0 && t <= 5) || (PL_F === 'sale' && (p.sale_set || p.old_price))
+                || (PL_F === 'new' && p.new) || (PL_F === 'nosold' && !p.sold) || (PL_F === 'nosrc' && !p.src) || (PL_F === 'priv' && p.private); };
+            let l = ADM_PRODS.map((p, i) => [p, i]).filter(([p]) => (!cat || p.cat === cat) && okF(p) && (!q || q.split(' ').every(w => normS(p.name + ' ' + p.cat).includes(w))));
+            const by = { new: (a, b) => a[1] - b[1], old: (a, b) => b[1] - a[1], sold: (a, b) => (b[0].sold || 0) - (a[0].sold || 0), pa: (a, b) => a[0].price - b[0].price, pd: (a, b) => b[0].price - a[0].price, name: (a, b) => a[0].name.localeCompare(b[0].name) };
+            l.sort(by[srt] || by.new);
+            $('plist-n').innerText = l.length === ADM_PRODS.length ? `(${l.length})` : `(${l.length} / ${ADM_PRODS.length})`;
+            $('adm-plist').innerHTML = l.map(([p]) => { const t = tot(p);
+                    return `<div class="hrow">${thumb(firstImg(p), 'cimg pl-img')}<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">${esc(p.name)} <span style="font-size:10px;color:var(--text-muted)">${esc(p.cat)}</span></div><div style="font-size:11px;color:var(--text-muted)">${ME.is_admin ? (p.fixed ? "qat'iy narx" : 'tannarx ' + fmt(p.cost)) + ' · ' : (p.cny ? p.cny + '¥ · ' : '')}${p.weight || 1} kg · mijozga ${fmt(p.price)} so'm · ${t === null ? 'soni cheksiz' : (t > 0 ? 'qoldi: ' + t : '<span style="color:var(--primary-color)">TUGADI</span>')}</div></div>${ME.is_admin ? `<b onclick="saleOpen(${ja(p.id)})" style="padding:8px;color:${p.sale_set ? '#a855f7' : 'var(--text-muted)'}" title="Aksiya"><i class="fas fa-tag"></i>${p.sale_set ? ` <small>${Number(p.sale_set)}%</small>` : ''}</b>` : ''}<b onclick="editProduct(${ja(p.id)})" style="padding:8px;color:var(--gold-color)"><i class="fas fa-pen"></i></b><b onclick="delProduct(${ja(p.id)})" style="color:var(--primary-color);padding:8px"><i class="fas fa-trash"></i></b></div>`; }).join('') || `<p style="font-size:12px;color:var(--text-muted)">${ADM_PRODS.length ? "Bu filtr bo'yicha mahsulot yo'q" : "Mahsulot yo'q"}</p>`;
         }
         function delProduct(id) { tg.showConfirm("Mahsulot katalogdan olib tashlansinmi? (Tarixda saqlanadi)", ok => { if (ok) call(async () => { await api('/api/admin/product_del', { id }); await loadAdminProducts(); await loadProducts(); }); }); }
         // -- buyurtmalar (faol / arxiv) --
