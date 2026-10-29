@@ -1473,6 +1473,10 @@
         }
         const thumb = (u, cls = 'cimg') => `<div class="${cls}">${u ? `<img src="${esc(u)}" loading="lazy">` : '<i class="fas fa-box-open"></i>'}</div>`;
         const firstImg = p => { const u = p.imgs[0] || Object.values(p.cimgs).flat()[0]; return u ? API + u : ''; };
+        // Har safar ilova ochilganda mahsulotlar tartibi yangidan aralashadi — hech biri doim pastda qolib ketmaydi.
+        // Bir ochilish davomida tartib o'zgarmaydi (ko'rib turganda sakrab ketmasin).
+        const SHUF_SEED = Math.floor(Math.random() * 2 ** 31);
+        function shufKey(id) { let h = SHUF_SEED ^ 0x9e3779b9; for (let i = 0; i < id.length; i++) h = Math.imul(h ^ id.charCodeAt(i), 2654435761); h ^= h >>> 15; return (h >>> 0) / 4294967296; }
         function renderCatalog() {
             renderCats();
             const q = normS($('search-input').value);
@@ -1482,7 +1486,7 @@
                 l = PRODUCTS.map(p => { if (!p.__sw) searchScore(p, 'x'); return [p, q.split(' ').reduce((t, w) => t + (w ? wordHit(w, p.__sw) : 0), 0)]; }).filter(x => x[1] > 0);
                 if (l.length) note = "Aynan shunday mahsulot topilmadi — o'xshashlari:";
             }
-            if (q) l.sort((a, b) => b[1] - a[1]); else l.sort((a, b) => (b[0].old_price ? 1 : 0) - (a[0].old_price ? 1 : 0));   // aksiyadagilar eng tepada (qolgan tartib o'zgarmaydi)
+            if (q) l.sort((a, b) => b[1] - a[1]); else l.sort((a, b) => (b[0].old_price ? 1 : 0) - (a[0].old_price ? 1 : 0) || shufKey(a[0].id) - shufKey(b[0].id));   // aksiyadagilar eng tepada, qolganlari har kirishda aralash
             l = l.map(x => x[0]);
             if ($('search-note')) { $('search-note').innerText = note; $('search-note').style.display = note ? 'block' : 'none'; }
             const hot = hotLimit();
