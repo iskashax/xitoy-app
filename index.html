@@ -3070,13 +3070,25 @@
             } catch (e) { tg.showAlert(e.message); }
         }
         // ===== KLAVIATURA OCHIQ: pastki menyu yashiriladi =====
-        (() => {
+        (() => {   // klaviatura ochiqligini ekran balandligi bo'yicha aniqlaymiz (fokusga ishonmaymiz — Android "orqaga" bilan yopilganda fokus qoladi)
             const isField = el => el && (el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && !/^(checkbox|radio|button|submit|file|range|color)$/i.test(el.type)) || el.isContentEditable);
-            let H = innerHeight, T = null;
-            const upd = () => { const kb = isField(document.activeElement) || (window.visualViewport ? visualViewport.height < H * 0.75 : innerHeight < H * 0.75); document.body.classList.toggle('kb-open', !!kb); };
-            document.addEventListener('focusin', e => { if (isField(e.target)) { clearTimeout(T); document.body.classList.add('kb-open'); } });
-            document.addEventListener('focusout', () => { clearTimeout(T); T = setTimeout(upd, 150); });
-            (window.visualViewport || window).addEventListener('resize', () => { const h = window.visualViewport ? visualViewport.height : innerHeight; if (h > H) H = h; clearTimeout(T); T = setTimeout(upd, 100); });
+            const vh = () => window.visualViewport ? visualViewport.height : innerHeight;
+            let H = vh(), open = false, T = null;
+            const set = on => { open = on; document.body.classList.toggle('kb-open', on); };
+            const check = () => {
+                const h = vh(); if (h > H) H = h;
+                const kb = h < H * 0.8;
+                if (kb) set(true);
+                else { if (open && isField(document.activeElement)) document.activeElement.blur(); set(false); }
+            };
+            document.addEventListener('focusin', e => {
+                if (!isField(e.target)) return;
+                set(true); clearTimeout(T); T = setTimeout(check, 700);   // klaviatura chiqmasa (masalan tashqi klaviatura) — menyu qaytadi
+                if (e.target.id === 'search-input') setTimeout(() => { const b = e.target.closest('.search-bar') || e.target; window.scrollTo({ top: Math.max(0, b.getBoundingClientRect().top + scrollY - 12), behavior: 'smooth' }); }, 350);   // qidiruv tepaga ko'tariladi
+            });
+            document.addEventListener('focusout', () => { clearTimeout(T); T = setTimeout(() => { if (!isField(document.activeElement)) set(false); else check(); }, 200); });
+            (window.visualViewport || window).addEventListener('resize', () => { clearTimeout(T); T = setTimeout(check, 120); });
+            addEventListener('orientationchange', () => { H = 0; setTimeout(check, 400); });
         })();
         // ===== MAHSULOTLAR ORASIDA ORQAGA QAYTISH =====
         let PROD_STACK = [], PROD_NAV = false;
