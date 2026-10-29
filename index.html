@@ -1995,7 +1995,11 @@
         let ADM_CFG = {}, VAL_CB = null, ADM_ARCH = 0, ADM_PRODS = [], CARGO_ID = null, PF = { id: null, imgs: { __g: [] }, stock: {} }, PF_KEYS = [];
         const ADM_SECS = ['dash', 'settings', 'products', 'ord', 'req', 'rev', 'users', 'staff', 'msg', 'ads'];
         async function admCfg() { if (!ADM_CFG.cny_rate) (await api('/api/admin/settings')).items.forEach(i => ADM_CFG[i.key] = i.value); }
-        function admTab(t) {
+        let ADM_CUR = '', ADM_HIST = [];
+        function admScrollEl() { const ap = $('admin-panel-fullscreen'); return ap && ap.scrollHeight > ap.clientHeight ? ap : document.scrollingElement; }
+        function admTab(t, back) {
+            if (!back && ADM_CUR && ADM_CUR !== t) { ADM_HIST.push({ t: ADM_CUR, y: admScrollEl().scrollTop }); if (ADM_HIST.length > 15) ADM_HIST.shift(); }   // «orqaga» uchun
+            ADM_CUR = t;
             ADM_SECS.forEach(x => $('adm-' + x).style.display = x === t ? 'block' : 'none');
             document.querySelectorAll('#adm-tabs .cat-chip').forEach(c => c.classList.toggle('active', c.dataset.t === t));
             ({ dash: () => loadDash('today'), settings: () => { SET_CUR = ''; loadSettings(); }, ads: () => { adReset(); loadAds(); }, products: () => { pfRender(true); pfPresets(); specRows(); if (ME.is_admin || staffCan('products_edit')) loadAdminProducts(); }, ord: loadAdminOrders, msg: loadNotices, req: loadAdminReqs, rev: loadAdminReviews, users: () => loadAdminUsers(), staff: () => { stfPage('home'); loadStaff(); } })[t]?.();
@@ -2203,11 +2207,16 @@
                 $('pf-card').style.display = (ME.is_admin || staffCan('products')) ? '' : 'none';
                 if (ME.is_admin) admCfg().catch(() => {});
                 const first = ME.is_admin ? 'dash' : ['products', 'req', 'ord', 'rev'].find(vis);
-                if (first) admTab(first);
+                ADM_CUR = ''; ADM_HIST = []; if (first) admTab(first);
                 if (!ME.is_admin && !STAFF.rules_ok) showRules();
             }, 300); }, 1000);
         }
-        function closeAdminPanel() { $('admin-panel-fullscreen').style.display = 'none'; calcVisible(); }
+        function admBack() {   // oldingi bo'limga, o'sha joyiga qaytadi
+            const h = ADM_HIST.pop(); if (!h) return closeAdminPanel();
+            admTab(h.t, true);
+            [60, 400, 900].forEach(ms => setTimeout(() => { if (ADM_CUR === h.t) admScrollEl().scrollTop = h.y; }, ms));
+        }
+        function closeAdminPanel() { ADM_HIST = []; ADM_CUR = ''; $('admin-panel-fullscreen').style.display = 'none'; calcVisible(); }
 
         function openTg(id, un, code) {
             if (un) return tg.openTelegramLink('https://t.me/' + un);
@@ -2605,7 +2614,7 @@
             if (ms.length && ms[ms.length - 1].id === 'prod-modal' && PROD_STACK.length) return prodBack;   // avval oldingi mahsulotga qaytadi
             if (ms.length) { const m = ms[ms.length - 1]; return () => m.dispatchEvent(new MouseEvent('click', { bubbles: true })); }
             const ap = $('admin-panel-fullscreen');
-            if (ap && ap.style.display === 'block') return ($('set-page') && $('set-page').style.display === 'block') ? () => setGroup('') : ($('adm-staff').style.display === 'block' && $('stf-home').style.display === 'none') ? () => stfPage('home') : closeAdminPanel;
+            if (ap && ap.style.display === 'block') return ($('set-page') && $('set-page').style.display === 'block') ? () => setGroup('') : ($('adm-staff').style.display === 'block' && $('stf-home').style.display === 'none') ? () => stfPage('home') : (ADM_HIST.length ? admBack : closeAdminPanel);
             if ($('auth-guest-bar') && $('auth-guest-bar').style.display === 'block' && $('auth-flow').style.display === 'block') return closeAuth;
             const act = document.querySelector('.view-section.active');
             if (act && act.id === 'tab-profile' && $('pv-home').style.display === 'none') return () => profView('home');
