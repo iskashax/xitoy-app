@@ -1504,21 +1504,34 @@
             const cg = ME.cfg.cargo;
             $('prod-body').innerHTML = `<div class="ps-act">${PROD_STACK.length ? `<div class="ps-back"><b class="psb" onclick="prodBack()" title="Oldingi mahsulot"><i class="fas fa-arrow-left"></i></b><span>${esc(PRODUCTS.find(x => x.id === PROD_STACK[PROD_STACK.length - 1].id)?.name || '')}</span></div>` : ''}<div><b class="psb" onclick="shareProduct()" title="Ulashish"><i class="fas fa-share-nodes"></i></b>${favBtn(p.id)}<b class="psb" onclick="closeModal('prod-modal')"><i class="fas fa-xmark"></i></b></div></div><div class="ps-gal">${pics.length ? gal : '<div class="pimg" style="height:200px"><i class="fas fa-box-open"></i></div>'}</div><div class="ps-body"><h3 style="margin-bottom:6px">${esc(p.name)}</h3><div class="prow ${p.old_price ? 'sale' : ''}" style="margin-top:0"><span class="pprice" style="font-size:20px">${fmt(p.price)} so'm</span>${p.sale_pct ? `<span class="pdisc" style="font-size:13px">↓${Number(p.sale_pct)}%</span>` : ''}${p.old_price ? cdChip(p.sale_until) : ''}</div>
                 ${p.old_price ? `<div class="pold" style="font-size:13px">${fmt(p.old_price)} so'm</div>` : ''}<div class="pmeta" style="margin:4px 0">${p.week_buyers ? `<span style="color:#ff7a45">🔥 Bu hafta ${Number(p.week_buyers)} kishi sotib oldi</span>` : ''}${p.sold ? `<span>🛍 ${Number(p.sold)} ta sotildi</span>` : ''}${p.new ? '<span style="color:#10b981">✨ Yangi</span>' : ''}</div><div id="prod-rev-sum" style="margin-bottom:10px;min-height:4px"></div>
-                ${p.colors.length ? `<label class="lbl">RANG</label><div style="margin:8px 0">${optList(p.colors, 'c', selC, c => p.tracked && sizes.every(s => stockOf(p, c, s) <= 0))}</div>` : ''}
+                <div id="ps-opts">${sheetOpts()}</div>
+                ${similarBlock(p)}${specsBlock(p)}<div id="prod-rev"></div><div style="height:20px"></div></div>`;
+            sheetReviews(p.id);
+        }
+        function sheetOpts() {   // tanlanadigan qism: rang, razmer, kargo, tugmalar — bosilganda faqat shu qayta chiziladi (rasm va sharhlar joyida qoladi)
+            const p = curP, sizes = p.sizes.length ? p.sizes : [''], left = stockOf(p, selC, selS), out = left <= 0, cg = ME.cfg.cargo;
+            return `${p.colors.length ? `<label class="lbl">RANG</label><div style="margin:8px 0">${optList(p.colors, 'c', selC, c => p.tracked && sizes.every(s => stockOf(p, c, s) <= 0))}</div>` : ''}
                 ${p.sizes.length ? `<label class="lbl">${sizeLbl(p.cat)}${selS ? `: <span style="color:var(--text-main);text-transform:none">${esc(selS)}</span>` : ''}</label><div style="margin:8px 0">${optList(p.sizes, 's', selS, s => stockOf(p, selC, s) <= 0)}</div>` : ''}
                 ${p.tracked ? `<p style="font-size:12px;margin:4px 0 10px;color:${out ? 'var(--primary-color)' : 'var(--text-muted)'}">${out ? 'Bu variant tugadi' : (left <= 10 ? 'Qoldi: ' + left + ' ta' : 'Mavjud')}</p>` : ''}
                 <label class="lbl">KARGO TURI (majburiy)</label><div style="margin:8px 0">${['avia', 'avto'].map(k => `<span class="opt ${selCargo === k ? 'sel' : ''}" onclick="pickCargo('${k}')">${CARGO[k]} · $${cg[k].usd}/kg · ${esc(cg[k].days)} kun</span>`).join('')}</div>
                 <p style="font-size:11px;color:var(--text-muted);line-height:1.5;margin-bottom:8px">⚠️ Kargo haqi narxga kirmagan. Mahsulot O'zbekistonga kelganda chiqqan og'irlik (kg) bo'yicha alohida to'lanadi, to'lov tasdiqlangach BTS orqali jo'natamiz. Kargo haqi mahsulot kelganidan keyin ${ME ? ME.cfg.cargo_days : 10} kun ichida to'lanmasa, mahsulot musodara qilinadi va to'langan pul qaytarilmaydi.</p>
                 ${btsNote(p.weight)}
-                <div style="display:flex;gap:10px;margin-top:10px;align-items:center">${EDIT_CI !== null && CART[EDIT_CI] ? `<button class="btn btn-gold" style="margin:0;flex:1;padding-left:8px;padding-right:8px" ${out ? 'disabled' : ''} onclick="saveCartEdit()"><i class="fas fa-check"></i> ${out ? 'Tugadi' : "O'zgarishni saqlash"}</button><button class="btn btn-outline" style="margin:0;flex:1;padding-left:8px;padding-right:8px" ${out ? 'disabled' : ''} onclick="addToCart()"><i class="fas fa-plus"></i> Yangi qo'shish</button>` : `<button class="btn btn-gold" style="margin:0;flex:1" ${out ? 'disabled' : ''} onclick="addToCart()"><i class="fas fa-cart-plus"></i> ${out ? 'Tugadi' : "Savatga qo'shish"}</button>`}</div>
-                ${similarBlock(p)}${specsBlock(p)}<div id="prod-rev"></div><div style="height:20px"></div></div>`;
-            sheetReviews(p.id);
+                <div style="display:flex;gap:10px;margin-top:10px;align-items:center">${EDIT_CI !== null && CART[EDIT_CI] ? `<button class="btn btn-gold" style="margin:0;flex:1;padding-left:8px;padding-right:8px" ${out ? 'disabled' : ''} onclick="saveCartEdit()"><i class="fas fa-check"></i> ${out ? 'Tugadi' : "O'zgarishni saqlash"}</button><button class="btn btn-outline" style="margin:0;flex:1;padding-left:8px;padding-right:8px" ${out ? 'disabled' : ''} onclick="addToCart()"><i class="fas fa-plus"></i> Yangi qo'shish</button>` : `<button class="btn btn-gold" style="margin:0;flex:1" ${out ? 'disabled' : ''} onclick="addToCart()"><i class="fas fa-cart-plus"></i> ${out ? 'Tugadi' : "Savatga qo'shish"}</button>`}</div>`;
+        }
+        function sheetUpd() {
+            const b = $('prod-body'), y = b.scrollTop, el = $('ps-opts');
+            if (!el) return drawSheet();
+            el.innerHTML = sheetOpts(); b.scrollTop = y;
         }
         function pick(k, i) {
             if (k === 'c') { selC = curP.colors[i]; if (stockOf(curP, selC, selS) <= 0) selS = curP.sizes.find(s => stockOf(curP, selC, s) > 0) ?? selS; } else selS = curP.sizes[i];
-            drawSheet();
+            sheetUpd();
+            if (k === 'c') {   // tanlangan rangning rasmiga silliq o'tamiz (galereya qayta chizilmaydi — miltillamaydi)
+                const g = document.querySelector('#prod-body .gal'), first = (curP.cimgs[selC] || [])[0], ix = first ? SHEET_PICS.indexOf(API + first) : -1;
+                if (g && ix >= 0 && g.firstElementChild) g.scrollTo({ left: ix * (g.firstElementChild.offsetWidth + 8), behavior: 'smooth' });
+            }
         }
-        function pickCargo(k) { selCargo = k; drawSheet(); }
+        function pickCargo(k) { selCargo = k; sheetUpd(); }
 
         // ===== SAVAT / BUYURTMA =====
         function saveCart() { try { localStorage.setItem(CART_KEY, JSON.stringify(CART)); } catch (e) {} NONCE = null; renderCart(); }
