@@ -1509,7 +1509,7 @@
                 <label class="lbl">KARGO TURI (majburiy)</label><div style="margin:8px 0">${['avia', 'avto'].map(k => `<span class="opt ${selCargo === k ? 'sel' : ''}" onclick="pickCargo('${k}')">${CARGO[k]} · $${cg[k].usd}/kg · ${esc(cg[k].days)} kun</span>`).join('')}</div>
                 <p style="font-size:11px;color:var(--text-muted);line-height:1.5;margin-bottom:8px">⚠️ Kargo haqi narxga kirmagan. Mahsulot O'zbekistonga kelganda chiqqan og'irlik (kg) bo'yicha alohida to'lanadi, to'lov tasdiqlangach BTS orqali jo'natamiz. Kargo haqi mahsulot kelganidan keyin ${ME ? ME.cfg.cargo_days : 10} kun ichida to'lanmasa, mahsulot musodara qilinadi va to'langan pul qaytarilmaydi.</p>
                 ${btsNote(p.weight)}
-                <div style="display:flex;gap:10px;margin-top:10px;align-items:center">${EDIT_CI !== null && CART[EDIT_CI] ? `<button class="btn btn-gold" style="margin:0;flex:1" ${out ? 'disabled' : ''} onclick="saveCartEdit()"><i class="fas fa-check"></i> ${out ? 'Bu variant tugadi' : "O'zgarishni saqlash"}</button>` : `<button class="btn btn-gold" style="margin:0;flex:1" ${out ? 'disabled' : ''} onclick="addToCart()"><i class="fas fa-cart-plus"></i> ${out ? 'Tugadi' : "Savatga qo'shish"}</button>`}</div>
+                <div style="display:flex;gap:10px;margin-top:10px;align-items:center">${EDIT_CI !== null && CART[EDIT_CI] ? `<button class="btn btn-gold" style="margin:0;flex:1;padding-left:8px;padding-right:8px" ${out ? 'disabled' : ''} onclick="saveCartEdit()"><i class="fas fa-check"></i> ${out ? 'Tugadi' : "O'zgarishni saqlash"}</button><button class="btn btn-outline" style="margin:0;flex:1;padding-left:8px;padding-right:8px" ${out ? 'disabled' : ''} onclick="addToCart()"><i class="fas fa-plus"></i> Yangi qo'shish</button>` : `<button class="btn btn-gold" style="margin:0;flex:1" ${out ? 'disabled' : ''} onclick="addToCart()"><i class="fas fa-cart-plus"></i> ${out ? 'Tugadi' : "Savatga qo'shish"}</button>`}</div>
                 ${similarBlock(p)}${specsBlock(p)}<div id="prod-rev"></div><div style="height:20px"></div></div>`;
             sheetReviews(p.id);
         }
@@ -1527,7 +1527,9 @@
             const it = CART.find(x => cartKey(x) === [curP.id, selC, selS, selCargo].join('|')), have = it ? it.qty : 0;
             if (have + 1 > stockOf(curP, selC, selS)) return tg.showAlert("Omborda yetarli son yo'q");
             if (it) it.qty = Math.min(50, it.qty + 1); else CART.push({ id: curP.id, color: selC, size: selS, cargo: selCargo, qty: 1 });
-            saveCart(); closeModal('prod-modal'); toast("Savatga qo'shildi ✓"); hap('success');
+            saveCart(); hap('success');   // oyna yopilmaydi: mijoz boshqa rang/razmerni ham tanlab qo'shishi mumkin
+            const n = CART.filter(x => x.id === curP.id).reduce((t, x) => t + x.qty, 0);
+            toast(`Savatga qo'shildi ✓ (bu mahsulotdan savatda: ${n} ta)`);
         }
         function chQty(i, d) {
             const x = CART[i]; if (!x) return; const p = PRODUCTS.find(p => p.id === x.id);
@@ -2471,7 +2473,7 @@
             ['rate', 'fa-coins', 'rgba(255,183,0,0.12)', 'var(--gold-color)', 'Kurs va narx-foyda', 'Dollar, yuan, foyda pog\'onalari', ['usd_rate', 'cny_rate', 'round_to', 'm1_upto', 'm1_pct', 'm2_upto', 'm2_pct', 'm3_upto', 'm3_pct', 'm4_pct', 'min_profit']],
             ['cargo', 'fa-plane', 'rgba(80,160,255,0.12)', '#5aa9ff', 'Kargo', 'Narx, muddat, xarajat, eslatma, kalkulyator', ['avia_usd', 'avia_days', 'avto_usd', 'avto_days', 'avia_cost_usd', 'avto_cost_usd', 'cargo_days', 'remind_hour', 'calc_on']],
             ['bts', 'fa-truck-fast', 'rgba(46,204,113,0.12)', '#2ecc71', 'BTS va yetkazish', 'BTS ulushi, qishki ustama, ofis', ['bts_origin', 'bts_in_price', 'winter_on', 'winter_pct', 'winter_note', 'pickup_on', 'pickup_addr']],
-            ['shop', 'fa-store', 'rgba(230,0,0,0.1)', 'var(--primary-color)', "Do'kon va ish vaqti", "Buyurtma qabul qilish, ish soatlari", ['shop_open', 'work_start', 'work_end', 'work_enforce', 'min_topup']],
+            ['shop', 'fa-store', 'rgba(230,0,0,0.1)', 'var(--primary-color)', "Do'kon va ish vaqti", "Buyurtma qabul qilish, ish soatlari", ['shop_open', 'work_start', 'work_end', 'work_enforce', 'min_topup', 'new_days']],
             ['token', 'fa-gift', 'rgba(236,72,153,0.12)', '#ec4899', 'Token va chegirma', "Do'st taklif qilish mukofotlari", ['token_unit', 'tier1_tokens', 'tier1_pct', 'tier2_tokens', 'tier2_pct']],
             ['cards', 'fa-credit-card', 'rgba(139,92,246,0.14)', '#8b5cf6', "To'lov kartalari", 'Mijozlar pul o\'tkazadigan kartalar', []],
             ['archive', 'fa-box-archive', 'rgba(148,163,184,0.15)', '#94a3b8', 'Kanallar', 'Asosiy kanal va arxiv kanali', ['main_channel', 'archive_chat']],
@@ -2906,6 +2908,22 @@
         setInterval(cdTick, 1000);
         const cdChip = u => (u && u - Date.now() / 1000 < 4 * 86400) ? `<span class="pb-cd" data-cd="${Number(u)}" data-noi18n><i class="fas fa-stopwatch"></i> ${cdFmt(Math.max(0, Math.floor(u - Date.now() / 1000)))}</span>` : '';
         function hotLimit() { const s = PRODUCTS.map(p => p.sold || 0).filter(x => x > 0).sort((a, b) => b - a); return Math.max(3, s[Math.floor(s.length * 0.2)] || 3); }
+        // Katalogdagi kartochka rasmlari o'zi almashib turadi (har ~4 soniyada). Ekranda ko'rinmayotgan,
+        // mijoz endi surgan yoki mahsulot oynasi ochiq bo'lsa — almashmaydi. Oxirgisidan keyin birinchisiga qaytadi.
+        const SLIDE_MS = 4000;
+        setInterval(() => {
+            if (document.hidden || document.querySelector('.modal.show') || document.body.classList.contains('kb-open')) return;
+            const now = Date.now(), H = innerHeight;
+            document.querySelectorAll('#product-grid .pslides').forEach((el, k) => {
+                const r = el.getBoundingClientRect(); if (r.bottom < 0 || r.top > H || !el.clientWidth) return;
+                if (!el.dataset.nx) { el.dataset.nx = now + SLIDE_MS + (k % 4) * 700; return; }   // bir vaqtda emas — navbat bilan
+                if (now < +el.dataset.nx) return;
+                el.dataset.nx = now + SLIDE_MS;
+                const n = el.children.length, i = Math.round(el.scrollLeft / el.clientWidth), j = (i + 1) % n;
+                el.scrollTo({ left: j * el.clientWidth, behavior: 'smooth' });
+            });
+        }, 500);
+        document.addEventListener('touchstart', e => { const el = e.target.closest && e.target.closest('.pslides'); if (el) el.dataset.nx = Date.now() + 8000; }, { passive: true });   // qo'lda surgan bo'lsa biroz kutadi
         function pdot(el) { const i = Math.round(el.scrollLeft / Math.max(1, el.clientWidth)); el.nextElementSibling.querySelectorAll('i').forEach((d, k) => d.classList.toggle('on', k === i)); }
         function pcard(p, hot) {
             const left = p.tracked ? totalStock(p) : Infinity, img = firstImg(p);
