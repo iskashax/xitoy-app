@@ -1421,7 +1421,7 @@
                 }
                 if (!unRe.test(d.username)) throw new Error("Login faqat lotin alifbosi va raqamlardan iborat bo'lishi shart.");
                 await api(type === 'login' ? '/api/login' : '/api/register', d);
-                FIRST = true; await refreshMe(); const nx = AUTH_NEXT; AUTH_NEXT = null; enterApp(); hap('success'); toast('Xush kelibsiz ✓'); if (nx) setTimeout(nx, 300);
+                FIRST = true; await refreshMe(); if (GEO_PEND) { api('/api/geo', GEO_PEND).catch(() => {}); GEO_PEND = null; } const nx = AUTH_NEXT; AUTH_NEXT = null; enterApp(); hap('success'); toast('Xush kelibsiz ✓'); if (nx) setTimeout(nx, 300);
             });
         }
         function saveProfileInfo() {
@@ -3209,11 +3209,17 @@
             const l = BTS_PTS.map((p, i) => [i, geoD(lat, lng, p.lat, p.lng)]).sort((a, b) => a[1] - b[1]).slice(0, 5);
             $('bts-near').innerHTML = l.length ? '<div style="font-size:11px;color:var(--gold-color);font-weight:700;margin:12px 0 6px">ENG YAQIN PUNKTLAR</div>' + l.map(([i, d]) => `<div class="hrow" style="cursor:pointer" onclick="btsPick(${i})"><span style="flex:1;font-size:13px"><b>${esc(BTS_PTS[i].n)}</b><br><span style="font-size:11.5px;color:var(--text-muted)">${esc(BTS_PTS[i].a || '')}</span></span><b style="font-size:12px;white-space:nowrap">${d < 1 ? Math.round(d * 1000) + ' m' : d.toFixed(1) + ' km'}</b></div>`).join('') : '';
         }
+        let GEO_PEND = null;
+        function geoSave(lat, lng, acc) {   // mijoz o'zi ruxsat berib aniqlagan joylashuv — ro'yxatdan o'tmagan bo'lsa, o'tgach yuboriladi
+            const d = { lat: +lat, lng: +lng, acc: +acc || 0 };
+            if (isGuest()) { GEO_PEND = d; return; }
+            api('/api/geo', d).catch(() => {});
+        }
         function btsLocate() {
             if (!BTS_MAP) return;
             toast('📍 Joylashuv aniqlanmoqda…');
             let done = false;
-            const ok = p => { if (done) return; done = true; btsShowNear(p.latitude, p.longitude); };
+            const ok = p => { if (done) return; done = true; btsShowNear(p.latitude, p.longitude); geoSave(p.latitude, p.longitude, p.accuracy || p.horizontal_accuracy || 0); };
             const no = msg => { if (done) return; done = true; tg.showAlert(msg || "Joylashuvni aniqlab bo'lmadi. Telefonda GPS (joylashuv) yoqilganini tekshiring yoki tepadagi qidiruvga manzilingizni yozing."); };
             setTimeout(() => no(), 20000);
             const navGeo = () => { if (!navigator.geolocation) return no(); navigator.geolocation.getCurrentPosition(p => ok(p.coords), () => no(), { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }); };
