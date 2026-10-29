@@ -930,6 +930,7 @@
                 <div class="form-group"><label>Pinduoduo narxi (yuan ¥)</label><input type="number" id="adm-p-cny" oninput="prevPrice()" class="form-control" placeholder="100"></div>
                 <div class="form-group"><label>Mahsulot og'irligi (kg, taxminiy) — BTS xarajatini ichki hisoblash uchun</label><input type="number" step="0.01" min="0.01" id="adm-p-weight" oninput="prevPrice()" class="form-control" placeholder="1"></div>
                 <div class="form-group owner-only"><label>Qo'shimcha xarajat ($, ixtiyoriy)</label><input type="number" id="adm-p-usd" oninput="prevPrice()" class="form-control" placeholder="0"></div>
+                <label id="adm-p-share-w" class="owner-only" style="display:none;align-items:center;gap:10px;font-size:13px;margin:-6px 0 12px;cursor:pointer"><input type="checkbox" id="adm-p-share" checked onchange="prevPrice()" style="width:20px;height:20px;accent-color:var(--gold-color)"><span>Narxga BTS ulushini qo'shish <small id="adm-p-share-h" style="color:var(--text-muted)"></small></span></label>
                 <p id="adm-p-prev" class="owner-only" style="font-size:12px;color:var(--gold-color);margin:-8px 0 6px"></p><div id="adm-p-rep" class="owner-only"></div>
                 <div class="form-group owner-only"><label>Qat'iy narx (so'm, faqat tannarx bo'lmasa)</label><input type="number" id="adm-p-price" class="form-control" placeholder="250000"></div>
                 <div class="form-group"><label>Ranglar (vergul bilan)</label><input type="text" id="adm-p-colors" oninput="pfSoon()" onchange="pfRender()" class="form-control" placeholder="Oq, Qora, Qizil"></div>
@@ -2121,20 +2122,23 @@
         const pfCount = () => Object.values(PF.imgs).reduce((t, a) => t + a.length, 0);
         function prevPrice() {
             const C = ADM_CFG, cny = +$('adm-p-cny').value || 0, usd = +$('adm-p-usd').value || 0;
-            if (!ME.is_admin || !C.cny_rate || (!cny && !usd)) { $('adm-p-prev').innerText = ''; $('adm-p-rep').innerHTML = ''; return; }
-            const cost = cny * C.cny_rate + usd * C.usd_rate, mg = cost <= C.m1_upto ? C.m1_pct : cost <= C.m2_upto ? C.m2_pct : cost <= C.m3_upto ? C.m3_pct : C.m4_pct, p = cost * (1 + mg / 100) + (C.bts_in_price || 0), r = Math.max(1, C.round_to);
-            $('adm-p-prev').innerHTML = `Tannarx: ${fmt(cost)} · foyda ${mg}% · BTS ulushi ${fmt(C.bts_in_price || 0)} · Mijozga narx: <b>${fmt(Math.ceil(p / r) * r)}</b> so'm`;
-            priceRep('adm-p-rep', cny, usd, +$('adm-p-weight').value || 1);
+            if (!ME.is_admin || !C.cny_rate || (!cny && !usd)) { $('adm-p-prev').innerText = ''; $('adm-p-rep').innerHTML = ''; $('adm-p-share-w').style.display = 'none'; return; }
+            const cost = cny * C.cny_rate + usd * C.usd_rate, mg = cost <= C.m1_upto ? C.m1_pct : cost <= C.m2_upto ? C.m2_pct : cost <= C.m3_upto ? C.m3_pct : C.m4_pct, r = Math.max(1, C.round_to);
+            const cheap = cost < (C.bts_share_min || 0), soff = cheap && !$('adm-p-share').checked, sh = soff ? 0 : (C.bts_in_price || 0), p = cost * (1 + mg / 100) + sh;
+            $('adm-p-share-w').style.display = cheap ? 'flex' : 'none';   // arzon mahsulot (masalan g'ilof) — BTS ulushi ixtiyoriy
+            $('adm-p-share-h').innerText = `(+${fmt(C.bts_in_price || 0)} so'm; tannarx ${fmt(C.bts_share_min)} dan arzon — ixtiyoriy)`;
+            $('adm-p-prev').innerHTML = `Tannarx: ${fmt(cost)} · foyda ${mg}% · BTS ulushi ${fmt(sh)} · Mijozga narx: <b>${fmt(Math.ceil(p / r) * r)}</b> so'm`;
+            priceRep('adm-p-rep', cny, usd, +$('adm-p-weight').value || 1, soff);
         }
         // Narxning to'liq hisoboti: hamma xarajat ayirilib qo'lda qoladigan sof foyda (server hisoblaydi — buyurtmadagi bilan bir xil formula)
         const PREP_T = {}, PREP_N = {};
-        function priceRep(el, cny, usd, kg) {
+        function priceRep(el, cny, usd, kg, share_off) {
             clearTimeout(PREP_T[el]); const box = $(el); if (!box) return;
             if (!ME.is_admin || (!cny && !usd)) { box.innerHTML = ''; return; }
             PREP_T[el] = setTimeout(async () => {
                 const n = PREP_N[el] = (PREP_N[el] || 0) + 1;
                 try {
-                    const d = await api('/api/admin/price_calc', { cny, usd, weight: kg });
+                    const d = await api('/api/admin/price_calc', { cny, usd, weight: kg, share_off: !!share_off });
                     if (n !== PREP_N[el]) return;
                     const L = (a, b, st) => `<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;${st || ''}"><span style="color:var(--text-muted)">${a}</span><b style="white-space:nowrap">${b}</b></div>`;
                     const sgn = v => (v < 0 ? '−' : '') + fmt(Math.abs(v)) + " so'm", col = v => v < 0 ? 'color:#e74c3c' : v < d.min_profit ? 'color:var(--gold-color)' : 'color:#2ecc71';
@@ -2144,7 +2148,7 @@
                         <div style="font-weight:800;margin-bottom:6px">📊 Sof foyda hisoboti (1 dona)</div>
                         ${L('Mijozga narx', fmt(d.price) + " so'm")}
                         ${L('− Tannarx (Pinduoduo' + (usd ? ' + qo\'shimcha $' : '') + ')', fmt(d.cost) + " so'm")}
-                        ${L('Foyda ' + d.pct + '%', '+' + fmt(d.markup))}${L('BTS ulushi (narx ichida)', '+' + fmt(d.bts_in))}${d.round ? L('Yaxlitlashdan', '+' + fmt(d.round)) : ''}
+                        ${L('Foyda ' + d.pct + '%', '+' + fmt(d.markup))}${L('BTS ulushi (narx ichida)', d.bts_in ? '+' + fmt(d.bts_in) : "qo'shilmagan")}${d.round ? L('Yaxlitlashdan', '+' + fmt(d.round)) : ''}
                         ${L('= Yalpi foyda', sgn(d.gross), 'border-top:1px dashed rgba(255,255,255,.15);margin-top:4px;padding-top:6px;' + col(d.gross))}
                         <div style="margin-top:8px;font-weight:700">🚚 BTS (${esc(d.origin)}dan, ${d.kg} kg, faqat shu mahsulot buyurtma qilinsa)</div>
                         <div style="color:var(--text-muted);line-height:1.5">${bts('Eng yaqin viloyat', d.near)}<br>${bts('Eng uzoq viloyat', d.far)}</div>
@@ -2192,12 +2196,12 @@
         function pfDel(ki, i) { PF.imgs[PF_KEYS[ki]].splice(i, 1); pfRender(); }
         function pfReset() {
             PF = { id: null, imgs: { __g: [] }, stock: {}, specs: [] }; specRows(); setTimeout(pfPresets, 0);
-            ['adm-p-name', 'adm-p-src', 'adm-p-cny', 'adm-p-usd', 'adm-p-price', 'adm-p-weight', 'adm-p-colors', 'adm-p-sizes'].forEach(i => $(i).value = '');
+            $('adm-p-share').checked = true; ['adm-p-name', 'adm-p-src', 'adm-p-cny', 'adm-p-usd', 'adm-p-price', 'adm-p-weight', 'adm-p-colors', 'adm-p-sizes'].forEach(i => $(i).value = '');
             $('pf-title').innerHTML = '<i class="fas fa-box"></i> Mahsulot qo\'shish'; $('pf-save').innerText = "Katalogga qo'shish"; $('pf-cancel').style.display = 'none'; prevPrice(); pfRender(true);
         }
         function editProduct(id) {
             const p = ADM_PRODS.find(x => x.id === id); if (!p) return;
-            $('adm-p-name').value = p.name; $('adm-p-cat').value = p.cat; $('adm-p-cny').value = p.cny || ''; $('adm-p-usd').value = p.usd || ''; $('adm-p-price').value = (ME.is_admin && p.fixed) ? p.price : ''; $('adm-p-weight').value = p.weight || 1; $('adm-p-src').value = p.src || '';
+            $('adm-p-name').value = p.name; $('adm-p-cat').value = p.cat; $('adm-p-cny').value = p.cny || ''; $('adm-p-usd').value = p.usd || ''; $('adm-p-price').value = (ME.is_admin && p.fixed) ? p.price : ''; $('adm-p-weight').value = p.weight || 1; $('adm-p-src').value = p.src || ''; $('adm-p-share').checked = !p.share_off;
             $('adm-p-colors').value = p.colors.join(', '); $('adm-p-sizes').value = p.sizes.join(', ');
             PF = { id, imgs: { __g: p.raw_imgs.map(n => ({ name: n, url: '/media/' + n })) }, stock: { ...p.stock }, specs: (p.specs || []).map(x => [...x]) }; specRows(); pfPresets();
             p.colors.forEach(c => PF.imgs[c] = (p.raw_cimgs[c] || []).map(n => ({ name: n, url: '/media/' + n })));
@@ -2211,7 +2215,7 @@
                 const keys = []; (colors.length ? colors : ['']).forEach(c => (sizes.length ? sizes : ['']).forEach(s => keys.push(c + '|' + s)));
                 const any = keys.some(k => PF.stock[k] !== '' && PF.stock[k] != null), stock = any ? Object.fromEntries(keys.map(k => [k, parseInt(PF.stock[k]) || 0])) : {};
                 const mk = a => ({ keep: a.filter(x => x.name).map(x => x.name), new: a.filter(x => x.data).map(x => x.data) });
-                await api('/api/admin/product', { id: PF.id, name: v('adm-p-name'), cat: v('adm-p-cat'), cny: v('adm-p-cny'), usd: v('adm-p-usd'), price: v('adm-p-price'), weight: v('adm-p-weight'), ...(ME.is_admin ? { src: $('adm-p-src').value.trim() } : {}), sizes, stock, colors: colors.map(n => ({ name: n, ...mk(PF.imgs[n] || []) })), general: mk(PF.imgs.__g || []), specs: (PF.specs || []).map(([k, v]) => [String(k).trim(), String(v).trim()]).filter(([k, v]) => k && v) });
+                await api('/api/admin/product', { id: PF.id, name: v('adm-p-name'), cat: v('adm-p-cat'), cny: v('adm-p-cny'), usd: v('adm-p-usd'), price: v('adm-p-price'), weight: v('adm-p-weight'), ...(ME.is_admin ? { src: $('adm-p-src').value.trim(), share_off: !$('adm-p-share').checked } : {}), sizes, stock, colors: colors.map(n => ({ name: n, ...mk(PF.imgs[n] || []) })), general: mk(PF.imgs.__g || []), specs: (PF.specs || []).map(([k, v]) => [String(k).trim(), String(v).trim()]).filter(([k, v]) => k && v) });
                 const was = !!PF.id; pfReset(); await loadProducts(); if (ME.is_admin || staffCan('products_edit')) loadAdminProducts(); hap('success'); tg.showAlert(was ? 'Saqlandi ✓' : "Mahsulot katalogga qo'shildi ✓");
             });
         }
@@ -2617,7 +2621,7 @@
         const SET_GROUPS = [
             ['rate', 'fa-coins', 'rgba(255,183,0,0.12)', 'var(--gold-color)', 'Kurs va narx-foyda', 'Dollar, yuan, foyda pog\'onalari', ['usd_rate', 'cny_rate', 'round_to', 'm1_upto', 'm1_pct', 'm2_upto', 'm2_pct', 'm3_upto', 'm3_pct', 'm4_pct', 'min_profit']],
             ['cargo', 'fa-plane', 'rgba(80,160,255,0.12)', '#5aa9ff', 'Kargo', 'Narx, muddat, xarajat, eslatma, kalkulyator', ['avia_usd', 'avia_days', 'avto_usd', 'avto_days', 'avia_cost_usd', 'avto_cost_usd', 'cargo_days', 'remind_hour', 'calc_on']],
-            ['bts', 'fa-truck-fast', 'rgba(46,204,113,0.12)', '#2ecc71', 'BTS va yetkazish', 'BTS ulushi, qishki ustama, ofis', ['bts_origin', 'bts_in_price', 'winter_on', 'winter_pct', 'winter_note', 'pickup_on', 'pickup_addr']],
+            ['bts', 'fa-truck-fast', 'rgba(46,204,113,0.12)', '#2ecc71', 'BTS va yetkazish', 'BTS ulushi, qishki ustama, ofis', ['bts_origin', 'bts_in_price', 'bts_share_min', 'winter_on', 'winter_pct', 'winter_note', 'pickup_on', 'pickup_addr']],
             ['shop', 'fa-store', 'rgba(230,0,0,0.1)', 'var(--primary-color)', "Do'kon va ish vaqti", "Buyurtma qabul qilish, ish soatlari", ['shop_open', 'work_start', 'work_end', 'work_enforce', 'min_topup', 'new_days']],
             ['token', 'fa-gift', 'rgba(236,72,153,0.12)', '#ec4899', 'Token va chegirma', "Do'st taklif qilish mukofotlari", ['token_unit', 'tier1_tokens', 'tier1_pct', 'tier2_tokens', 'tier2_pct']],
             ['cards', 'fa-credit-card', 'rgba(139,92,246,0.14)', '#8b5cf6', "To'lov kartalari", 'Mijozlar pul o\'tkazadigan kartalar', []],
