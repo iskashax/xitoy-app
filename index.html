@@ -218,9 +218,10 @@
         .sim-img { width: 128px; height: 128px; border-radius: 14px; overflow: hidden; background: var(--input-bg); display: flex; align-items: center; justify-content: center; color: var(--gold-color); font-size: 28px; }
         .sim-img img { width: 100%; height: 100%; object-fit: cover; }
         .sim-name { font-size: 12px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: var(--text-main); }
-        .bts-res { position: absolute; left: 0; right: 0; top: 100%; z-index: 1000; background: var(--bg-color); border: 1px solid var(--surface-border); border-radius: 12px; margin-top: 4px; max-height: 42vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+        .dist-tag { display: inline-block; font-size: 11px; font-weight: 700; color: var(--gold-color); background: rgba(255,183,0,.12); border-radius: 8px; padding: 1px 7px; margin-left: 4px; white-space: nowrap; }
+        .bts-res { position: absolute; left: 0; right: 0; top: 100%; z-index: 2000; background: var(--bg-color); border: 1px solid var(--surface-border); border-radius: 12px; margin-top: 4px; max-height: 42vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
         .bts-ri { padding: 10px 12px; border-bottom: 1px solid var(--surface-border); cursor: pointer; font-size: 13px; }
-        .bts-ri span { display: block; font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
+        .bts-ri > span { display: block; font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
         .stk-grp { background: var(--input-bg); border-radius: 12px; margin-top: 8px; overflow: hidden; }
         .stk-h { display: flex; align-items: center; gap: 8px; padding: 9px 10px; cursor: pointer; }
         .stk-chev { color: var(--text-muted); font-size: 11px; transition: transform .2s; }
@@ -1040,7 +1041,7 @@
     <div class="modal" id="specs-modal" onclick="if(event.target===this)closeModal('specs-modal')"><div class="sheet" id="specs-body"></div></div>
     <div class="modal" id="bts-modal" onclick="if(event.target===this)closeModal('bts-modal')"><div class="sheet" style="max-height:92vh">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h3 style="font-size:17px">🗺 BTS punktini tanlang</h3><b class="sheet-x" style="float:none;margin:0" onclick="closeModal('bts-modal')"><i class="fas fa-xmark"></i></b></div>
-        <div style="position:relative;margin-bottom:8px"><input id="bts-q" class="form-control" style="margin:0;padding:11px 12px" placeholder="🔍 BTS filiali, tuman yoki ko'cha nomi" oninput="btsSearch()" autocomplete="off"><div id="bts-res" class="bts-res" style="display:none"></div></div>
+        <div style="position:relative;margin-bottom:8px;z-index:1500"><input id="bts-q" class="form-control" style="margin:0;padding:11px 12px" placeholder="🔍 BTS filiali, tuman yoki ko'cha nomi" oninput="btsSearch()" autocomplete="off"><div id="bts-res" class="bts-res" style="display:none"></div></div>
         <div id="bts-map" data-noi18n style="height:48vh;border-radius:14px;overflow:hidden;background:var(--surface-color)"></div>
         <div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-outline" style="margin:0;padding:11px;font-size:13px" onclick="btsLocate()"><i class="fas fa-location-crosshairs"></i> Mening joyim</button></div>
         <div id="bts-info" style="font-size:12px;color:var(--text-muted);margin-top:10px;line-height:1.5"></div><div id="bts-near"></div>
@@ -3167,6 +3168,7 @@
                         .bindPopup(`<b>${esc(p.n)}</b>${p.a ? '<br>' + esc(p.a) : ''}${p.h ? '<br>🕘 ' + esc(p.h) : ''}<br><button class="btn btn-gold" style="margin-top:8px;padding:8px 12px;font-size:12px" onclick="btsPick(${i})">✓ Shu punktni tanlash</button>`));
                 }
                 setTimeout(() => BTS_MAP.invalidateSize(), 250);
+                if (!BTS_ME) setTimeout(() => btsLocate(true), 400);   // masofani ko'rsatish uchun joylashuv (bir marta ruxsat so'raladi)
                 $('bts-info').innerHTML = (BTS_BR.length ? `🔍 Tepada qidiruv: BTS filiali nomi yoki tumaningizni yozing (${BTS_BR.length} ta filial). ` : '') + (BTS_PTS.length ? `🔴 Qizil nuqtalar — BTS punktlari (${BTS_PTS.length} ta). Nuqtani bosing va «Shu punktni tanlash» ni bosing. Ro'yxatda bo'lmasa, xaritada kerakli joyni bosing.`
                     : "Qidiruvga manzilni yozing yoki «Mening joyim» ni bosing, keyin xaritada BTS filiali joylashgan joyni bosib belgilang.");
             } catch (e) { $('bts-info').innerText = "Xaritani yuklab bo'lmadi. Internetni tekshiring yoki manzilni qo'lda yozing."; }
@@ -3215,12 +3217,12 @@
             if (isGuest()) { GEO_PEND = d; return; }
             api('/api/geo', d).catch(() => {});
         }
-        function btsLocate() {
+        function btsLocate(silent) {
             if (!BTS_MAP) return;
-            toast('📍 Joylashuv aniqlanmoqda…');
+            if (!silent) toast('📍 Joylashuv aniqlanmoqda…');
             let done = false;
             const ok = p => { if (done) return; done = true; btsShowNear(p.latitude, p.longitude); geoSave(p.latitude, p.longitude, p.accuracy || p.horizontal_accuracy || 0); };
-            const no = msg => { if (done) return; done = true; tg.showAlert(msg || "Joylashuvni aniqlab bo'lmadi. Telefonda GPS (joylashuv) yoqilganini tekshiring yoki tepadagi qidiruvga manzilingizni yozing."); };
+            const no = msg => { if (done) return; done = true; if (silent) return; tg.showAlert(msg || "Joylashuvni aniqlab bo'lmadi. Telefonda GPS (joylashuv) yoqilganini tekshiring yoki tepadagi qidiruvga manzilingizni yozing."); };
             setTimeout(() => no(), 20000);
             const navGeo = () => { if (!navigator.geolocation) return no(); navigator.geolocation.getCurrentPosition(p => ok(p.coords), () => no(), { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }); };
             const lm = tg.LocationManager;
@@ -3229,7 +3231,7 @@
                     const go = () => {
                         if (!lm.isLocationAvailable) return navGeo();
                         if (lm.isAccessRequested && !lm.isAccessGranted) {   // avval rad etilgan — sozlamani ochishni taklif qilamiz
-                            done = true; return tg.showConfirm("Telegram'ga joylashuvdan foydalanishga ruxsat berilmagan. Sozlamalarni ochib ruxsat berasizmi?", y => { if (y) lm.openSettings(); });
+                            done = true; if (silent) return; return tg.showConfirm("Telegram'ga joylashuvdan foydalanishga ruxsat berilmagan. Sozlamalarni ochib ruxsat berasizmi?", y => { if (y) lm.openSettings(); });
                         }
                         lm.getLocation(d => d ? ok(d) : navGeo());
                     };
@@ -3245,22 +3247,27 @@
             clearTimeout(BTS_ST);
             if (q.length < 2) { box.style.display = 'none'; return; }
             const words = q.split(' ');
-            const br = BTS_BR.map((b, i) => [i, normS(`${b.c} ${b.n} ${b.a} ${b.r}`)]).filter(([, t]) => words.every(w => t.includes(w))).slice(0, 6);
-            const head = br.map(([i]) => { const b = BTS_BR[i]; return `<div class="bts-ri" onclick="btsPickBr(${i})"><b>📮 BTS ${esc(b.c)} ${esc(b.n)}</b><span>${esc(b.a)}${b.r ? ' · ' + esc(b.r) : ''}</span></div>`; }).join('');
+            const br = BTS_BR.map((b, i) => [i, normS(`bts ${b.c} ${b.n} ${b.a} ${b.r}`)]).filter(([, t]) => words.every(w => t.includes(w))).slice(0, 6);
+            if (BTS_ME) br.sort((x, y) => (BTS_BR[x[0]].lat ? geoD(BTS_ME[0], BTS_ME[1], BTS_BR[x[0]].lat, BTS_BR[x[0]].lng) : 1e9) - (BTS_BR[y[0]].lat ? geoD(BTS_ME[0], BTS_ME[1], BTS_BR[y[0]].lat, BTS_BR[y[0]].lng) : 1e9));
+            const head = br.map(([i]) => { const b = BTS_BR[i]; return `<div class="bts-ri" onclick="btsPickBr(${i})"><b>📮 BTS ${esc(b.c)} ${esc(b.n)}${distTag(b.lat, b.lng)}</b><span>${esc(b.a)}${b.r ? ' · ' + esc(b.r) : ''}</span></div>`; }).join('');
             box.innerHTML = head + '<div class="bts-ri" style="color:var(--text-muted)">🔎 Joy qidirilmoqda…</div>'; box.style.display = 'block';
             BTS_ST = setTimeout(async () => {
                 let pl = [];
                 try {
-                    const r = await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&countrycodes=uz&accept-language=uz,ru&q=' + encodeURIComponent(raw));
+                    const vb = BTS_ME ? `&viewbox=${BTS_ME[1] - 0.6},${BTS_ME[0] + 0.6},${BTS_ME[1] + 0.6},${BTS_ME[0] - 0.6}` : '';   // yaqin joylar birinchi
+                    const r = await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=8&countrycodes=uz&accept-language=uz,ru' + vb + '&q=' + encodeURIComponent(raw));
                     pl = r.ok ? await r.json() : [];
+                    if (BTS_ME) pl.sort((a, b) => geoD(BTS_ME[0], BTS_ME[1], +a.lat, +a.lon) - geoD(BTS_ME[0], BTS_ME[1], +b.lat, +b.lon));
                 } catch (e) {}
                 if ($('bts-q').value.trim() !== raw) return;
                 BTS_PL = pl;
-                box.innerHTML = head + pl.map((p, i) => `<div class="bts-ri" onclick="btsGoPlace(${i})"><b>📍 ${esc(String(p.name || p.display_name).slice(0, 60))}</b><span>${esc(String(p.display_name).slice(0, 110))}</span></div>`).join('')
+                box.innerHTML = head + pl.map((p, i) => `<div class="bts-ri" onclick="btsGoPlace(${i})"><b>📍 ${esc(String(p.name || p.display_name).slice(0, 60))}${distTag(+p.lat, +p.lon)}</b><span>${esc(String(p.display_name).slice(0, 110))}</span></div>`).join('')
                     || '<div class="bts-ri" style="color:var(--text-muted)">Topilmadi — boshqacha yozib ko\'ring</div>';
             }, 600);
         }
         let BTS_PL = [], BTS_RG = null;
+        function fmtDist(d) { return d < 1 ? Math.round(d * 1000) + ' m' : (d < 10 ? d.toFixed(1) : Math.round(d)) + ' km'; }
+        function distTag(lat, lng) { return BTS_ME && lat ? ` <span class="dist-tag">📏 ${fmtDist(geoD(BTS_ME[0], BTS_ME[1], lat, lng))}</span>` : ''; }
         async function btsSetHere(lat, lng) {
             let t = BTS_RG && BTS_RG.lat === lat && BTS_RG.lng === lng ? BTS_RG.t : '';
             if (!t) { toast('Manzil aniqlanmoqda…'); t = await revGeo(lat, lng); }
