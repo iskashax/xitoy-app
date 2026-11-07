@@ -1042,7 +1042,8 @@
         <div id="adm-msg" class="adm-sec" style="display:none">
             <div class="glass-card">
                 <h3 style="margin-bottom:15px; color:var(--text-main);"><i class="fas fa-bullhorn"></i> Xabar yuborish</h3>
-                <div class="form-group"><label>Kimga (Mijoz ID: XB-1234 yoki Telegram ID) — bo'sh qoldirsangiz hammaga</label><input id="bc-to" class="form-control" placeholder="Bo'sh = barcha mijozlar"></div>
+                <div class="form-group"><label>Kimga (Mijoz ID: XB-1234 yoki Telegram ID) — bo'sh qoldirsangiz hammaga</label><input id="bc-to" class="form-control" placeholder="Bo'sh = ko'pchilikka (pastdan tanlang)" oninput="$('bc-aud-w').style.display = this.value.trim() ? 'none' : ''"></div>
+                <div class="form-group" id="bc-aud-w"><label>Kimlarga</label><select id="bc-aud" class="form-control"><option value="all">👥 Botga kirgan hammaga</option><option value="reg">✅ Faqat ro'yxatdan o'tganlarga</option><option value="guest">⏳ Faqat ro'yxatdan o'tmaganlarga</option></select></div>
                 <div class="form-group"><textarea id="bc-text" class="form-control" rows="5" maxlength="1000" placeholder="Xabar matni..."></textarea></div>
                 <div class="form-group"><label>Rasm (ixtiyoriy)</label><input type="file" id="bc-file" accept="image/*" class="form-control" style="padding:12px;"></div>
                 <button class="btn btn-gold" onclick="sendBroadcast()"><i class="fas fa-paper-plane"></i> Yuborish</button>
@@ -2087,7 +2088,7 @@
             ADM_CUR = t;
             ADM_SECS.forEach(x => $('adm-' + x).style.display = x === t ? 'block' : 'none');
             document.querySelectorAll('#adm-tabs .cat-chip').forEach(c => c.classList.toggle('active', c.dataset.t === t));
-            ({ dash: () => loadDash('today'), settings: () => { SET_CUR = ''; loadSettings(); }, ads: () => { adReset(); loadAds(); }, calc: pcOpen, visitors: () => visLoad(), products: () => { pfRender(true); pfPresets(); specRows(); if (ME.is_admin || staffCan('products_edit')) loadAdminProducts(); }, ord: loadAdminOrders, msg: loadNotices, req: loadAdminReqs, rev: loadAdminReviews, users: () => loadAdminUsers(), staff: () => { stfPage('home'); loadStaff(); } })[t]?.();
+            ({ dash: () => loadDash('today'), settings: () => { SET_CUR = ''; loadSettings(); }, ads: () => { adReset(); loadAds(); }, calc: pcOpen, visitors: () => visLoad(), products: () => { pfRender(true); pfPresets(); specRows(); if (ME.is_admin || staffCan('products_edit')) loadAdminProducts(); }, ord: loadAdminOrders, msg: () => { loadNotices(); bcCount(); }, req: loadAdminReqs, rev: loadAdminReviews, users: () => loadAdminUsers(), staff: () => { stfPage('home'); loadStaff(); } })[t]?.();
         }
         function dashRange(el) {
             el.parentNode.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active')); el.classList.add('active');
@@ -2281,7 +2282,7 @@
                     <div style="font-size:11.5px;color:var(--text-muted)">${x.username ? '@' + esc(x.username) + ' · ' : ''}ID ${x.tg_id}${x.code ? ' · ' + esc(x.code) : ''}${x.region ? ' · ' + esc(x.region) : ''}</div></div>
                     <span style="flex:none;font-size:10.5px;font-weight:700;color:${b[1]};border:1px solid ${b[1]};border-radius:20px;padding:2px 8px">${b[0]}${x.orders ? ' ' + x.orders : ''}</span></div>
                     <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Birinchi: ${visAgo(x.first)} · oxirgi: ${visAgo(x.last)} · /start ${x.starts} · ilova ${x.opens}${x.src ? ' · manba: ' + esc(x.src) : ''}</div>
-                    <div style="display:flex;gap:6px;margin-top:6px">${x.username ? `<button class="btn btn-outline" style="margin:0;width:auto;padding:5px 12px;font-size:11.5px" onclick="tg.openTelegramLink('https://t.me/${esc(x.username)}')">✉️ Yozish</button>` : ''}${x.code ? `<button class="btn btn-outline" style="margin:0;width:auto;padding:5px 12px;font-size:11.5px" onclick="userProfile(${ja(x.code)})">👤 Profil</button>` : ''}</div></div>`; }).join('') || '<p style="font-size:12px;color:var(--text-muted)">Hech kim topilmadi</p>';
+                    <div style="display:flex;gap:6px;margin-top:6px">${x.gone ? '<span style="font-size:11px;color:#e74c3c;align-self:center">🚫 Botni bloklagan</span>' : `<button class="btn btn-outline" style="margin:0;width:auto;padding:5px 12px;font-size:11.5px" onclick="dmTo('${x.tg_id}')">🤖 Bot orqali xabar</button>`}${x.username ? `<button class="btn btn-outline" style="margin:0;width:auto;padding:5px 12px;font-size:11.5px" onclick="tg.openTelegramLink('https://t.me/${esc(x.username)}')">✉️ Yozish</button>` : ''}${x.code ? `<button class="btn btn-outline" style="margin:0;width:auto;padding:5px 12px;font-size:11.5px" onclick="userProfile(${ja(x.code)})">👤 Profil</button>` : ''}</div></div>`; }).join('') || '<p style="font-size:12px;color:var(--text-muted)">Hech kim topilmadi</p>';
         }
         // ===== 🧮 FOYDA HISOBI (faqat egalar) =====
         let CALC = []; try { CALC = JSON.parse(localStorage.getItem('xb_calc') || '[]'); } catch (e) {}
@@ -2419,11 +2420,17 @@
         function userAct(code, action, value) { call(async () => { await api('/api/admin/user', { code, action, value }); toast('Bajarildi ✓'); await loadAdminUsers(); }); }
         function userAsk(code, action, title) { $('val-title').innerText = title; $('val-input').value = ''; VAL_CB = v => userAct(code, action, v); $('val-modal').classList.add('show'); }
         function valOk() { const v = $('val-input').value; closeModal('val-modal'); if (v !== '' && VAL_CB) VAL_CB(v); }
+        let BC_N = null;
+        async function bcCount() {   // har bir tanlovda necha kishi
+            try { BC_N = await api('/api/admin/broadcast', { count: 1 }); } catch (e) { return; }
+            const o = $('bc-aud').options; o[0].text = `👥 Botga kirgan hammaga (${BC_N.all})`; o[1].text = `✅ Faqat ro'yxatdan o'tganlarga (${BC_N.reg})`; o[2].text = `⏳ Faqat ro'yxatdan o'tmaganlarga (${BC_N.guest})`;
+        }
         function sendBroadcast() {
-            const t = $('bc-text').value.trim(), f = $('bc-file').files[0], to = $('bc-to').value.trim();
+            const t = $('bc-text').value.trim(), f = $('bc-file').files[0], to = $('bc-to').value.trim(), aud = $('bc-aud').value;
             if (t.length < 3 && !f) return tg.showAlert('Matn yoki rasm kerak');
-            tg.showConfirm(to ? `${to} ga xabar yuborilsinmi?` : 'Barcha mijozlarga yuborilsinmi?', ok => { if (ok) call(async () => {
-                const image = f ? await readImg(f, 1280) : undefined, r = await api('/api/admin/broadcast', { text: t, image, to });
+            const who = { all: 'botga kirgan hammaga', reg: "ro'yxatdan o'tganlarga", guest: "ro'yxatdan o'tmaganlarga" }[aud] + (BC_N ? ` (${BC_N[aud]} kishi)` : '');
+            tg.showConfirm(to ? `${to} ga xabar yuborilsinmi?` : `Xabar ${who} yuborilsinmi?`, ok => { if (ok) call(async () => {
+                const image = f ? await readImg(f, 1280) : undefined, r = await api('/api/admin/broadcast', { text: t, image, to, aud });
                 $('bc-text').value = ''; $('bc-file').value = ''; toast(r.single ? `${r.name} ga yuborildi ✓` : 'Yuborilmoqda ✓'); }); });
         }
         async function openAdminLoader() {
@@ -2455,7 +2462,7 @@
             if (!code) return tg.showAlert("Telegram ma'lumoti topilmadi");
             call(async () => { await api('/api/admin/contact', { code }); tg.showAlert("Bu mijozda username yo'q. Bot sizga uning profil havolasi va telefonini yubordi — botdagi xabarda ismni bosing."); });
         }
-        function dmTo(code) { $('bc-to').value = code; admTab('msg'); }
+        function dmTo(code) { $('bc-to').value = code; $('bc-aud-w').style.display = 'none'; admTab('msg'); }
         function doLogout() {
             tg.showConfirm("Profildan chiqasizmi?\n\nMa'lumotlaringiz o'chmaydi. Login va parol bilan istalgan Telegram akkauntdan qayta kirishingiz mumkin.", ok => { if (ok) call(async () => {
                 await api('/api/logout', {}); try { localStorage.removeItem(CART_KEY); } catch (e) {}
