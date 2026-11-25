@@ -877,6 +877,13 @@
                     <div id="set-form"></div>
                     <button class="btn btn-gold" onclick="saveSettings()"><i class="fas fa-save"></i> Saqlash</button>
                 </div>
+                <div class="glass-card" id="offices-card" style="display:none">
+                    <h3 style="margin-bottom:4px">🏢 Ofislar</h3>
+                    <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Mijoz savatda «Ofisdan olish»ni tanlasa, shu ro'yxatdan o'ziga qulay ofisni tanlaydi. O'chirilgan ofis mijozlarga ko'rinmaydi.</p>
+                    <div id="of-list"></div>
+                    <button class="btn btn-outline" style="margin-top:6px" onclick="ofcAdd()"><i class="fas fa-plus"></i> Yangi ofis qo'shish</button>
+                    <button class="btn btn-gold" style="margin-top:8px" onclick="ofcSave()"><i class="fas fa-check"></i> Ofislarni saqlash</button>
+                </div>
                 <div class="glass-card" id="cards-card">
                     <h3 style="margin-bottom:12px;color:var(--text-main)"><i class="fas fa-credit-card"></i> To'lov kartalari</h3>
                     <div id="cards-adm"></div>
@@ -1474,7 +1481,7 @@
 
         // ===== KATALOG =====
         function btsNote(w) {
-            const pk = ME && ME.cfg.ship.pickup ? ". Farg'ona ofisidan olib ketsangiz — bepul" : '';
+            const pk = ME && ME.cfg.ship.pickup ? ". Ofisdan olib ketsangiz — bepul" : '';
             return `<div style="font-size:12px;color:#2ecc71;margin:8px 0"><i class="fas fa-truck"></i> BTS pochta: buyurtma summasi yetarli bo'lsa <b>bepul</b>${pk}</div>
                 <div style="font-size:11px;color:var(--text-muted);line-height:1.5;margin-bottom:8px">BTS haqi (bo'lsa) savatda aniq ko'rinadi va buyurtmadan keyin o'zgarmaydi — og'irlik uchun qo'shimcha BTS haqi olinmaydi.</div>${winterNote()}`;
         }
@@ -1614,11 +1621,24 @@
         function cartTotal() { return CART.reduce((t, x) => { const p = PRODUCTS.find(p => p.id === x.id); return t + (p ? p.price * x.qty : 0); }, 0); }
         let QUOTE = null, QPEND = '';
         const qKey = () => JSON.stringify([CART.map(x => [x.id, x.color, x.size, x.qty]), DELIVERY, PROMO ? PROMO.code : '', ME ? ME.bts_region : '']);
-        const qBody = () => ({ items: CART.map(x => ({ id: x.id, color: x.color, size: x.size, qty: x.qty, cargo: x.cargo })), code: PROMO ? PROMO.code : '', delivery: DELIVERY });
+        const qBody = () => ({ items: CART.map(x => ({ id: x.id, color: x.color, size: x.size, qty: x.qty, cargo: x.cargo })), code: PROMO ? PROMO.code : '', delivery: DELIVERY, office: DELIVERY === 'pickup' && curOffice() ? curOffice().id : '' });
         function cartFee() { return (DELIVERY !== 'pickup' && QUOTE && QUOTE.key === qKey() && QUOTE.ok) ? QUOTE.fee : 0; }
         async function quoteAwait() { const key = qKey(); try { QUOTE = { key, ...(await api('/api/quote', qBody())) }; } catch (e) { QUOTE = { key, error: e.message }; } renderCart(); }
         function quoteNow() { const key = qKey(); if (DELIVERY === 'pickup' || !CART.length || QPEND === key || (QUOTE && QUOTE.key === key)) return; QPEND = key; quoteAwait().finally(() => { QPEND = ''; }); }
         function setDelivery(d) { DELIVERY = d; NONCE = null; renderCart(); }
+        // Qaysi ofisdan olib ketadi — mijoz tanlaydi, tanlovi eslab qolinadi
+        let OFFICE = ''; try { OFFICE = localStorage.getItem('xb_office') || ''; } catch (e) {}
+        const offList = () => (ME && ME.cfg.ship.offices) || [];
+        function curOffice() { const l = offList(); return l.find(o => o.id === OFFICE) || (l.length === 1 ? l[0] : null); }
+        function setOffice(id) { OFFICE = id; try { localStorage.setItem('xb_office', id); } catch (e) {} NONCE = null; renderCart(); }
+        function officePick(sh) {
+            const l = offList(), cur = curOffice();
+            return `<div style="margin-bottom:10px">${l.length > 1 ? `<div style="font-size:11.5px;color:var(--text-muted);margin-bottom:6px">Qaysi ofisdan olib ketasiz?</div>` : ''}
+                ${l.map(o => `<div onclick="setOffice('${o.id}')" style="cursor:pointer;border:1.5px solid ${cur && cur.id === o.id ? 'var(--gold-color)' : 'var(--surface-border)'};background:${cur && cur.id === o.id ? 'rgba(212,175,55,.08)' : 'transparent'};border-radius:12px;padding:10px 12px;margin-bottom:6px">
+                    <div style="display:flex;gap:8px;align-items:center"><span style="font-size:16px">${cur && cur.id === o.id ? '🟡' : '⚪'}</span><b style="font-size:13.5px">${esc(o.name)}</b></div>
+                    <div style="font-size:11.5px;color:var(--text-muted);margin:4px 0 0 26px;line-height:1.5">${o.addr ? '📍 ' + esc(o.addr) + '<br>' : ''}${o.hours ? '🕘 ' + esc(o.hours) : ''}${o.phone ? ' · 📞 ' + esc(o.phone) : ''}${o.map ? ` · <a href="#" onclick="event.stopPropagation();tg.openLink('${esc(o.map)}');return false" style="color:var(--gold-color)">Xaritada</a>` : ''}</div></div>`).join('')}
+                <div style="font-size:11.5px;color:var(--text-muted)">${cur ? "Mahsulot ofisga kelgach xabar beramiz, BTS xarajati yo'q." : '<span style="color:var(--gold-color)">👆 Ofisni tanlang</span>'}</div></div>`;
+        }
         function applyPromo() {
             call(async () => {
                 const code = $('promo-in').value.trim().toUpperCase(); if (!code) throw new Error('Kodni kiriting');
@@ -1643,8 +1663,8 @@
                 return `<div class="cart-row" style="gap:12px"><div onclick="openProduct(${ja(p.id)},${ja(x.color)},${ja(x.size)},${ja(x.cargo)},${i})" style="display:flex;gap:12px;flex:1;align-items:center;cursor:pointer;min-width:0">${thumb(itemImg(x))}<div style="flex:1;min-width:0"><div class="pname" style="margin:0">${esc(p.name)}</div><div class="cvar">${esc([x.color, x.size].filter(Boolean).join(' · '))} · ${CARGO[x.cargo]} <span style="color:var(--gold-color)">✎ o'zgartirish</span></div><div class="pprice">${fmt(p.price * x.qty)} so'm</div></div></div><div class="qty"><b onclick="chQty(${i},-1)">−</b>${x.qty}<b onclick="chQty(${i},1)">+</b></div></div>`; }).join('') + '</div>'
                 + `<div class="glass-card"><div style="font-size:11px;color:var(--gold-color);font-weight:700;margin-bottom:8px">CHEGIRMA KODI</div>
                 ${PROMO ? `<div class="hrow"><span style="flex:1;font-weight:800">${esc(PROMO.code)} · ${PROMO.pct}%</span><b onclick="clearPromo()" style="color:var(--primary-color);padding:6px">×</b></div>` : `<div style="display:flex;gap:8px;margin-bottom:12px"><input id="promo-in" class="form-control" placeholder="XB2-ABC123" value="${esc(pv)}" style="margin:0"><button class="btn btn-outline" style="width:auto;padding:0 18px" onclick="applyPromo()">Qo'llash</button></div>`}
-                ${sh ? `<div style="font-size:11px;color:var(--gold-color);font-weight:700;margin:6px 0">YETKAZISH USULI</div><div style="margin-bottom:10px"><span class="opt ${DELIVERY === 'bts' ? 'sel' : ''}" onclick="setDelivery('bts')">📦 BTS pochta</span>${sh.pickup ? `<span class="opt ${DELIVERY === 'pickup' ? 'sel' : ''}" onclick="setDelivery('pickup')">🏢 Farg'ona ofisidan olish</span>` : ''}</div>
-                ${DELIVERY === 'pickup' ? `<div style="font-size:11.5px;color:var(--text-muted);margin-bottom:10px">🏢 Ofis: ${esc(sh.pickup_addr)}. Mahsulot kelgach xabar beramiz, BTS xarajati yo'q.</div>` : (ps === 'ok' && fee > 0 && QUOTE.need_more > 0 ? `<div style="font-size:12px;color:var(--gold-color);margin-bottom:6px">Yana taxminan <b>${fmt(QUOTE.need_more)} so'm</b> lik mahsulot qo'shsangiz BTS bepul bo'ladi!</div><div class="bar"><i style="width:${Math.min(100, (QUOTE.cost - fee) / QUOTE.cost * 100)}%"></i></div>` : '')}` : ''}
+                ${sh ? `<div style="font-size:11px;color:var(--gold-color);font-weight:700;margin:6px 0">YETKAZISH USULI</div><div style="margin-bottom:10px"><span class="opt ${DELIVERY === 'bts' ? 'sel' : ''}" onclick="setDelivery('bts')">📦 BTS pochta</span>${sh.pickup ? `<span class="opt ${DELIVERY === 'pickup' ? 'sel' : ''}" onclick="setDelivery('pickup')">🏢 Ofisdan olib ketish</span>` : ''}</div>
+                ${DELIVERY === 'pickup' ? officePick(sh) : (ps === 'ok' && fee > 0 && QUOTE.need_more > 0 ? `<div style="font-size:12px;color:var(--gold-color);margin-bottom:6px">Yana taxminan <b>${fmt(QUOTE.need_more)} so'm</b> lik mahsulot qo'shsangiz BTS bepul bo'ladi!</div><div class="bar"><i style="width:${Math.min(100, (QUOTE.cost - fee) / QUOTE.cost * 100)}%"></i></div>` : '')}` : ''}
                 <div style="display:flex;justify-content:space-between;font-weight:800;margin-bottom:6px"><span>Mahsulotlar:</span><span>${fmt(total)} so'm</span></div>${(() => { const sv = CART.reduce((t, x) => { const p = PRODUCTS.find(y => y.id === x.id); return t + (p && p.old_price ? (p.old_price - p.price) * x.qty : 0); }, 0); return sv > 0 ? `<div style="display:flex;justify-content:space-between;font-size:12.5px;color:#a855f7;font-weight:700;margin-bottom:6px"><span>🏷 Aksiya bo'yicha tejadingiz:</span><span>${fmt(sv)} so'm</span></div>` : ''; })()}
                 ${disc ? `<div style="display:flex;justify-content:space-between;font-size:13px;color:#2ecc71;margin-bottom:6px"><span>Chegirma:</span><span>−${fmt(disc)} so'm</span></div>` : ''}
                 <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span>${DELIVERY === 'pickup' ? 'Ofisdan olish' : 'BTS pochta'}:</span><span style="color:${fee || ps !== 'ok' ? 'inherit' : '#2ecc71'};text-align:right">${bv}</span></div>
@@ -1656,6 +1676,7 @@
         }
         function checkout() {   // avval eng so'nggi narx va BTS haqini olamiz, keyin tasdiqlash oynasi
             if (!needAuth('Buyurtma berish uchun', () => switchTab('cart'))) return;
+            if (DELIVERY === 'pickup' && !curOffice()) return tg.showAlert("Qaysi ofisdan olib ketishingizni tanlang");
             if (busy) return; let ready = false;
             call(async () => { await loadProducts(); if (DELIVERY === 'bts') { QUOTE = null; await quoteAwait(); } ready = true; }).then(() => { if (ready) checkout2(); });
         }
@@ -1669,7 +1690,7 @@
                 call(async () => {
                     NONCE = NONCE || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2));
                     let r = null;
-                    if (!await withPay(`${fmt(pay)} so'm — xaridni tasdiqlash`, async a => { r = await api('/api/order', { ...a, nonce: NONCE, code: PROMO ? PROMO.code : '', delivery: DELIVERY, items: CART.map(x => ({ id: x.id, color: x.color, size: x.size, qty: x.qty, cargo: x.cargo })) }); })) return;
+                    if (!await withPay(`${fmt(pay)} so'm — xaridni tasdiqlash`, async a => { r = await api('/api/order', { ...a, nonce: NONCE, code: PROMO ? PROMO.code : '', delivery: DELIVERY, office: DELIVERY === 'pickup' && curOffice() ? curOffice().id : '', items: CART.map(x => ({ id: x.id, color: x.color, size: x.size, qty: x.qty, cargo: x.cargo })) }); })) return;
                     CART = []; PROMO = null; QUOTE = null; saveCart(); await refreshMe(); await loadProducts(); hap('success');
                     tg.showAlert(`Buyurtma qabul qilindi! Trek kod: ${r.track}`); showOrders();
                 });
@@ -1696,7 +1717,7 @@
                     <div style="display:flex;gap:12px;align-items:center">
                         <div style="display:flex;gap:6px;flex:none">${pics}</div>
                         <div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(it0.name || '')}${more > 0 ? ` <span style="color:var(--text-muted);font-weight:400">+${more}</span>` : ''}</div>
-                            <div style="font-size:11.5px;color:var(--text-muted)">${nIt} dona · ${o.delivery === 'pickup' ? "Farg'ona ofisidan" : 'BTS pochta'}</div>
+                            <div style="font-size:11.5px;color:var(--text-muted)">${nIt} dona · ${o.delivery === 'pickup' ? esc((o.office && o.office.name) || "Farg'ona ofisi") : 'BTS pochta'}</div>
                             <div style="font-size:14px;font-weight:800;color:var(--gold-color);margin-top:2px">${fmt(o.total)} so'm${o.discount ? ` <span style="font-size:11px;color:#2ecc71;font-weight:600">−${fmt(o.discount)}</span>` : ''}</div></div></div>
                     ${bad ? '' : `<div class="tdots">${steps.map((s, i) => `<i class="${i <= idx ? 'on' : ''}"></i>`).join('')}</div><div style="font-size:11px;color:var(--text-muted);margin-top:4px">${idx + 1}/${steps.length}${steps[idx + 1] && o.status !== 'Yetkazildi' ? ' · keyingi: ' + esc(stl(o, steps[idx + 1])) : ''}</div>`}
                     ${(o.cargo_sum + o.bts_extra) ? `<div style="margin-top:10px;padding:10px 12px;border-radius:12px;background:var(--input-bg);font-size:12px;display:flex;justify-content:space-between;gap:8px"><span>⚖️ ${kgTxt || 'Kargo'}</span><span>${fmt(o.cargo_sum + o.bts_extra)} so'm ${o.cargo_paid ? '<span class="pill ok">to\'langan</span>' : '<span class="pill">to\'lanmagan</span>'}</span></div>` : ''}
@@ -1769,7 +1790,7 @@
                 let idx = steps.indexOf(o.status);
                 if (bad) idx = Math.max(0, ...steps.map((s, i) => first[s] ? i : -1));
                 const lab = (s, i) => pk && i === 5 ? 'Ofisda tayyor' : s;
-                const info = (i) => pk && i === 5 ? "Farg'ona ofisimizda tayyor — olib ketishingiz mumkin" : i === 3 ? `${STEP_INFO[3]} (✈️ Avia ~${esc(ME.cfg.cargo.avia.days)} kun, 🚛 Avto ~${esc(ME.cfg.cargo.avto.days)} kun)` : STEP_INFO[i];
+                const info = (i) => pk && i === 5 ? `${esc((o.office && o.office.name) || "Farg'ona ofisi")}da tayyor — olib ketishingiz mumkin${o.office && o.office.addr ? '<br>📍 ' + esc(o.office.addr) : ''}${o.office && o.office.hours ? ' · 🕘 ' + esc(o.office.hours) : ''}` : i === 3 ? `${STEP_INFO[3]} (✈️ Avia ~${esc(ME.cfg.cargo.avia.days)} kun, 🚛 Avto ~${esc(ME.cfg.cargo.avto.days)} kun)` : STEP_INFO[i];
                 const tl = steps.map((s, i) => `<div class="tl-step ${i <= idx ? 'done' : ''} ${i === idx && !bad && o.status !== 'Yetkazildi' ? 'cur' : ''}"><i class="tl-dot"></i><div><div class="tl-t">${esc(lab(s, i))}</div><div class="tl-d">${i <= idx ? (first[s] ? dtt(first[s]) + ' · ' : '') + esc(info(i)) : esc(info(i))}</div></div></div>`).join('')
                     + (bad ? `<div class="tl-step done bad"><i class="tl-dot"></i><div><div class="tl-t">${esc(o.status)}</div><div class="tl-d">${first[o.status] ? dtt(first[o.status]) : ''}</div></div></div>` : '');
                 const nums = [['Buyurtma kodi', o.track], ['Xitoy ichidagi trek', o.china_track], ['Kargo partiyasi', o.party], ['BTS trek raqami', o.bts_track]].filter(x => x[1]);
@@ -1788,7 +1809,7 @@
                     <button class="more-btn" onclick="trkToggle(${Number(o.id)})">${open ? "Yopish ▴" : "Ko'proq ▾"}</button>
                     ${open ? `<div style="margin-top:12px;border-top:1px solid var(--surface-border);padding-top:10px">
                     ${o.items.map(i => `<div class="hrow" style="gap:10px;padding:7px 0">${thumb(itemImg(i), 'cimg" style="width:42px;height:42px')}<div style="flex:1;font-size:12px"><b>${esc(i.name)}</b><br><span style="color:var(--text-muted)">${esc([i.color, i.size].filter(Boolean).join(' · '))} ×${i.qty} · ${CARGO[i.cargo] || ''}</span></div></div>`).join('')}
-                    <div style="font-size:11px;color:var(--text-muted);margin-top:6px">${pk ? "🏢 Farg'ona ofisidan olib ketish" : '📦 BTS pochta orqali'} · ${fmt(o.total)} so'm</div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:6px">${pk ? '🏢 ' + esc((o.office && o.office.name) || "Farg'ona ofisi") + 'dan olib ketish' : '📦 BTS pochta orqali'} · ${fmt(o.total)} so'm</div>
                     <div class="tl">${tl}</div>
                     ${nums.length ? `<div style="border-top:1px solid var(--surface-border);padding-top:8px">${nums.map(([k, v]) => `<div class="hrow" style="padding:7px 0"><span style="flex:1;font-size:12px;color:var(--text-muted)">${k}</span><b style="font-size:13px" onclick="copyText(${ja(v)},'Nusxalandi ✓')">${esc(v)} <i class="fas fa-copy" style="font-size:11px;color:var(--text-muted)"></i></b></div>`).join('')}</div>` : ''}
                     ${hist.length ? `<details style="margin-top:8px"><summary style="font-size:12px;color:var(--gold-color);cursor:pointer">Batafsil tarix (${hist.length})</summary>${hist.map(e => `<div style="font-size:11.5px;padding:6px 0;border-bottom:1px solid var(--surface-border)"><span style="color:var(--text-muted)">${dtt(e.ts)}</span> · <b>${esc(pk && e.status === "BTS orqali jo'natildi" ? 'Ofisda tayyor' : e.status)}</b>${e.note ? '<br>' + esc(e.note) : ''}</div>`).join('')}</details>` : ''}
@@ -2669,13 +2690,31 @@
         const SET_GROUPS = [
             ['rate', 'fa-coins', 'rgba(255,183,0,0.12)', 'var(--gold-color)', 'Kurs va narx-foyda', 'Dollar, yuan, foyda pog\'onalari', ['usd_rate', 'cny_rate', 'round_to', 'm1_upto', 'm1_pct', 'm2_upto', 'm2_pct', 'm3_upto', 'm3_pct', 'm4_pct', 'min_profit']],
             ['cargo', 'fa-plane', 'rgba(80,160,255,0.12)', '#5aa9ff', 'Kargo', 'Narx, muddat, xarajat, eslatma, kalkulyator', ['avia_usd', 'avia_days', 'avto_usd', 'avto_days', 'avia_cost_usd', 'avto_cost_usd', 'cargo_days', 'remind_hour', 'calc_on']],
-            ['bts', 'fa-truck-fast', 'rgba(46,204,113,0.12)', '#2ecc71', 'BTS va yetkazish', 'BTS ulushi, qishki ustama, ofis', ['bts_origin', 'bts_in_price', 'bts_share_min', 'winter_on', 'winter_pct', 'winter_note', 'pickup_on', 'pickup_addr']],
+            ['bts', 'fa-truck-fast', 'rgba(46,204,113,0.12)', '#2ecc71', 'BTS va yetkazish', 'BTS ulushi, qishki ustama', ['bts_origin', 'bts_in_price', 'bts_share_min', 'winter_on', 'winter_pct', 'winter_note']],
+            ['offices', 'fa-building', 'rgba(243,156,18,0.13)', '#f39c12', 'Ofislar', "Olib ketish ofislari: qo'shish, manzil, ish vaqti", ['pickup_on', 'pickup_addr']],
             ['shop', 'fa-store', 'rgba(230,0,0,0.1)', 'var(--primary-color)', "Do'kon va ish vaqti", "Buyurtma qabul qilish, ish soatlari", ['shop_open', 'work_start', 'work_end', 'work_enforce', 'min_topup', 'new_days']],
             ['token', 'fa-gift', 'rgba(236,72,153,0.12)', '#ec4899', 'Token va chegirma', "Do'st taklif qilish mukofotlari", ['token_unit', 'tier1_tokens', 'tier1_pct', 'tier2_tokens', 'tier2_pct']],
             ['cards', 'fa-credit-card', 'rgba(139,92,246,0.14)', '#8b5cf6', "To'lov kartalari", 'Mijozlar pul o\'tkazadigan kartalar', []],
             ['archive', 'fa-box-archive', 'rgba(148,163,184,0.15)', '#94a3b8', 'Kanallar', 'Asosiy kanal va arxiv kanali', ['main_channel', 'archive_chat']],
         ];
-        let SET_ITEMS = [], SET_CUR = '';
+        let SET_ITEMS = [], SET_CUR = '', OFC = [];
+        async function ofcLoad() { try { OFC = (await api('/api/admin/offices', {})).items; } catch (e) { return tg.showAlert(e.message); } ofcRender(); }
+        function ofcSet(i, k, v) { if (OFC[i]) OFC[i][k] = v; }
+        function ofcAdd() { OFC.push({ id: '', name: '', city: '', addr: '', hours: '09:00–18:00', phone: '', map: '', on: 1 }); ofcRender(); }
+        function ofcDel(i) { tg.showConfirm(`«${OFC[i].name || 'Ofis'}» o'chirilsinmi?`, y => { if (y) { OFC.splice(i, 1); ofcRender(); } }); }
+        function ofcRender() {
+            const f = (i, k, l, ph, t = 'text') => `<div class="form-group" style="margin-bottom:8px"><label style="font-size:11px">${l}</label><input type="${t}" class="form-control" value="${esc(OFC[i][k] || '')}" placeholder="${ph}" oninput="ofcSet(${i},'${k}',this.value)"></div>`;
+            $('of-list').innerHTML = OFC.map((o, i) => `<div style="background:var(--input-bg);border-radius:14px;padding:12px;margin-bottom:10px;${o.on ? '' : 'opacity:.6'}">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b>${i + 1}. ${esc(o.name || 'Yangi ofis')}</b>
+                <div style="display:flex;gap:10px;align-items:center"><label style="display:flex;gap:6px;align-items:center;font-size:12px;cursor:pointer"><input type="checkbox" ${o.on ? 'checked' : ''} onchange="ofcSet(${i},'on',this.checked?1:0);ofcRender()" style="width:18px;height:18px;accent-color:#2ecc71"> Yoqilgan</label>
+                <b onclick="ofcDel(${i})" style="color:var(--primary-color);cursor:pointer;padding:4px">🗑</b></div></div>
+                ${f(i, 'name', 'Nomi *', 'Masalan: Toshkent ofisi')}${f(i, 'city', 'Shahar', 'Toshkent')}${f(i, 'addr', 'Manzil', "Chilonzor tumani, ... ko'chasi 12, mo'ljal: ...")}
+                ${f(i, 'hours', 'Ish vaqti', '09:00–18:00, Yakshanba dam')}${f(i, 'phone', 'Telefon', '+998 90 000 00 00', 'tel')}${f(i, 'map', 'Xaritadagi havola (ixtiyoriy)', 'https://maps.google.com/...', 'url')}</div>`).join('') || '<p style="font-size:12px;color:var(--text-muted)">Ofis yo\'q</p>';
+        }
+        async function ofcSave() {
+            if (OFC.some(o => (o.name || '').trim().length < 2)) return tg.showAlert("Har bir ofisga nom yozing");
+            call(async () => { OFC = (await api('/api/admin/offices', { list: OFC })).items; ofcRender(); toast('Ofislar saqlandi ✓'); try { ME = await api('/api/me'); } catch (e) {} });
+        }
         function setGroup(g) {
             SET_CUR = g; $('set-home').style.display = g ? 'none' : 'block'; $('set-page').style.display = g ? 'block' : 'none';
             if (!g) return renderSetMenu();
@@ -2684,6 +2723,7 @@
             document.querySelectorAll('#set-form [data-g]').forEach(e => e.style.display = e.dataset.g === g ? '' : 'none');
             $('set-fields-card').style.display = g === 'cards' ? 'none' : 'block'; $('cards-card').style.display = g === 'cards' ? 'block' : 'none';
             if (g === 'cards') loadCards();
+            $('offices-card').style.display = g === 'offices' ? 'block' : 'none'; if (g === 'offices') ofcLoad();
             $('admin-panel-fullscreen').scrollTo(0, 0);
         }
         function renderSetMenu() {
